@@ -1,0 +1,32 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "fs-blocks/modal-button",
+	"version": "0.1.0",
+	"title": "Modal Button",
+	"category": "widgets",
+	"icon": "admin-links",
+	"description": "A Bootstrap 5 button that opens a specific modal by ID.",
+	"keywords": [ "bootstrap", "modal", "button" ],
+	"textdomain": "fs-blocks",
+	"supports": {
+		"html": false,
+		"anchor": true
+	},
+	"parent": [ "core/buttons" ],
+	"attributes": {
+		"buttonText": {
+			"type": "string",
+			"default": "Open Modal"
+		},
+		"modalId": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"viewScript": "file:./view.js",
+	"render": "file:./render.php"
+}

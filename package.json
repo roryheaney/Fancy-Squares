@@ -1,0 +1,21 @@
+{
+	"name": "fs-blocks",
+	"version": "1.0.0",
+	"description": "Custom blocks for framework development (currently with Bootstrap 5 for reference).",
+	"author": "Rory Heaney",
+	"license": "GPL-2.0-or-later",
+	"main": "build/index.js",
+	"scripts": {
+		"build": "wp-scripts build --webpack-copy-php",
+		"format": "wp-scripts format",
+		"lint:css": "wp-scripts lint-style",
+		"lint:js": "wp-scripts lint-js",
+		"packages-update": "wp-scripts packages-update",
+		"plugin-zip": "wp-scripts plugin-zip",
+		"start": "wp-scripts start --webpack-copy-php"
+	},
+	"devDependencies": {
+		"@wordpress/scripts": "^30.10.0",
+		"classnames": "^2.5.1"
+	}
+}

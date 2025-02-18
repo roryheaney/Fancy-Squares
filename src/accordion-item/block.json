@@ -1,0 +1,31 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "fs-blocks/accordion-item",
+	"version": "0.1.0",
+	"title": "Accordion Item",
+	"category": "layout",
+	"icon": "list-view",
+	"description": "A single Accordion item for the Bootstrap 5 accordion.",
+	"keywords": [ "bootstrap", "accordion-item" ],
+	"textdomain": "fs-blocks",
+	"parent": [ "fs-blocks/accordion" ],
+	"supports": {
+		"html": false,
+		"anchor": true
+	},
+	"attributes": {
+		"clientId": {
+			"type": "string"
+		},
+		"title": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"viewScript": "file:./view.js",
+	"render": "file:./render.php"
+}

@@ -1,0 +1,1 @@
+document.addEventListener("DOMContentLoaded",(()=>{document.querySelectorAll(".swiper").forEach((e=>{const t=e.getAttribute("data-swiper")||"{}";let n={};try{n=JSON.parse(t)}catch(e){console.warn("Invalid JSON in data-swiper:",e)}new Swiper(e,n)}))}));

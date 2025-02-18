@@ -1,0 +1,13 @@
+.fs-blocks-accordion {
+	// Some minimal styling or outlines in editor
+	outline: 2px dashed #888;
+}
+[data-type="fs-blocks/accordion"] {
+	> .block-editor-inner-blocks {
+		> .block-editor-block-list__layout {
+			> .block-list-appender {
+				position: relative;
+			}
+		}
+	}
+}

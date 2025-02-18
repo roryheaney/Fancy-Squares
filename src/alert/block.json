@@ -1,0 +1,61 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "fs-blocks/alert",
+	"version": "0.1.0",
+	"title": "Fs Alert",
+	"category": "widgets",
+	"icon": "warning",
+	"description": "A Bootstrap 5 Alert component with customizable classes.",
+	"keywords": [ "bootstrap", "alert" ],
+	"textdomain": "fs-blocks",
+	"supports": {
+		"html": false,
+		"anchor": true
+	},
+	"attributes": {
+		"alertOptions": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"default": []
+		},
+		"displayOptions": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"default": []
+		},
+		"marginOptions": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"default": []
+		},
+		"paddingOptions": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"default": []
+		},
+		"additionalClasses": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"default": []
+		},
+		"alertContent": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"render": "file:./render.php"
+}

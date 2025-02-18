@@ -1,0 +1,15 @@
+.wp-block-fs-blocks-tab-item {
+    display: none;
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    border-top: none;
+
+    &.is-active {
+        display: block;
+    }
+
+    .tab-title-editor {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+}

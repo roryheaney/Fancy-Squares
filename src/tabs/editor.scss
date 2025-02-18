@@ -1,0 +1,62 @@
+.wp-block-fs-blocks-tabs-editor {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    margin: 1rem 0;
+
+    .tabs-nav {
+        display: flex;
+        flex-wrap: wrap;
+        padding-left: 0;
+        margin-bottom: 0;
+        list-style: none;
+        border-bottom: 1px solid #dee2e6;
+        margin-bottom: 1rem;
+
+        .nav-item {
+            .nav-link {
+                background: transparent;
+                border: none;
+                border-bottom: 2px solid transparent;
+                color: var(--wp-admin-theme-color, #007bff);
+                padding: 0.5rem 1rem;
+                margin-bottom: -1px;
+                transition: color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+
+                &.is-active,
+				&.is-selected {
+                    border-bottom-color: currentColor;
+                    font-weight: 500;
+                }
+            }
+
+            .block-editor-button-block-appender {
+                margin-left: 0.5rem;
+                padding: 0.5rem;
+            }
+        }
+    }
+
+    .tab-content-editor {
+        position: relative;
+
+        .wp-block-fs-blocks-tab-item:not(.is-active),
+		.wp-block-fs-blocks-tab-item:not(.is-selected),
+		.wp-block-fs-blocks-tab-item:not(.has-child-selected) {
+            display: none;
+        }
+
+        .wp-block-fs-blocks-tab-item.is-active,
+		.wp-block-fs-blocks-tab-item.is-selected,
+		.wp-block-fs-blocks-tab-item.has-child-selected {
+            animation: fadeIn 0.3s ease;
+            display: block;
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+}

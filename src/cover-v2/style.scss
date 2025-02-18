@@ -1,0 +1,94 @@
+// .wp-block-fancysquares-cover-block {
+// 	position: relative;
+// 	overflow: hidden;
+
+// 	&__overlay {
+// 	  position: absolute;
+// 	  inset: 0;
+// 	  background-color: #000;
+// 	  pointer-events: none;
+// 	  z-index: 1;
+// 	}
+
+// 	&__image-background,
+// 	&__video-background {
+// 	  position: absolute;
+// 	  inset: 0;
+// 	  object-fit: cover;
+// 	  width: 100%;
+// 	  height: 100%;
+// 	  z-index: 0;
+// 	}
+
+// 	&__inner-container {
+// 	  position: relative;
+// 	  z-index: 2;
+// 	  padding: 2rem;
+// 	}
+//   }
+
+  .wp-block-fancysquares-cover-block {
+	position: relative;
+	overflow: hidden;
+	min-height: 400px;
+	display: flex;
+	.wp-block-cover__background.has-background-dim {
+	  background-color: #000; /* or theme var */
+	  position: absolute;
+	  top: 0; right: 0; bottom: 0; left: 0;
+	  pointer-events: none;
+	  z-index: 1;
+	}
+	.wp-block-cover__image-background,
+	.wp-block-cover__video-background {
+	  position: absolute;
+	  top: 0; left: 0; width: 100%; height: 100%;
+	  object-fit: cover;
+	  z-index: 0;
+	}
+	.wp-block-cover__inner-container {
+	  position: relative;
+	  z-index: 2;
+	  padding: 2rem;
+	}
+  }
+  .wp-block-fancysquares-cover-block.has-custom-content-position .wp-block-cover__inner-container {
+	margin:0;
+	width:auto;
+  }
+  .wp-block-fancysquares-cover-block.is-position-top-left{
+	align-items:flex-start;
+	justify-content:flex-start;
+  }
+  .wp-block-fancysquares-cover-block.is-position-top-center{
+	align-items:flex-start;
+	justify-content:center;
+  }
+  .wp-block-fancysquares-cover-block.is-position-top-right{
+	align-items:flex-start;
+	justify-content:flex-end;
+  }
+  .wp-block-fancysquares-cover-block.is-position-center-left{
+	align-items:center;
+	justify-content:flex-start;
+  }
+  .wp-block-fancysquares-cover-block.is-position-center-center{
+	align-items:center;
+	justify-content:center;
+  }
+  .wp-block-fancysquares-cover-block.is-position-center-right{
+	align-items:center;
+	justify-content:flex-end;
+  }
+  .wp-block-fancysquares-cover-block.is-position-bottom-left{
+	align-items:flex-end;
+	justify-content:flex-start;
+  }
+  .wp-block-fancysquares-cover-block.is-position-bottom-center{
+	align-items:flex-end;
+	justify-content:center;
+  }
+  .wp-block-fancysquares-cover-block.is-position-bottom-right{
+	align-items:flex-end;
+	justify-content:flex-end;
+  }

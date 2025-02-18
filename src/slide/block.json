@@ -1,0 +1,44 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "fancysquares/slide",
+	"title": "Fancy Slide",
+	"category": "design",
+	"parent": [ "fancysquares/carousel" ],
+	"description": "A single slide in the FancySquares carousel. Allows the Cover block inside.",
+	"icon": "slides",
+	"supports": {
+		"html": false,
+		"__experimentalBorder": {
+			"color": true,
+			"radius": true,
+			"style": true,
+			"width": true,
+			"__experimentalDefaultControls": {
+				"color": true,
+				"radius": false,
+				"width": true
+			}
+		},
+		"color": {
+			"gradients": true,
+			"link": true,
+			"__experimentalDefaultControls": {
+				"link": false
+			}
+		},
+		"spacing": {
+			"padding": true,
+			"__experimentalDefaultControls": {
+				"padding": true
+			}
+		}
+	},
+	"attributes": {
+		"verticalAlign": {
+			"type": "string"
+		}
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}

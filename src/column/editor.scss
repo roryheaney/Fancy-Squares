@@ -1,0 +1,18 @@
+/**
+ * The following styles get applied inside the editor only.
+ *
+ * Replace them with your own styles or remove the file completely.
+ */
+
+.wp-block-fancysquares-column-block {
+	border: 1px dotted #f00;
+}
+[data-type="fs-blocks/column-block"] {
+	> div {
+		width: 100%;
+		// padding: 0 15px;
+		> .block-editor-inner-blocks {
+			width: 100%;
+		}
+	}
+}
