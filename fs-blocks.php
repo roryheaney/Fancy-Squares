@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Plugin Name:       FancySquare Blocks
+ * Plugin Name:       Fancy Squares - Blocks
  * Description:       A collection of custom blocks
  * Version:           1.0.0
  * Requires at least: 6.7

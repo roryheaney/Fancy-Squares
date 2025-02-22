@@ -37,6 +37,19 @@ This plugin currently add's the css/js to the FE as well, but only for testing p
 - ADA enhancements.
 - Other frameworks (Tailwind, Material, etc).
 
+### Node
+
+- v20
+- `npm ci`
+- `npm run start` (see package.json for additional commands)
+
+Not on v20? Thats ok, `npx -p node@20 npm ci`. You'll then use that `npx -p node@20` prefix for all commands.
+
 #### PR's welcome
 
 Feel free to chime in, we are better together.
+
+### In progress
+
+- Tabbed panel admin refinements
+- Swiper Carousel logic refinements and more clear requirements for specific settingsr
