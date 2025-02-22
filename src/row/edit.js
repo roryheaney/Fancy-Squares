@@ -5,7 +5,7 @@ import {
 } from '@wordpress/block-editor';
 import { PanelBody, FormTokenField } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { Fragment, useEffect } from '@wordpress/element';
+import { Fragment, useEffect, useRef } from '@wordpress/element';
 import './editor.scss';
 
 // Import your class definition arrays
@@ -136,18 +136,28 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		...additionalClasses,
 	].join( ' ' );
 
+	const blockRef = useRef();
+
 	/**
 	 * Whenever additionalClasses changes, update the row classes on the
 	 * "layout" container for this specific block ID.
 	 */
 	useEffect( () => {
-		const adminBlock = document.querySelector(
-			`.wp-block-fancysquares-row-block[data-block="${ clientId }"]`
-		);
+		// blockRef.current is the actual <div> node returned by React
+        if ( ! blockRef.current ) return;
 
-		const layoutEl = document.querySelector(
-			`.wp-block-fancysquares-row-block[data-block="${ clientId }"] > .block-editor-inner-blocks > .block-editor-block-list__layout`
-		);
+        console.log( 'clientID =', clientId );
+        console.log( 'blockRef =', blockRef );
+
+        // If you want to find the .block-editor-block-list__layout inside our block:
+        const layoutEl = blockRef.current.querySelector(
+            '.block-editor-inner-blocks > .block-editor-block-list__layout'
+        );
+
+		console.log(layoutEl);
+
+		// console.log(adminBlock);
+
 
 		// console.log( 'Layout Element from query:', layoutEl );
 		if ( layoutEl ) {
@@ -160,7 +170,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 			].join( ' ' );
 			layoutEl.className = mergedEditorClasses;
 
-			adminBlock.className = 'wp-block-fancysquares-row-block-admin';
+			// adminBlock.className = 'wp-block-fancysquares-row-block-admin';
 		}
 	}, [ additionalClasses, clientId ] );
 
@@ -206,7 +216,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 				</PanelBody>
 			</InspectorControls>
 
-			<div { ...blockProps } className={ previewClassString }>
+			<div { ...blockProps } className={ previewClassString } ref={ blockRef }>
 				<InnerBlocks
 					allowedBlocks={ ALLOWED_BLOCKS }
 					template={ [ [ 'fs-blocks/column-block' ] ] }
