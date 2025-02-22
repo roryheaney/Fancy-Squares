@@ -102,28 +102,18 @@ function fancysquares_fs_blocks_settings_page_html()
 }
 
 /**
- * Conditionally enqueue Bootstrap in the block editor when the user chooses "Bootstrap 5".
- *
- * @param string $hook The current admin page.
+ * Enqueue Bootstrap (if enabled) in the block editor's iframe.
  */
-function fancysquares_fs_blocks_enqueue_editor_assets($hook)
+function fancysquares_fs_blocks_enqueue_editor_iframe_assets()
 {
-	// Only load on post edit screens
-	if ('post.php' !== $hook && 'post-new.php' !== $hook) {
-		return;
-	}
-
 	$bootstrap_setting = get_option('fancysquares_fs_blocks_bootstrap', '');
 	if ('bootstrap5' === $bootstrap_setting) {
-		// Enqueue Bootstrap CSS
 		wp_enqueue_style(
 			'fancysquares-bootstrap5',
 			'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
 			array(),
 			'5.3.3'
 		);
-
-		// Enqueue Bootstrap JS Bundle
 		wp_enqueue_script(
 			'fancysquares-bootstrap5',
 			'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js',
@@ -133,7 +123,8 @@ function fancysquares_fs_blocks_enqueue_editor_assets($hook)
 		);
 	}
 }
-add_action('admin_enqueue_scripts', 'fancysquares_fs_blocks_enqueue_editor_assets');
+add_action('enqueue_block_assets', 'fancysquares_fs_blocks_enqueue_editor_iframe_assets');
+
 /**
  * Enqueue Bootstrap on the front end of the site.
  */
