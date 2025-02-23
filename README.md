@@ -1,4 +1,4 @@
-# Custom-Blocks
+# Custom Blocks (Fancy Squares, oh my!)
 
 The following blocks are based around Bootstrap 5 components.
 
@@ -30,7 +30,7 @@ This plugin currently add's the css/js to the FE as well, but only for testing p
   - slide preview
   - minor ada updates
     - play/pause
-   	- pagination is buttons instead of spans
+    - pagination is buttons instead of spans
 
 ### Road Map
 
