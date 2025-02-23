@@ -43,7 +43,7 @@ export default function save( { attributes } ) {
 		navigation: navigation
 			? { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' }
 			: false,
-		loop: loop && (finalSlidesPerView > 1 || slidesToShow > 1),
+		loop: loop,
 	};
 
 	// If fade is enabled (only relevant if slidesToShow=1):
