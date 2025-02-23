@@ -1,19 +1,18 @@
 import {
 	useBlockProps,
 	InnerBlocks,
-	useSetting,
+	InspectorControls,
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
+import { PanelBody, ToggleControl } from '@wordpress/components';
 import './editor.scss';
-// Add this import at the top
 import { useActiveTabClass } from './editor';
 
 export default function Edit( { clientId, attributes, setAttributes } ) {
-	const { blockId } = attributes;
+	const { blockId, activeTab, responsiveTabs } = attributes;
 	const blockProps = useBlockProps();
-	const [ activeTab, setActiveTab ] = useState( '' );
 	const { selectBlock } = useDispatch( blockEditorStore );
 
 	// Get child blocks
@@ -28,56 +27,99 @@ export default function Edit( { clientId, attributes, setAttributes } ) {
 		[ clientId ]
 	);
 
-	// Initialize block ID and active tab
+	// Initialize block ID and active tab (only if not set)
 	useEffect( () => {
-		if ( ! blockId ) setAttributes( { blockId: clientId } );
+		if ( ! blockId ) {
+			setAttributes( { blockId: clientId } );
+		}
+		// When there are children but no activeTab yet, default to the first child's persistent ID.
 		if ( childBlocks.length > 0 && ! activeTab ) {
-			setActiveTab( childBlocks[ 0 ].clientId );
+			const firstChildTabId =
+				childBlocks[ 0 ].attributes.tabId || childBlocks[ 0 ].clientId;
+			setAttributes( { activeTab: firstChildTabId } );
 		}
 	}, [ clientId, childBlocks ] );
 
-	// Handle tab click
-	const handleTabClick = ( tabClientId ) => {
-		setActiveTab( tabClientId );
-		selectBlock( tabClientId );
+	// Track the previous number of child blocks so we can detect when a new one is added.
+	const previousChildCountRef = useRef( childBlocks.length );
+	useEffect( () => {
+		if ( childBlocks.length > previousChildCountRef.current ) {
+			// A new tab-item has been added.
+			const newChild = childBlocks[ childBlocks.length - 1 ];
+			const newActiveTab = newChild.attributes.tabId || newChild.clientId;
+			setAttributes( { activeTab: newActiveTab } );
+			selectBlock( newChild.clientId );
+		}
+		previousChildCountRef.current = childBlocks.length;
+	}, [ childBlocks ] );
+
+	// Handle tab click manually (if user clicks on an existing tab)
+	const handleTabClick = ( childBlock ) => {
+		const childTabId = childBlock.attributes.tabId || childBlock.clientId;
+		setAttributes( { activeTab: childTabId } );
+		selectBlock( childBlock.clientId );
 	};
 
-	// Add this hook inside the component
+	// Apply active class on child elements based on activeTab attribute
 	useActiveTabClass( clientId, activeTab );
 
-	return (
-		<div { ...blockProps }>
-			<div className="wp-block-fs-blocks-tabs-editor">
-				<ul className="tabs-nav">
-					{ childBlocks.map( ( block ) => (
-						<li key={ block.clientId } className="nav-item">
-							<button
-								className={ `nav-link ${
-									activeTab === block.clientId
-										? 'is-active'
-										: ''
-								}` }
-								onClick={ () =>
-									handleTabClick( block.clientId )
-								}
-								role="tab"
-								aria-selected={ activeTab === block.clientId }
-							>
-								{ block.attributes.title || 'New Tab' }
-							</button>
-						</li>
-					) ) }
-					<li className="nav-item">
-						<InnerBlocks.ButtonBlockAppender />
-					</li>
-				</ul>
+	const TEMPLATE = [ [ 'fs-blocks/tab-item' ] ];
 
-				<div className="tab-content-editor">
-					<InnerBlocks
-					// ... other props ...
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title="Responsive Settings" initialOpen={ true }>
+					<ToggleControl
+						label="Responsive tabs"
+						help="Use an accordion on mobile"
+						checked={ responsiveTabs }
+						onChange={ ( value ) =>
+							setAttributes( { responsiveTabs: value } )
+						}
 					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				<div className="wp-block-fs-blocks-tabs-editor">
+					<ul className="tabs-nav">
+						{ childBlocks.map( ( block ) => {
+							const childTabId =
+								block.attributes.tabId || block.clientId;
+							return (
+								<li key={ block.clientId } className="nav-item">
+									<button
+										className={ `nav-link ${
+											activeTab === childTabId
+												? 'is-active'
+												: ''
+										}` }
+										onClick={ () =>
+											handleTabClick( block )
+										}
+										role="tab"
+										aria-selected={
+											activeTab === childTabId
+										}
+									>
+										{ block.attributes.title || 'New Tab' }
+									</button>
+								</li>
+							);
+						} ) }
+						<li className="nav-item">
+							<InnerBlocks.ButtonBlockAppender />
+						</li>
+					</ul>
+
+					<div className="tab-content-editor">
+						<InnerBlocks
+							allowedBlocks={ [ 'fs-blocks/tab-item' ] }
+							template={ TEMPLATE }
+							templateLock={ false }
+						/>
+					</div>
 				</div>
 			</div>
-		</div>
+		</>
 	);
 }
