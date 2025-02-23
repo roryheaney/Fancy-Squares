@@ -1,12 +1,13 @@
 <?php
 $block_id = $attributes['blockId'] ?? '';
-$active_tab = $attributes['activeTab'] ?? '';
+// $active_tab = $attributes['activeTab'] ?? '';
 $wrapper_attributes = get_block_wrapper_attributes();
 ?>
 <div <?php echo $wrapper_attributes; ?> data-bs-id="<?php echo esc_attr($block_id); ?>">
 	<ul class="nav nav-tabs" role="tablist">
 		<?php foreach ($tabs as $index => $tab) :
-			$is_active = ($active_tab === $tab['id']) || ($index === 0 && !$active_tab);
+			// Force the first tab to be active regardless of stored activeTab
+			$is_active = (0 === $index);
 		?>
 			<li class="nav-item" role="presentation">
 				<button class="nav-link <?php echo $is_active ? 'active' : ''; ?>"
@@ -25,7 +26,7 @@ $wrapper_attributes = get_block_wrapper_attributes();
 
 	<div class="tab-content">
 		<?php foreach ($tabs as $index => $tab) :
-			$is_active = ($active_tab === $tab['id']) || ($index === 0 && !$active_tab);
+			$is_active = (0 === $index);
 		?>
 			<div class="tab-pane fade <?php echo $is_active ? 'show active' : ''; ?>"
 				id="content-<?php echo esc_attr($tab['id']); ?>"
