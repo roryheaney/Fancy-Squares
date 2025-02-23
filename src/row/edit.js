@@ -146,20 +146,11 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		// blockRef.current is the actual <div> node returned by React
         if ( ! blockRef.current ) return;
 
-        console.log( 'clientID =', clientId );
-        console.log( 'blockRef =', blockRef );
-
         // If you want to find the .block-editor-block-list__layout inside our block:
         const layoutEl = blockRef.current.querySelector(
             '.block-editor-inner-blocks > .block-editor-block-list__layout'
         );
 
-		console.log(layoutEl);
-
-		// console.log(adminBlock);
-
-
-		// console.log( 'Layout Element from query:', layoutEl );
 		if ( layoutEl ) {
 			// We'll merge the "row" + our additional classes into one string.
 			const mergedEditorClasses = [
