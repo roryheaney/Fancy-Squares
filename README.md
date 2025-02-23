@@ -54,5 +54,6 @@ Feel free to chime in, we are better together.
 ### In progress
 
 - Tabbed panel accordion on mobile
+  - basic setup in place, needs style refinment, will probably leave as is so you're not tied down too much.
 - Swiper Carousel logic refinements and more clear requirements for specific settings
   - switch to render.php for easier admin editing and maintance.
