@@ -2,6 +2,8 @@
 $block_id = $attributes['blockId'] ?? '';
 // $active_tab = $attributes['activeTab'] ?? '';
 $wrapper_attributes = get_block_wrapper_attributes();
+$responsive_tabs = $attributes['responsiveTabs'] ?? false;
+print_r($responsive_tabs);
 ?>
 <div <?php echo $wrapper_attributes; ?> data-bs-id="<?php echo esc_attr($block_id); ?>">
 	<ul class="nav nav-tabs" role="tablist">

@@ -22,15 +22,19 @@ export default function Edit( { clientId, attributes, setAttributes } ) {
 	const persistentTabId = tabId || clientId;
 
 	// Compare the parent's activeTab with the persistentTabId
-	const { isActiveTab } = useSelect( ( select ) => {
-		const { getBlock, getBlockRootClientId } = select( blockEditorStore );
-		const parentClientId = getBlockRootClientId( clientId );
-		const parentBlock = getBlock( parentClientId );
-		const parentActiveTab = parentBlock?.attributes?.activeTab;
-		return {
-			isActiveTab: parentActiveTab === persistentTabId,
-		};
-	}, [ clientId, tabId ] );
+	const { isActiveTab } = useSelect(
+		( select ) => {
+			const { getBlock, getBlockRootClientId } =
+				select( blockEditorStore );
+			const parentClientId = getBlockRootClientId( clientId );
+			const parentBlock = getBlock( parentClientId );
+			const parentActiveTab = parentBlock?.attributes?.activeTab;
+			return {
+				isActiveTab: parentActiveTab === persistentTabId,
+			};
+		},
+		[ clientId, tabId ]
+	);
 
 	const blockProps = useBlockProps( {
 		className: isActiveTab ? 'is-active-tab' : '',
