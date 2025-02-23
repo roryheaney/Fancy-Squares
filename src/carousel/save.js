@@ -38,12 +38,16 @@ export default function save( { attributes } ) {
 			return acc;
 		}, {} ),
 		pagination: pagination
-			? { el: '.swiper-pagination', clickable: true }
+			? {
+					el: '.swiper-pagination',
+					clickable: true,
+					bulletElement: 'button',
+			  }
 			: false,
 		navigation: navigation
 			? { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' }
 			: false,
-		loop: loop && (finalSlidesPerView > 1 || slidesToShow > 1),
+		loop: loop,
 	};
 
 	// If fade is enabled (only relevant if slidesToShow=1):
@@ -70,7 +74,7 @@ export default function save( { attributes } ) {
 				<InnerBlocks.Content />
 			</div>
 
-			{/* Always render the container, but hide it if empty */}
+			{ /* Always render the container, but hide it if empty */ }
 			<div className={ pausePaginationClasses.join( ' ' ) }>
 				<div className="swiper-pause-pagination__inner-container">
 					{ showPlayPauseButton && (
@@ -79,13 +83,13 @@ export default function save( { attributes } ) {
 							aria-label="Carousel is playing, click to pause"
 						>
 							<span aria-hidden="true">Pause</span>
-							<span aria-hidden="true" class="d-none">Play</span>
+							<span aria-hidden="true" class="d-none">
+								Play
+							</span>
 						</button>
 					) }
 
-					{ pagination && (
-						<div className="swiper-pagination"></div>
-					) }
+					{ pagination && <div className="swiper-pagination"></div> }
 				</div>
 			</div>
 

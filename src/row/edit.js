@@ -144,12 +144,12 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 	 */
 	useEffect( () => {
 		// blockRef.current is the actual <div> node returned by React
-        if ( ! blockRef.current ) return;
+		if ( ! blockRef.current ) return;
 
-        // If you want to find the .block-editor-block-list__layout inside our block:
-        const layoutEl = blockRef.current.querySelector(
-            '.block-editor-inner-blocks > .block-editor-block-list__layout'
-        );
+		// If you want to find the .block-editor-block-list__layout inside our block:
+		const layoutEl = blockRef.current.querySelector(
+			'.block-editor-inner-blocks > .block-editor-block-list__layout'
+		);
 
 		if ( layoutEl ) {
 			// We'll merge the "row" + our additional classes into one string.
@@ -207,7 +207,11 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 				</PanelBody>
 			</InspectorControls>
 
-			<div { ...blockProps } className={ previewClassString } ref={ blockRef }>
+			<div
+				{ ...blockProps }
+				className={ previewClassString }
+				ref={ blockRef }
+			>
 				<InnerBlocks
 					allowedBlocks={ ALLOWED_BLOCKS }
 					template={ [ [ 'fs-blocks/column-block' ] ] }
