@@ -45,6 +45,12 @@ export default function Edit( { clientId, attributes, setAttributes } ) {
 	// Add this hook inside the component
 	useActiveTabClass( clientId, activeTab );
 
+	const TEMPLATE = [
+		[
+			'fs-blocks/tab-item'
+		],
+	];
+
 	return (
 		<div { ...blockProps }>
 			<div className="wp-block-fs-blocks-tabs-editor">
@@ -74,7 +80,9 @@ export default function Edit( { clientId, attributes, setAttributes } ) {
 
 				<div className="tab-content-editor">
 					<InnerBlocks
-					// ... other props ...
+						allowedBlocks={ [ 'fs-blocks/tab-item' ] }
+						template={ TEMPLATE }
+						templateLock={ false }
 					/>
 				</div>
 			</div>
