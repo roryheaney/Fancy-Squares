@@ -8,7 +8,7 @@ These blocks are set up and created using `@wordpress/create-block` and the `dyn
 
 ## Admin settings
 
-The plugin includes an option to select either yes or now for using Bootstrap 5.  If you select Bootstrap, it will add the Bootstrap 5 JS/CSS to the admin. You'll notice when you use blocks like `accordion`, it will work in the admin. If you select no, then I assume you've probably added your own framework.
+The plugin includes an option to select either yes or no for using Bootstrap 5.  If you select Bootstrap, it will add the Bootstrap 5 JS/CSS to the admin. You'll notice when you use blocks like `accordion`, it will work in the admin. If you select no, then I assume you've probably added your own framework.
 
 This plugin currently add's the css/js to the FE as well, but only for testing purposes.
 
