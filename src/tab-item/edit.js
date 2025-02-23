@@ -1,5 +1,6 @@
 import { useBlockProps, RichText, InnerBlocks } from '@wordpress/block-editor';
 import { useEffect } from '@wordpress/element';
+import './editor.scss';
 
 export default function Edit( { clientId, attributes, setAttributes } ) {
 	const { title, tabId } = attributes;
