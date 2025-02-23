@@ -151,6 +151,10 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 			'.block-editor-inner-blocks > .block-editor-block-list__layout'
 		);
 
+		const parentEl = blockRef.current.querySelector(
+			'.block-editor-inner-blocks'
+		);
+
 		if ( layoutEl ) {
 			// We'll merge the "row" + our additional classes into one string.
 			const mergedEditorClasses = [
@@ -160,8 +164,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 				...additionalClasses,
 			].join( ' ' );
 			layoutEl.className = mergedEditorClasses;
-
-			// adminBlock.className = 'wp-block-fancysquares-row-block-admin';
+			parentEl.className += ' wp-block-fancysquares-row-block-admin';
 		}
 	}, [ additionalClasses, clientId ] );
 
