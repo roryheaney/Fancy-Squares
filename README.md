@@ -1,4 +1,4 @@
-# Custom-Blocks
+# Custom Blocks (Fancy Squares, oh my!)
 
 The following blocks are based around Bootstrap 5 components.
 
@@ -23,17 +23,19 @@ This plugin currently add's the css/js to the FE as well, but only for testing p
 - Cover Block v2 (lazy loading for images and video backgrounds)
 - Alerts
 - tabbed panels (horizontal)
-  - ready to use, could use admin improvement though
+  - working on a responsive state when on mobile you can choose to use an accordion instead of the tabs
 - swiper carousel
   - slide
   - crossfade
   - slide preview
-  - still a work in progress but is usable
+  - minor ada updates
+    - play/pause
+    - pagination is buttons instead of spans
 
 ### Road Map
 
 - Add an option to add the js/css or them individually to the FE of the site.
-- More blocks (carousels, alerts, etc)
+- More blocks types
 - ADA enhancements.
 - Other frameworks (Tailwind, Material, etc).
 
@@ -51,5 +53,6 @@ Feel free to chime in, we are better together.
 
 ### In progress
 
-- Tabbed panel admin refinements
-- Swiper Carousel logic refinements and more clear requirements for specific settingsr
+- Tabbed panel accordion on mobile
+- Swiper Carousel logic refinements and more clear requirements for specific settings
+  - switch to render.php for easier admin editing and maintance.
