@@ -1,43 +1,43 @@
-document.addEventListener('DOMContentLoaded', () => {
-	const carousels = document.querySelectorAll('.swiper');
+document.addEventListener( 'DOMContentLoaded', () => {
+	const carousels = document.querySelectorAll( '.swiper' );
 
-	carousels.forEach((el) => {
+	carousels.forEach( ( el ) => {
 		// Retrieve config from data-swiper
-		const data = el.getAttribute('data-swiper') || '{}';
+		const data = el.getAttribute( 'data-swiper' ) || '{}';
 		let config = {};
 		try {
-			config = JSON.parse(data);
-		} catch (err) {
-			console.warn('Invalid JSON in data-swiper:', err);
+			config = JSON.parse( data );
+		} catch ( err ) {
+			console.warn( 'Invalid JSON in data-swiper:', err );
 		}
 
 		// Initialize Swiper
-		const swiper = new Swiper(el, config);
+		const swiper = new Swiper( el, config );
 
 		// Track whether the user manually paused via the button
 		let isPaused = false;
 
 		// 1) Always pause on hover if autoplay is set
-		if (config.autoplay) {
-			el.addEventListener('mouseenter', () => {
-				if (!isPaused) {
+		if ( config.autoplay ) {
+			el.addEventListener( 'mouseenter', () => {
+				if ( ! isPaused ) {
 					swiper.autoplay.stop();
 				}
-			});
-			el.addEventListener('mouseleave', () => {
-				if (!isPaused) {
+			} );
+			el.addEventListener( 'mouseleave', () => {
+				if ( ! isPaused ) {
 					swiper.autoplay.start();
 				}
-			});
+			} );
 		}
 
 		// 2) Look for the dsb-button-control (Play/Pause button)
-		const playPauseButton = el.querySelector('.dsb-button-control');
-		if (playPauseButton) {
-			playPauseButton.addEventListener('click', (evt) => {
+		const playPauseButton = el.querySelector( '.dsb-button-control' );
+		if ( playPauseButton ) {
+			playPauseButton.addEventListener( 'click', ( evt ) => {
 				evt.preventDefault();
 
-				if (!isPaused) {
+				if ( ! isPaused ) {
 					// Currently playing, so pause it
 					swiper.autoplay.stop();
 
@@ -48,8 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
 					);
 
 					// Hide first span, show second
-					playPauseButton.children[0].classList.add('d-none');
-					playPauseButton.children[1].classList.remove('d-none');
+					playPauseButton.children[ 0 ].classList.add( 'd-none' );
+					playPauseButton.children[ 1 ].classList.remove( 'd-none' );
 
 					isPaused = true;
 				} else {
@@ -63,12 +63,12 @@ document.addEventListener('DOMContentLoaded', () => {
 					);
 
 					// Show first span, hide second
-					playPauseButton.children[0].classList.remove('d-none');
-					playPauseButton.children[1].classList.add('d-none');
+					playPauseButton.children[ 0 ].classList.remove( 'd-none' );
+					playPauseButton.children[ 1 ].classList.add( 'd-none' );
 
 					isPaused = false;
 				}
-			});
+			} );
 		}
-	});
-});
+	} );
+} );

@@ -1,4 +1,3 @@
-import { createElement } from '@wordpress/element';
 import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import classnames from 'classnames';
 
