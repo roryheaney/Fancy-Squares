@@ -38,7 +38,7 @@ export default function save( { attributes } ) {
 			return acc;
 		}, {} ),
 		pagination: pagination
-			? { el: '.swiper-pagination', clickable: true }
+			? { el: '.swiper-pagination', clickable: true, bulletElement: 'button' }
 			: false,
 		navigation: navigation
 			? { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' }
