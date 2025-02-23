@@ -8,7 +8,7 @@ These blocks are set up and created using `@wordpress/create-block` and the `dyn
 
 ## Admin settings
 
-The plugin includes an option to yes or now to using Bootstrap 5.  If you select Bootstrap, it will add the Bootstrap 5 JS/CSS to the admin. You'll notice when you use blocks like `accordion`, it will work in the admin.
+The plugin includes an option to select either yes or now for using Bootstrap 5.  If you select Bootstrap, it will add the Bootstrap 5 JS/CSS to the admin. You'll notice when you use blocks like `accordion`, it will work in the admin. If you select no, then I assume you've probably added your own framework.
 
 This plugin currently add's the css/js to the FE as well, but only for testing purposes.
 
@@ -54,6 +54,6 @@ Feel free to chime in, we are better together.
 ### In progress
 
 - Tabbed panel accordion on mobile
-  - basic setup in place, needs style refinment, will probably leave as is so you're not tied down too much.
+  - Basic setup in place, needs style refinment, will probably leave as is so you're not tied down too much.
 - Swiper Carousel logic refinements and more clear requirements for specific settings
-  - switch to render.php for easier admin editing and maintance.
+  - Switch to render.php for easier admin editing and maintance.
