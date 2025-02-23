@@ -74,6 +74,10 @@
     "fractionalSlidesValue": {
       "type": "number",
       "default": 1
+    },
+    "showPlayPauseButton": {
+      "type": "boolean",
+      "default": false
     }
   },
   "editorScript": "file:./index.js",
