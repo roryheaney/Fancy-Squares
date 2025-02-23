@@ -15,6 +15,7 @@ import { useSelect } from '@wordpress/data';
 import classnames from 'classnames';
 import './editor.scss';
 
+// Helper function exactly as you had it
 function getCurrentSlidesToShow( slidesToShow, breakpoints ) {
 	let slides = slidesToShow;
 	let largest = 0;
@@ -46,6 +47,9 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		enableFade,
 		fractionalSlidesEnabled,
 		fractionalSlidesValue,
+
+		// 1) ADD OUR NEW ATTRIBUTE HERE:
+		showPlayPauseButton,
 	} = attributes;
 
 	const [ localBreakpoints, setLocalBreakpoints ] = useState( breakpoints );
@@ -136,6 +140,58 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 							step={ 500 }
 						/>
 					) }
+
+					{ /* SHOW CROSSFADE & FRACTIONAL ONLY IF slidesToShow == 1 */ }
+					{ slidesToShow === 1 && (
+						<>
+							<ToggleControl
+								label="Enable Fade (Crossfade)"
+								help="Use a fade transition instead of sliding."
+								checked={ enableFade }
+								onChange={ () =>
+									setAttributes( {
+										enableFade: ! enableFade,
+									} )
+								}
+							/>
+							<ToggleControl
+								label="Use Partial (Fractional) Slides?"
+								help="Overrides slidesToShow=1 with a fractional slidesPerView (0.05–0.50)."
+								checked={ fractionalSlidesEnabled }
+								onChange={ () =>
+									setAttributes( {
+										fractionalSlidesEnabled:
+											! fractionalSlidesEnabled,
+									} )
+								}
+							/>
+							{ fractionalSlidesEnabled && (
+								<RangeControl
+									label="Fractional slides per view"
+									value={ fractionalSlidesValue }
+									onChange={ ( val ) =>
+										setAttributes( {
+											fractionalSlidesValue: val,
+										} )
+									}
+									min={ 0.05 }
+									max={ 0.5 }
+									step={ 0.05 }
+								/>
+							) }
+						</>
+					) }
+
+					{ /* 2) ADD OUR NEW TOGGLE FOR "Play/Pause" */ }
+					<ToggleControl
+						label="Enable Play/Pause Button"
+						checked={ showPlayPauseButton }
+						onChange={ () =>
+							setAttributes( {
+								showPlayPauseButton: ! showPlayPauseButton,
+							} )
+						}
+					/>
 				</PanelBody>
 
 				<PanelBody title="Responsive" initialOpen={ false }>
@@ -224,47 +280,6 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 						max={ 900 }
 						step={ 50 }
 					/>
-
-					{ /* SHOW CROSSFADE & FRACTIONAL ONLY IF slidesToShow == 1 */ }
-					{ slidesToShow === 1 && (
-						<>
-							<ToggleControl
-								label="Enable Fade (Crossfade)"
-								help="Use a fade transition instead of sliding."
-								checked={ enableFade }
-								onChange={ () =>
-									setAttributes( {
-										enableFade: ! enableFade,
-									} )
-								}
-							/>
-							<ToggleControl
-								label="Use Partial (Fractional) Slides?"
-								help="Overrides slidesToShow=1 with a fractional slidesPerView (0.05–0.50)."
-								checked={ fractionalSlidesEnabled }
-								onChange={ () =>
-									setAttributes( {
-										fractionalSlidesEnabled:
-											! fractionalSlidesEnabled,
-									} )
-								}
-							/>
-							{ fractionalSlidesEnabled && (
-								<RangeControl
-									label="Fractional slides per view"
-									value={ fractionalSlidesValue }
-									onChange={ ( val ) =>
-										setAttributes( {
-											fractionalSlidesValue: val,
-										} )
-									}
-									min={ 0.05 }
-									max={ 0.5 }
-									step={ 0.05 }
-								/>
-							) }
-						</>
-					) }
 				</PanelBody>
 			</InspectorControls>
 
