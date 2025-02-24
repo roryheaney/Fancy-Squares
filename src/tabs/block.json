@@ -22,6 +22,10 @@
 		"activeTab": {
 			"type": "string",
 			"default": ""
+		},
+		"responsiveTabs": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"editorScript": "file:./index.js",

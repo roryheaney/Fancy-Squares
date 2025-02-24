@@ -3,7 +3,7 @@
 /**
  * Plugin Name:       Fancy Squares - Blocks
  * Description:       A collection of custom blocks
- * Version:           1.0.3
+ * Version:           1.0.5
  * Requires at least: 6.7
  * Requires PHP:      7.4
  * Author:            Rory Heaney

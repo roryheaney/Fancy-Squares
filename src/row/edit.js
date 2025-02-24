@@ -144,12 +144,16 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 	 */
 	useEffect( () => {
 		// blockRef.current is the actual <div> node returned by React
-        if ( ! blockRef.current ) return;
+		if ( ! blockRef.current ) return;
 
-        // If you want to find the .block-editor-block-list__layout inside our block:
-        const layoutEl = blockRef.current.querySelector(
-            '.block-editor-inner-blocks > .block-editor-block-list__layout'
-        );
+		// If you want to find the .block-editor-block-list__layout inside our block:
+		const layoutEl = blockRef.current.querySelector(
+			'.block-editor-inner-blocks > .block-editor-block-list__layout'
+		);
+
+		const parentEl = blockRef.current.querySelector(
+			'.block-editor-inner-blocks'
+		);
 
 		if ( layoutEl ) {
 			// We'll merge the "row" + our additional classes into one string.
@@ -160,8 +164,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 				...additionalClasses,
 			].join( ' ' );
 			layoutEl.className = mergedEditorClasses;
-
-			// adminBlock.className = 'wp-block-fancysquares-row-block-admin';
+			parentEl.className += ' wp-block-fancysquares-row-block-admin';
 		}
 	}, [ additionalClasses, clientId ] );
 
@@ -207,7 +210,11 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 				</PanelBody>
 			</InspectorControls>
 
-			<div { ...blockProps } className={ previewClassString } ref={ blockRef }>
+			<div
+				{ ...blockProps }
+				className={ previewClassString }
+				ref={ blockRef }
+			>
 				<InnerBlocks
 					allowedBlocks={ ALLOWED_BLOCKS }
 					template={ [ [ 'fs-blocks/column-block' ] ] }

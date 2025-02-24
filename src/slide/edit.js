@@ -1,4 +1,3 @@
-import { createElement } from '@wordpress/element';
 import {
 	useBlockProps,
 	InnerBlocks,
