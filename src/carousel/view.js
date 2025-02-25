@@ -31,8 +31,8 @@ document.addEventListener( 'DOMContentLoaded', () => {
 			} );
 		}
 
-		// 2) Look for the dsb-button-control (Play/Pause button)
-		const playPauseButton = el.querySelector( '.dsb-button-control' );
+		// 2) Look for the swiper__button-control (Play/Pause button)
+		const playPauseButton = el.querySelector( '.swiper__button-control' );
 		if ( playPauseButton ) {
 			playPauseButton.addEventListener( 'click', ( evt ) => {
 				evt.preventDefault();

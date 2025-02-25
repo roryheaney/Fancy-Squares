@@ -214,6 +214,6 @@ function fsblocks_render_carousel_block($attributes, $content)
 function fsblocks_render_slide_block($attributes, $content)
 {
 	ob_start();
-	include plugin_dir_path(__FILE__) . '../build/slide/render.php';
+	include plugin_dir_path(__FILE__) . '../build/carousel-slide/render.php';
 	return ob_get_clean();
 }

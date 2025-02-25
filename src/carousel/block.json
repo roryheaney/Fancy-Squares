@@ -7,14 +7,25 @@
 	"description": "A dynamic carousel container block (multiple carousels allowed).",
 	"icon": "slides",
 	"supports": {
-		"align": [ "wide", "full" ],
+		"align": [
+			"wide",
+			"full"
+		],
 		"html": false,
 		"anchor": true
 	},
 	"attributes": {
 		"templateLock": {
-			"type": [ "string", "boolean" ],
-			"enum": [ "all", "insert", "contentOnly", false ]
+			"type": [
+				"string",
+				"boolean"
+			],
+			"enum": [
+				"all",
+				"insert",
+				"contentOnly",
+				false
+			]
 		},
 		"slidesToShow": {
 			"type": "number",

@@ -2,8 +2,8 @@
  * Registers the `fancysquares/carousel` block in the editor.
  */
 import { registerBlockType } from '@wordpress/blocks';
+import { InnerBlocks } from '@wordpress/block-editor';
 import edit from './edit';
-import save from './save';
 import metadata from './block.json';
 import './style.scss'; // Front-end styles
 
@@ -12,5 +12,5 @@ import './style.scss'; // Front-end styles
 registerBlockType( metadata.name, {
 	...metadata,
 	edit,
-	save,
+	save: () => <InnerBlocks.Content />
 } );
