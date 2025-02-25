@@ -8,7 +8,7 @@ import {
 	PanelBody,
 	RangeControl,
 	ToggleControl,
-	NumberControl,
+	__experimentalNumberControl as NumberControl,
 	Button,
 } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';

@@ -1,77 +1,120 @@
 <?php
 
 /**
- * Actual HTML logic for the FancySquares Carousel block.
- * The variables $attributes and $content are available from the including function.
+ * Server render for carousel block
+ *
+ * @param array  $attributes The block attributes.
+ * @param string $content    The inner blocks (slide items).
  */
 
-// 1. Parse attributes
-$slides_to_show = $attributes['slides_to_show'] ?? 3;
-$column_gap     = $attributes['column_gap']     ?? 30;
-$pagination     = ! empty($attributes['pagination']);
-$navigation     = ! empty($attributes['navigation']);
-$autoplay       = ! empty($attributes['autoplay']);
-$delay          = $attributes['delay']          ?? 2000;
-$loop           = ! empty($attributes['loop']);
-$breakpoints    = $attributes['breakpoints']    ?? [];
-$speed          = $attributes['speed']          ?? 300;
+// Default attributes
+$defaults = array(
+	'slidesToShow'             => 1,
+	'columnGap'               => 0,
+	'pagination'              => false,
+	'navigation'              => false,
+	'autoplay'                => false,
+	'delay'                   => 3000,
+	'loop'                    => false,
+	'speed'                   => 500,
+	'enableFade'              => false,
+	'fractionalSlidesEnabled' => false,
+	'fractionalSlidesValue'   => 0.25,
+	'showPlayPauseButton'     => false,
+	'breakpoints'             => array(),
+);
 
-// 2. Build the Swiper config
-$swiper_data = [
-	'slidesPerView' => (int) $slides_to_show,
-	'speed'         => (int) $speed,
-	'spaceBetween'  => (int) $column_gap,
-	'breakpoints'   => [],
-];
-foreach ($breakpoints as $bp) {
-	if (isset($bp['breakpoint'], $bp['slides_to_show'])) {
-		$swiper_data['breakpoints'][(int) $bp['breakpoint']] = [
-			'slidesPerView' => (int) $bp['slides_to_show'],
-		];
+// Merge with defaults
+$attributes = wp_parse_args($attributes, $defaults);
+
+// Build Swiper configuration
+$swiper_data = array(
+	'slidesPerView' => $attributes['slidesToShow'],
+	'spaceBetween'  => $attributes['columnGap'],
+	'loop'          => $attributes['loop'],
+	'speed'         => $attributes['speed'],
+);
+
+// Handle fractional slides
+if ($attributes['slidesToShow'] === 1 && $attributes['fractionalSlidesEnabled']) {
+	$swiper_data['slidesPerView'] = 1 + $attributes['fractionalSlidesValue'];
+}
+
+// Handle fade effect
+if ($attributes['enableFade'] && $attributes['slidesToShow'] === 1) {
+	$swiper_data['effect'] = 'fade';
+	$swiper_data['fadeEffect'] = array('crossFade' => true);
+}
+
+// Handle breakpoints
+if (!empty($attributes['breakpoints'])) {
+	$swiper_data['breakpoints'] = array();
+	foreach ($attributes['breakpoints'] as $bp) {
+		$swiper_data['breakpoints'][$bp['breakpoint']] = array(
+			'slidesPerView' => $bp['slidesToShow']
+		);
 	}
 }
-if ($autoplay) {
-	$swiper_data['autoplay'] = ['delay' => (int) $delay];
-	if ($loop) {
-		$swiper_data['loop'] = true;
-	}
+
+// Handle autoplay
+if ($attributes['autoplay']) {
+	$swiper_data['autoplay'] = array(
+		'delay' => $attributes['delay'],
+		'pauseOnMouseEnter' => true,
+		'disableOnInteraction' => false
+	);
 }
-if ($pagination) {
-	$swiper_data['pagination'] = [
-		'el'        => '.swiper-pagination',
+
+// Handle pagination
+if ($attributes['pagination']) {
+	$swiper_data['pagination'] = array(
+		'el' => '.swiper-pagination',
 		'clickable' => true,
-	];
+		'bulletElement' => 'button'
+	);
 }
-if ($navigation) {
-	$swiper_data['navigation'] = [
+
+// Handle navigation
+if ($attributes['navigation']) {
+	$swiper_data['navigation'] = array(
 		'nextEl' => '.swiper-button-next',
-		'prevEl' => '.swiper-button-prev',
-	];
+		'prevEl' => '.swiper-button-prev'
+	);
 }
 
-$json_config = wp_json_encode($swiper_data);
-
-// 3. Render child blocks
-//   `$content` is raw block markup (comment-delimited).
-//   We call `do_blocks($content)` so nested blocks get processed.
-$inner_html = do_blocks($content);
+// Classes for pause/pagination container
+$pause_pagination_classes = array('swiper-pause-pagination');
+if (!$attributes['showPlayPauseButton'] && !$attributes['pagination']) {
+	$pause_pagination_classes[] = 'd-none';
+}
 ?>
-<div
-	class="swiper"
-	role="region"
-	aria-roledescription="carousel"
-	aria-label="FancySquares Carousel"
-	data-swiper="<?php echo esc_attr($json_config); ?>">
+
+<div class="swiper wp-block-fancysquares-carousel" data-swiper="<?php echo esc_js(wp_json_encode($swiper_data)); ?>">
 	<div class="swiper-wrapper">
-		<?php echo $inner_html; ?>
+		<?php echo $content; // Slide items
+		?>
 	</div>
 
-	<?php if ($pagination) : ?>
-		<div class="swiper-pagination" aria-hidden="true"></div>
-	<?php endif; ?>
+	<div class="<?php echo esc_attr(implode(' ', $pause_pagination_classes)); ?>">
+		<div class="swiper-pause-pagination__inner-container">
+			<?php if ($attributes['navigation']) : ?>
+				<button class="swiper-button-prev"></button>
+			<?php endif; ?>
+			<?php if ($attributes['navigation']) : ?>
+				<button class="swiper-button-next"></button>
+			<?php endif; ?>
+			<div className="swiper-pause-pagination__inner-container">
+				<?php if ($attributes['showPlayPauseButton']) : ?>
+					<button class="swiper__button-control" aria-label="<?php esc_attr_e('Carousel is playing, click to pause', 'fancysquares'); ?>">
+						<span aria-hidden="true"><?php esc_html_e('Pause', 'fancysquares'); ?></span>
+						<span aria-hidden="true" class="d-none"><?php esc_html_e('Play', 'fancysquares'); ?></span>
+					</button>
+				<?php endif; ?>
+				<?php if ($attributes['pagination']) : ?>
+					<div class="swiper-pagination"></div>
+				<?php endif; ?>
+			</div>
+		</div>
+	</div>
 
-	<?php if ($navigation) : ?>
-		<button class="swiper-button-next" aria-label="Next Slide"></button>
-		<button class="swiper-button-prev" aria-label="Previous Slide"></button>
-	<?php endif; ?>
 </div>

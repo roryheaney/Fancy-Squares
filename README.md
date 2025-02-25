@@ -31,6 +31,7 @@ This plugin currently add's the css/js to the FE as well, but only for testing p
   - minor ada updates
     - play/pause
     - pagination is buttons instead of spans
+    - use render.php
 
 ### Road Map
 
@@ -53,7 +54,7 @@ Feel free to chime in, we are better together.
 
 ### In progress
 
-- Tabbed panel accordion on mobile
+- Tabbed panel to accordion on mobile
   - Basic setup in place, needs style refinment, will probably leave as is so you're not tied down too much.
-- Swiper Carousel logic refinements and more clear requirements for specific settings
-  - Switch to render.php for easier admin editing and maintance.
+- Cards
+- Rounded classes
