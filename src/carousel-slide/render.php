@@ -19,7 +19,7 @@ if (!empty($vertical_align)) {
 }
 ?>
 
-<div class="wp-block-fancysquares-slide <?php echo esc_attr(implode(' ', $classes)); ?>">
+<div class="wp-block-fancysquares-slide <?php echo esc_attr(implode(' ', $classes)); ?>" aria-roledescription="slide">
 	<?php echo $content; // Inner blocks content
 	?>
 </div>

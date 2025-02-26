@@ -89,7 +89,7 @@ if (!$attributes['showPlayPauseButton'] && !$attributes['pagination']) {
 }
 ?>
 
-<div class="swiper wp-block-fancysquares-carousel" data-swiper="<?php echo esc_js(wp_json_encode($swiper_data)); ?>">
+<div class="swiper wp-block-fancysquares-carousel" data-swiper="<?php echo esc_js(wp_json_encode($swiper_data)); ?>" aria-roledescription="carousel" aria-label="Highlighted content">
 	<div class="swiper-wrapper">
 		<?php echo $content; // Slide items
 		?>

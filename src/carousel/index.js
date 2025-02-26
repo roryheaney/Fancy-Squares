@@ -12,5 +12,5 @@ import './style.scss'; // Front-end styles
 registerBlockType( metadata.name, {
 	...metadata,
 	edit,
-	save: () => <InnerBlocks.Content />
+	save: () => <InnerBlocks.Content />,
 } );

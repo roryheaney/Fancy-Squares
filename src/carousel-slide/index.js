@@ -10,5 +10,5 @@ import metadata from './block.json';
 registerBlockType( metadata.name, {
 	...metadata,
 	edit,
-	save: () => <InnerBlocks.Content />
+	save: () => <InnerBlocks.Content />,
 } );

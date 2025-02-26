@@ -2,3 +2,8 @@
 .fs-tab-item-body {
 	padding: 1rem 0;
   }
+.wp-block-fs-blocks-tab-item {
+	.tab-title {
+		display: none;
+	}
+}

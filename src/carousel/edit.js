@@ -15,7 +15,7 @@ import { useSelect } from '@wordpress/data';
 import classnames from 'classnames';
 import './editor.scss';
 
-// Helper function exactly as you had it
+// Helper function to get the current slides to show based on breakpoints
 function getCurrentSlidesToShow( slidesToShow, breakpoints ) {
 	let slides = slidesToShow;
 	let largest = 0;
@@ -48,7 +48,8 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		fractionalSlidesEnabled,
 		fractionalSlidesValue,
 
-		// 1) ADD OUR NEW ATTRIBUTE HERE:
+		// ADA specific feature
+		// New attribute for play/pause button
 		showPlayPauseButton,
 	} = attributes;
 
