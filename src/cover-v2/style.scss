@@ -5,7 +5,7 @@
 	display: flex;
 
 	.wp-block-cover__background.has-background-dim {
-	  background-color: #000; // or theme var
+	  background-color: #000;
 	  position: absolute;
 	  top: 0;
 	  right: 0;
@@ -39,42 +39,159 @@
 	  }
 	}
 
-	&.is-position {
-	  &-top-left {
-		align-items: flex-start;
-		justify-content: flex-start;
+	.wp-block-cover__img-video-wrapper {
+		z-index: 0;
+	}
+
+	&.is-position-top-left {
+	  align-items: flex-start;
+	  justify-content: flex-start;
+	}
+	&.is-position-top-center {
+	  align-items: flex-start;
+	  justify-content: center;
+	}
+	&.is-position-top-right {
+	  align-items: flex-start;
+	  justify-content: flex-end;
+	}
+	&.is-position-center-left {
+	  align-items: center;
+	  justify-content: flex-start;
+	}
+	&.is-position-center-center {
+	  align-items: center;
+	  justify-content: center;
+	}
+	&.is-position-center-right {
+	  align-items: center;
+	  justify-content: flex-end;
+	}
+	&.is-position-bottom-left {
+	  align-items: flex-end;
+	  justify-content: flex-start;
+	}
+	&.is-position-bottom-center {
+	  align-items: flex-end;
+	  justify-content: center;
+	}
+	&.is-position-bottom-right {
+	  align-items: flex-end;
+	  justify-content: flex-end;
+	}
+
+	&.cover-negative-margin-left {
+	  background-color: #000;
+	  overflow: visible;
+
+	  .wp-block-cover__background,
+	  .wp-block-cover__img-video-wrapper {
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		position: absolute;
 	  }
-	  &-top-center {
-		align-items: flex-start;
-		justify-content: center;
+
+	  @media (min-width: 1024px) {
+		.wp-block-cover__background,
+		.wp-block-cover__img-video-wrapper {
+		  --container-width: 480px;
+		  --negative-margin: calc(var(--container-width) - 50vw - 30px);
+		  left: var(--negative-margin);
+		  right: 0;
+		}
 	  }
-	  &-top-right {
-		align-items: flex-start;
-		justify-content: flex-end;
+	  @media (min-width: 1200px) {
+		.wp-block-cover__background,
+		.wp-block-cover__img-video-wrapper {
+		  --container-width: 570px;
+		}
 	  }
-	  &-center-left {
-		align-items: center;
-		justify-content: flex-start;
+	  @media (min-width: 1400px) {
+		.wp-block-cover__background,
+		.wp-block-cover__img-video-wrapper {
+		  --container-width: 660px;
+		}
 	  }
-	  &-center-center {
-		align-items: center;
-		justify-content: center;
+
+	  .wp-block-cover__img-video-wrapper {
+		.wp-block-cover__image-background {
+		  object-fit: cover;
+		  width: 100%;
+		  height: 100%;
+		}
 	  }
-	  &-center-right {
-		align-items: center;
-		justify-content: flex-end;
+	}
+
+	&.cover-negative-margin-right {
+	  background-color: #000;
+	  overflow: visible;
+
+	  .wp-block-cover__background,
+	  .wp-block-cover__img-video-wrapper {
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		position: absolute;
 	  }
-	  &-bottom-left {
-		align-items: flex-end;
-		justify-content: flex-start;
+
+	  @media (min-width: 1024px) {
+		.wp-block-cover__background,
+		.wp-block-cover__img-video-wrapper {
+		  --container-width: 480px;
+		  --negative-margin: calc(var(--container-width) - 50vw - 30px);
+		  right: var(--negative-margin);
+		  left: 0;
+		}
 	  }
-	  &-bottom-center {
-		align-items: flex-end;
-		justify-content: center;
+	  @media (min-width: 1200px) {
+		.wp-block-cover__background,
+		.wp-block-cover__img-video-wrapper {
+		  --container-width: 570px;
+		}
 	  }
-	  &-bottom-right {
-		align-items: flex-end;
-		justify-content: flex-end;
+	  @media (min-width: 1400px) {
+		.wp-block-cover__background,
+		.wp-block-cover__img-video-wrapper {
+		  --container-width: 660px;
+		}
+	  }
+
+	  .wp-block-cover__img-video-wrapper {
+		.wp-block-cover__image-background {
+		  object-fit: cover;
+		  width: 100% !important;
+		  height: 100% !important;
+		}
+	  }
+	}
+
+	.wp-block-cover__image-background {
+	  background-size: cover;
+	  background-position: center;
+	  width: 100%;
+	}
+  }
+
+  // Override container width for constrained layouts.
+  .wp-block-post-content-is-layout-constrained {
+	.wp-block-fancysquares-cover-block {
+	  &.cover-negative-margin-left,
+	  &.cover-negative-margin-right {
+		@media (min-width: 1200px) {
+		  .wp-block-cover__background,
+		  .wp-block-cover__img-video-wrapper {
+			--container-width: 530px;
+		  }
+		}
+		@media (min-width: 1400px) {
+		  .wp-block-cover__background,
+		  .wp-block-cover__img-video-wrapper {
+			--container-width: 530px;
+		  }
+		}
 	  }
 	}
   }

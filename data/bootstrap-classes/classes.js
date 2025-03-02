@@ -1,23 +1,7 @@
 // options.js
-export const exoticColumnOptions = [
-	{ label: 'Bleed Left LG', value: 'bs-g-col-negative-left-margin' },
-	{
-		label: 'Bleed Left LG - Full MD Down',
-		value: 'bs-g-col-negative-left-margin bs-g-col-negative-left-margin--full-md-down',
-	},
-	{
-		label: 'Bleed Left LG - Full LG Down',
-		value: 'bs-g-col-negative-left-margin bs-g-col-negative-left-margin--full-lg-down',
-	},
-	{ label: 'Bleed Right LG', value: 'bs-g-col-negative-right-margin' },
-	{
-		label: 'Bleed Right LG - Full MD Down',
-		value: 'bs-g-col-negative-right-margin bs-g-col-negative-right-margin--full-md-down',
-	},
-	{
-		label: 'Bleed Right LG - Full LG Down',
-		value: 'bs-g-col-negative-right-margin bs-g-col-negative-right-margin--full-lg-down',
-	},
+export const bleedCoverOptions = [
+	{label: 'cover-negative-margin-left', value: 'cover-negative-margin-left',},
+	{label: 'cover-negative-margin-right', value: 'cover-negative-margin-right',},
 ];
 
 export const columnOptions = [

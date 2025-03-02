@@ -26,6 +26,7 @@ import {
 	paddingOptions,
 	positionOptions,
 	zindexOptions,
+	bleedCoverOptions, // <-- Added here
 } from '../../data/bootstrap-classes/classes.js';
 
 /* ------------------------------------------------------------------------ */
@@ -36,16 +37,12 @@ const marginSuggestions = marginOptions.map( ( o ) => o.value );
 const paddingSuggestions = paddingOptions.map( ( o ) => o.value );
 const positionSuggestions = positionOptions.map( ( o ) => o.value );
 const zindexSuggestions = zindexOptions.map( ( o ) => o.value );
+const bleedCoverSuggestions = bleedCoverOptions.map( ( o ) => o.value ); // <-- Added here
 
 /* ------------------------------------------------------------------------ */
 /*  Utility functions
 /* ------------------------------------------------------------------------ */
 
-/**
- * Make sure we always have the base classes in the array:
- * - wp-block-cover
- * - wp-block-fancysquares-cover-block
- */
 function ensureBaseClasses( arr ) {
 	let final = [ ...arr ];
 	[ 'wp-block-cover', 'wp-block-fancysquares-cover-block' ].forEach(
@@ -58,59 +55,41 @@ function ensureBaseClasses( arr ) {
 	return final;
 }
 
-/* ------------------------------------------------------------------------ */
-/*  Utility: Build final class array
-/* ------------------------------------------------------------------------ */
-/**
- * 1) Ensuring base classes
- * 2) Removing any existing display/margin/padding/position/zindex classes
- * 3) Adding the new tokens from each set
- *
- * @param {string} orig  'default' or 'fluid'
- * @param {string[]} displayArr
- * @param {string[]} marginArr
- * @param {string[]} paddingArr
- * @param {string[]} positionArr
- * @param {string[]} zindexArr
- * @return {string[]} The unified array of class names
- */
 function buildClassArray(
 	orig,
 	displayArr,
 	marginArr,
 	paddingArr,
 	positionArr,
-	zindexArr
+	zindexArr,
+	bleedCoverArr // <-- Added to function signature
 ) {
 	let final = ensureBaseClasses( orig );
 
-	// Combine all suggestions so we can remove them from `final`.
 	const allSuggestions = [
 		...displaySuggestions,
 		...marginSuggestions,
 		...paddingSuggestions,
 		...positionSuggestions,
 		...zindexSuggestions,
+		...bleedCoverSuggestions, // <-- Added here
 	];
 
-	// Remove any classes that appear in the known sets
+	// Remove classes that belong to any of the known sets
 	final = final.filter( ( c ) => ! allSuggestions.includes( c ) );
 
-	// Now add in the new tokens from each set
+	// Add the selected classes from each set
 	final.push(
 		...displayArr,
 		...marginArr,
 		...paddingArr,
 		...positionArr,
-		...zindexArr
+		...zindexArr,
+		...bleedCoverArr // <-- Added here
 	);
 	return final;
 }
 
-/**
- * Convert a string like "top left" to "top-left" for use in a class name.
- * Rough approximation of sanitize_title in WP.
- */
 function toSlug( str ) {
 	return str
 		.toLowerCase()
@@ -133,9 +112,6 @@ export default function Edit( { attributes, setAttributes } ) {
 		additionalClasses,
 	} = attributes;
 
-	// ----------------------------------------------------------------------
-	// Ensure base classes on mount (or if classes changed)
-	// ----------------------------------------------------------------------
 	useEffect( () => {
 		if ( additionalClasses.length === 0 ) {
 			setAttributes( {
@@ -152,9 +128,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		}
 	}, [ additionalClasses, setAttributes ] );
 
-	// ----------------------------------------------------------------------
-	// Extract known classes for display/margin/padding/position/zindex
-	// ----------------------------------------------------------------------
+	// Filter out base classes for easier handling in the advanced fields
 	const filtered = additionalClasses.filter(
 		( c ) =>
 			! [
@@ -163,6 +137,7 @@ export default function Edit( { attributes, setAttributes } ) {
 			].includes( c )
 	);
 
+	// Helper to find intersection (to pre-populate fields)
 	const intersect = ( arr, list ) =>
 		arr.filter( ( c ) => list.includes( c ) );
 
@@ -171,10 +146,11 @@ export default function Edit( { attributes, setAttributes } ) {
 	const paddingVals = intersect( filtered, paddingSuggestions );
 	const positionVals = intersect( filtered, positionSuggestions );
 	const zindexVals = intersect( filtered, zindexSuggestions );
+	const bleedCoverVals = intersect( filtered, bleedCoverSuggestions ); // <-- Bleed cover
 
-	// ----------------------------------------------------------------------
-	// onChange handlers for each set
-	// ----------------------------------------------------------------------
+	/* ------------------------------------------------------------------------ */
+	/*  onChange handlers for advanced classes
+	/* ------------------------------------------------------------------------ */
 	const onChangeDisplay = ( newTokens ) => {
 		const updated = buildClassArray(
 			additionalClasses,
@@ -182,7 +158,8 @@ export default function Edit( { attributes, setAttributes } ) {
 			marginVals,
 			paddingVals,
 			positionVals,
-			zindexVals
+			zindexVals,
+			bleedCoverVals
 		);
 		setAttributes( { additionalClasses: updated } );
 	};
@@ -194,7 +171,8 @@ export default function Edit( { attributes, setAttributes } ) {
 			newTokens,
 			paddingVals,
 			positionVals,
-			zindexVals
+			zindexVals,
+			bleedCoverVals
 		);
 		setAttributes( { additionalClasses: updated } );
 	};
@@ -206,7 +184,8 @@ export default function Edit( { attributes, setAttributes } ) {
 			marginVals,
 			newTokens,
 			positionVals,
-			zindexVals
+			zindexVals,
+			bleedCoverVals
 		);
 		setAttributes( { additionalClasses: updated } );
 	};
@@ -218,7 +197,8 @@ export default function Edit( { attributes, setAttributes } ) {
 			marginVals,
 			paddingVals,
 			newTokens,
-			zindexVals
+			zindexVals,
+			bleedCoverVals
 		);
 		setAttributes( { additionalClasses: updated } );
 	};
@@ -230,14 +210,28 @@ export default function Edit( { attributes, setAttributes } ) {
 			marginVals,
 			paddingVals,
 			positionVals,
+			newTokens,
+			bleedCoverVals
+		);
+		setAttributes( { additionalClasses: updated } );
+	};
+
+	const onChangeBleedCover = ( newTokens ) => {
+		const updated = buildClassArray(
+			additionalClasses,
+			displayVals,
+			marginVals,
+			paddingVals,
+			positionVals,
+			zindexVals,
 			newTokens
 		);
 		setAttributes( { additionalClasses: updated } );
 	};
 
-	// ----------------------------------------------------------------------
-	// Media selection + Remove logic
-	// ----------------------------------------------------------------------
+	/* ------------------------------------------------------------------------ */
+	/*  Media Handling
+	/* ------------------------------------------------------------------------ */
 	const onSelectMedia = ( media ) => {
 		if ( ! media || ! media.url ) {
 			setAttributes( { url: '', isVideo: false, lazyLoadVideo: false } );
@@ -257,20 +251,15 @@ export default function Edit( { attributes, setAttributes } ) {
 		} );
 	};
 
-	// ----------------------------------------------------------------------
-	// contentPosition => e.g. "top left", "center center", "bottom right"
-	// ----------------------------------------------------------------------
 	const setPosition = ( val ) => {
 		setAttributes( { contentPosition: val } );
 	};
 
-	// ----------------------------------------------------------------------
-	// Build the editor preview classes
-	// ----------------------------------------------------------------------
+	/* ------------------------------------------------------------------------ */
+	/*  Build block classes
+	/* ------------------------------------------------------------------------ */
 	const editorClasses = [ ...additionalClasses ];
 
-	// If there's a contentPosition, add "is-position-{slug}"
-	// If it's != 'center center', also add "has-custom-content-position"
 	if ( contentPosition ) {
 		const slug = toSlug( contentPosition );
 		editorClasses.push( `is-position-${ slug }` );
@@ -279,17 +268,42 @@ export default function Edit( { attributes, setAttributes } ) {
 		}
 	}
 
-	// ----------------------------------------------------------------------
-	// useBlockProps => merges alignment classes, etc.
-	// ----------------------------------------------------------------------
 	const blockProps = useBlockProps( {
 		className: editorClasses.join( ' ' ),
 		style: fullHeight ? { minHeight: '100vh' } : {},
 	} );
 
-	// ----------------------------------------------------------------------
-	// Render the editor UI
-	// ----------------------------------------------------------------------
+	// ------------------------------------------------------------------------
+	// Compute background element classes and inline styles.
+	// ------------------------------------------------------------------------
+	const bgClasses = [ 'wp-block-cover__background' ];
+	if ( dimRatio !== 100 ) {
+		bgClasses.push( 'has-background-dim' );
+	}
+	if ( attributes.gradient ) {
+		bgClasses.push( `has-${ attributes.gradient }-gradient-background` );
+	}
+	if ( attributes.backgroundColor ) {
+		bgClasses.push( `has-${ attributes.backgroundColor }-background-color` );
+	}
+
+	const bgStyle = {
+		opacity: dimRatio / 100,
+	};
+
+	if ( attributes.style && attributes.style.color && attributes.style.color.gradient ) {
+		bgStyle.backgroundImage = attributes.style.color.gradient;
+	}
+	if ( attributes.background ) {
+		bgStyle.background = attributes.background;
+	}
+	if ( attributes.style && attributes.style.color && attributes.style.color.background ) {
+		bgStyle.backgroundColor = attributes.style.color.background;
+	};
+
+	/* ------------------------------------------------------------------------ */
+	/*  Return Edit markup
+	/* ------------------------------------------------------------------------ */
 	return (
 		<Fragment>
 			<BlockControls group="block">
@@ -348,18 +362,14 @@ export default function Edit( { attributes, setAttributes } ) {
 						<ToggleControl
 							label={ __( 'Lazy Load Video', 'fs-blocks' ) }
 							checked={ lazyLoadVideo }
-							onChange={ ( val ) =>
-								setAttributes( { lazyLoadVideo: val } )
-							}
+							onChange={ ( val ) => setAttributes( { lazyLoadVideo: val } ) }
 						/>
 					) }
 
 					<RangeControl
 						label={ __( 'Dim Ratio', 'fs-blocks' ) }
 						value={ dimRatio }
-						onChange={ ( val ) =>
-							setAttributes( { dimRatio: val } )
-						}
+						onChange={ ( val ) => setAttributes( { dimRatio: val } ) }
 						min={ 0 }
 						max={ 100 }
 					/>
@@ -367,9 +377,7 @@ export default function Edit( { attributes, setAttributes } ) {
 					<ToggleControl
 						label={ __( 'Toggle Full Height', 'fs-blocks' ) }
 						checked={ fullHeight }
-						onChange={ ( val ) =>
-							setAttributes( { fullHeight: val } )
-						}
+						onChange={ ( val ) => setAttributes( { fullHeight: val } ) }
 					/>
 				</PanelBody>
 
@@ -407,32 +415,41 @@ export default function Edit( { attributes, setAttributes } ) {
 						suggestions={ zindexSuggestions }
 						onChange={ onChangeZIndex }
 					/>
+					{/* FormTokenField for Bleed Cover Classes */}
+					<FormTokenField
+						label={ __( 'Bleed Cover Classes', 'fs-blocks' ) }
+						value={ bleedCoverVals }
+						suggestions={ bleedCoverSuggestions }
+						onChange={ onChangeBleedCover }
+					/>
 				</PanelBody>
 			</InspectorControls>
 
 			<div { ...blockProps }>
 				<div
-					className="wp-block-cover__background has-background-dim"
+					className={ bgClasses.join( ' ' ) }
 					aria-hidden="true"
-					style={ { opacity: dimRatio / 100 } }
+					style={ bgStyle }
 				/>
-				{ url && isVideo ? (
-					<video
-						className="wp-block-cover__video-background"
-						src={ url }
-						autoPlay
-						loop
-						muted
-						playsInline
-					/>
-				) : url ? (
-					<img
-						className="wp-block-cover__image-background"
-						src={ url }
-						alt=""
-						loading="lazy"
-					/>
-				) : null }
+				<div className="wp-block-cover__img-video-wrapper">
+					{ url && isVideo ? (
+						<video
+							className="wp-block-cover__video-background"
+							src={ url }
+							autoPlay
+							loop
+							muted
+							playsInline
+						/>
+					) : url ? (
+						<img
+							className="wp-block-cover__image-background"
+							src={ url }
+							alt=""
+							loading="lazy"
+						/>
+					) : null }
+				</div>
 				<div className="wp-block-cover__inner-container">
 					<InnerBlocks />
 				</div>
