@@ -284,22 +284,32 @@ export default function Edit( { attributes, setAttributes } ) {
 		bgClasses.push( `has-${ attributes.gradient }-gradient-background` );
 	}
 	if ( attributes.backgroundColor ) {
-		bgClasses.push( `has-${ attributes.backgroundColor }-background-color` );
+		bgClasses.push(
+			`has-${ attributes.backgroundColor }-background-color`
+		);
 	}
 
 	const bgStyle = {
 		opacity: dimRatio / 100,
 	};
 
-	if ( attributes.style && attributes.style.color && attributes.style.color.gradient ) {
+	if (
+		attributes.style &&
+		attributes.style.color &&
+		attributes.style.color.gradient
+	) {
 		bgStyle.backgroundImage = attributes.style.color.gradient;
 	}
 	if ( attributes.background ) {
 		bgStyle.background = attributes.background;
 	}
-	if ( attributes.style && attributes.style.color && attributes.style.color.background ) {
+	if (
+		attributes.style &&
+		attributes.style.color &&
+		attributes.style.color.background
+	) {
 		bgStyle.backgroundColor = attributes.style.color.background;
-	};
+	}
 
 	/* ------------------------------------------------------------------------ */
 	/*  Return Edit markup
@@ -362,14 +372,18 @@ export default function Edit( { attributes, setAttributes } ) {
 						<ToggleControl
 							label={ __( 'Lazy Load Video', 'fs-blocks' ) }
 							checked={ lazyLoadVideo }
-							onChange={ ( val ) => setAttributes( { lazyLoadVideo: val } ) }
+							onChange={ ( val ) =>
+								setAttributes( { lazyLoadVideo: val } )
+							}
 						/>
 					) }
 
 					<RangeControl
 						label={ __( 'Dim Ratio', 'fs-blocks' ) }
 						value={ dimRatio }
-						onChange={ ( val ) => setAttributes( { dimRatio: val } ) }
+						onChange={ ( val ) =>
+							setAttributes( { dimRatio: val } )
+						}
 						min={ 0 }
 						max={ 100 }
 					/>
@@ -377,7 +391,9 @@ export default function Edit( { attributes, setAttributes } ) {
 					<ToggleControl
 						label={ __( 'Toggle Full Height', 'fs-blocks' ) }
 						checked={ fullHeight }
-						onChange={ ( val ) => setAttributes( { fullHeight: val } ) }
+						onChange={ ( val ) =>
+							setAttributes( { fullHeight: val } )
+						}
 					/>
 				</PanelBody>
 
@@ -415,7 +431,7 @@ export default function Edit( { attributes, setAttributes } ) {
 						suggestions={ zindexSuggestions }
 						onChange={ onChangeZIndex }
 					/>
-					{/* FormTokenField for Bleed Cover Classes */}
+					{ /* FormTokenField for Bleed Cover Classes */ }
 					<FormTokenField
 						label={ __( 'Bleed Cover Classes', 'fs-blocks' ) }
 						value={ bleedCoverVals }

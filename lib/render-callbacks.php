@@ -35,6 +35,29 @@ function fsblocks_render_container_block($attributes, $content)
 }
 
 /**
+ * Render callback for the content-wrapper block.
+ *
+ * @param array  $attributes Block attributes.
+ * @param string $content    Inner block markup.
+ * @return string            HTML markup.
+ */
+function fsblocks_render_content_wrapper_block($attributes, $content)
+{
+	$additional_class = isset($attributes['additionalClass'])
+		? sanitize_html_class($attributes['additionalClass'])
+		: '';
+
+	// $classes = 'content-wrapper';
+	// if (! empty($additional_class)) {
+	// 	$classes .= ' ' . $additional_class;
+	// }
+
+	ob_start();
+	include plugin_dir_path(__FILE__) . '../build/content-wrapper/render.php';
+	return ob_get_clean();
+}
+
+/**
  * Render callback for the row block.
  */
 function fsblocks_render_row_block($attributes, $content)
