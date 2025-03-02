@@ -207,7 +207,10 @@ export default function Edit( { attributes, setAttributes } ) {
 						value={ elementTag } // 'div' or 'section'
 						options={ [
 							{ label: __( 'Div', 'fs-blocks' ), value: 'div' },
-							{ label: __( 'Section', 'fs-blocks' ), value: 'section' },
+							{
+								label: __( 'Section', 'fs-blocks' ),
+								value: 'section',
+							},
 						] }
 						onChange={ onChangeElementTag }
 					/>
@@ -246,7 +249,7 @@ export default function Edit( { attributes, setAttributes } ) {
 				</PanelBody>
 			</InspectorControls>
 
-			{/* Our dynamic preview */}
+			{ /* Our dynamic preview */ }
 			<div { ...blockProps }>
 				<InnerBlocks template={ [ [ 'fs-blocks/container-block' ] ] } />
 			</div>

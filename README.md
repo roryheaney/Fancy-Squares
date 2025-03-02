@@ -32,6 +32,7 @@ This plugin currently add's the css/js to the FE as well, but only for testing p
     - play/pause
     - pagination is buttons instead of spans
     - use render.php
+- content wrapper
 
 ### Road Map
 
