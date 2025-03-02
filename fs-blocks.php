@@ -29,6 +29,14 @@ require_once plugin_dir_path(__FILE__) . 'lib/admin-settings.php';
  */
 function fancysquares_fs_blocks_block_init()
 {
+	// content-wrapper block
+	register_block_type(
+		__DIR__ . '/build/content-wrapper',
+		array(
+			'render_callback' => 'fsblocks_render_content_wrapper_block',
+		)
+	);
+
 	// container block
 	register_block_type(
 		__DIR__ . '/build/container',

@@ -1,7 +1,13 @@
 // options.js
 export const bleedCoverOptions = [
-	{label: 'cover-negative-margin-left', value: 'cover-negative-margin-left',},
-	{label: 'cover-negative-margin-right', value: 'cover-negative-margin-right',},
+	{
+		label: 'cover-negative-margin-left',
+		value: 'cover-negative-margin-left',
+	},
+	{
+		label: 'cover-negative-margin-right',
+		value: 'cover-negative-margin-right',
+	},
 ];
 
 export const columnOptions = [
