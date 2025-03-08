@@ -3,7 +3,7 @@
 /**
  * Plugin Name:       Fancy Squares - Blocks
  * Description:       A collection of custom blocks
- * Version:           1.0.8
+ * Version:           1.0.9
  * Requires at least: 6.7
  * Requires PHP:      7.4
  * Author:            Rory Heaney
@@ -135,6 +135,14 @@ function fancysquares_fs_blocks_block_init()
 		__DIR__ . '/build/carousel-slide',
 		[
 			'render_callback' => 'fsblocks_render_slide_block',
+		]
+	);
+
+	// Register the picture block from metadata, override render_callback
+	register_block_type_from_metadata(
+		__DIR__ . '/build/picture-block',
+		[
+			'render_callback' => 'fs_dynamic_picture_block_render_callback',
 		]
 	);
 }
