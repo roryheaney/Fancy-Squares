@@ -1,14 +1,34 @@
 /**
  * edit.js
  *
- * Demonstrates a dynamic block editor that closely matches
- * the front-end <picture> & <figure> logic:
- * - Uses a "default" image's alt & caption from the Media Library via the REST API
- * - If defaultImageId is 0, we allow the user to enter an alt text for the filler image. (We have an extra attribute: fillerAlt.)
- * - Fallback logic for small, medium, large breakpoints
- * - Provides remove buttons and aspect ratio
- * - Adds `wp-block-image fs-block-image` plus either `fs-block-image--no-aspect-ratio`
- *   or `fs-block-image--has-aspect-ratio is-aspect-ratio-XYZ` to <figure>
+ * This file defines the editor-side behavior for the FS Dynamic Picture Block.
+ * It provides:
+ *  - An ImageSelector component for uploading, previewing, or removing images
+ *    (default, small, medium, large).
+ *  - Automatic fetching of alt text and captions from the Media Library
+ *    for the default image.
+ *  - A fallback 1×1 pixel "filler" image if no default is chosen,
+ *    with an optional custom alt text.
+ *  - Aspect ratio options to control the rendered shape (e.g., 16:9, 4:3, etc.).
+ *  - A live preview that mimics the front-end's <picture> markup and
+ *    shows how breakpoints and captions will appear.
+ *  - Basic accessibility features, such as wrapping the preview
+ *    image in a button for keyboard interaction.
+ *
+ * The goal is to mirror the block’s dynamic rendering logic
+ * on the front end, ensuring editors can see an approximate representation
+ * before publishing.
+ *
+ * WordPress references:
+ *  - @wordpress/block-editor for useBlockProps, InspectorControls, MediaUpload, etc.
+ *  - @wordpress/components for UI elements like PanelBody, Button, SelectControl, etc.
+ *  - @wordpress/i18n for translation functions (__ and sprintf).
+ *  - @wordpress/api-fetch for retrieving alt/caption data from the REST API.
+ *
+ * For the final output, this block uses a separate render.php file (server-side)
+ * to produce the <picture> element and handle alt text/caption logic.
+ * The server-side logic ensures any updates to attachments in the Media Library
+ * automatically reflect on the front end.
  */
 
 import {
@@ -17,60 +37,109 @@ import {
 	MediaUpload,
 	MediaUploadCheck,
 } from '@wordpress/block-editor';
-
 import {
 	PanelBody,
 	Button,
 	SelectControl,
 	TextControl,
 } from '@wordpress/components';
-
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
+/**
+ * Reusable ImageSelector component
+ * Shows a button, image preview (wrapped in <button> for a11y), and a "Remove" button.
+ *
+ * @param {Object} props                  The props object.
+ * @param {string} props.label            The label for the image slot, e.g. "Default" or "Small".
+ * @param {number} props.imageId          The ID of the selected image in the WordPress Media Library.
+ * @param {string} props.imageUrl         The URL of the selected image.
+ * @param {Function} props.onSelect       Callback fired when a new image is selected.
+ * @param {Function} props.onRemove       Callback fired when the image is removed.
+ */
 function ImageSelector( { label, imageId, imageUrl, onSelect, onRemove } ) {
+	// We'll build the "Select" or "Edit/Replace" label with sprintf
+	const selectLabel = sprintf(
+		/* translators: %s is the breakpoint label, like 'Default' or 'Small' */
+		__( 'Select %s Image', 'fs-blocks' ),
+		label
+	);
+	const editLabel = sprintf(
+		/* translators: %s is the breakpoint label, like 'Default' or 'Small' */
+		__( 'Edit or Replace %s Image', 'fs-blocks' ),
+		label
+	);
+	const removeLabel = sprintf(
+		/* translators: %s is the breakpoint label, like 'Default' or 'Small' */
+		__( 'Remove %s Image', 'fs-blocks' ),
+		label
+	);
+
 	return (
 		<MediaUploadCheck>
 			<MediaUpload
 				onSelect={ onSelect }
 				allowedTypes={ [ 'image' ] }
 				value={ imageId }
-				render={ ( { open } ) => (
-					<div style={ { marginBottom: '1em' } }>
-						<Button isSecondary onClick={ open }>
-							{ imageId
-								? __(
-										`Edit/Replace ${ label } Image`,
-										'fs-blocks'
-								  )
-								: __( `Select ${ label } Image`, 'fs-blocks' ) }
-						</Button>
+				render={ ( { open } ) => {
+					const handleKeyDown = ( event ) => {
+						// Provide a keyboard event for accessibility
+						if ( event.key === 'Enter' || event.key === ' ' ) {
+							open();
+						}
+					};
 
-						{ imageUrl && (
-							<>
-								<img
-									src={ imageUrl }
-									alt=""
-									style={ {
-										maxWidth: '100%',
-										marginTop: '0.5em',
-										cursor: 'pointer',
-									} }
-									onClick={ open }
-								/>
-								<div style={ { marginTop: '0.5em' } }>
-									<Button isDestructive onClick={ onRemove }>
-										{ __(
-											`Remove ${ label } Image`,
-											'fs-blocks'
-										) }
-									</Button>
-								</div>
-							</>
-						) }
-					</div>
-				) }
+					return (
+						<div style={ { marginBottom: '1em' } }>
+							<Button isSecondary onClick={ open }>
+								{ imageId ? editLabel : selectLabel }
+							</Button>
+
+							{ imageUrl && (
+								<>
+									{ /*
+					  Wrap <img> in a <button> so it's interactive.
+					  Alternatively, you could do role="button" + tabIndex=0 on the <img>,
+					  plus onKeyDown, but a <button> is usually simpler.
+					*/ }
+									<button
+										type="button"
+										style={ {
+											display: 'block',
+											background: 'none',
+											border: 'none',
+											padding: 0,
+											marginTop: '0.5em',
+											cursor: 'pointer',
+										} }
+										onClick={ open }
+										onKeyDown={ handleKeyDown }
+										aria-label={ editLabel }
+									>
+										<img
+											src={ imageUrl }
+											alt=""
+											style={ {
+												maxWidth: '100%',
+												display: 'block',
+											} }
+										/>
+									</button>
+
+									<div style={ { marginTop: '0.5em' } }>
+										<Button
+											isDestructive
+											onClick={ onRemove }
+										>
+											{ removeLabel }
+										</Button>
+									</div>
+								</>
+							) }
+						</div>
+					);
+				} }
 			/>
 		</MediaUploadCheck>
 	);
@@ -88,7 +157,7 @@ export default function Edit( props ) {
 		largeImageId,
 		largeImageUrl,
 		aspectRatio,
-		fillerAlt, // NEW attribute
+		fillerAlt,
 	} = attributes;
 
 	const blockProps = useBlockProps();
@@ -96,7 +165,6 @@ export default function Edit( props ) {
 	const [ defaultAlt, setDefaultAlt ] = useState( '' );
 	const [ defaultCaption, setDefaultCaption ] = useState( '' );
 
-	// If defaultImageId != 0, fetch alt/caption from the Media Library
 	useEffect( () => {
 		if ( ! defaultImageId ) {
 			setDefaultAlt( '' );
@@ -115,7 +183,9 @@ export default function Edit( props ) {
 	}, [ defaultImageId ] );
 
 	const onSelectImage = ( breakpoint ) => ( media ) => {
-		if ( ! media?.id || ! media?.url ) return;
+		if ( ! media?.id || ! media?.url ) {
+			return;
+		}
 		setAttributes( {
 			[ `${ breakpoint }ImageId` ]: media.id,
 			[ `${ breakpoint }ImageUrl` ]: media.url,
@@ -133,7 +203,8 @@ export default function Edit( props ) {
 	const hasMedium = !! mediumImageUrl;
 	const hasLarge = !! largeImageUrl;
 
-	let figureClassNames = [ 'wp-block-image', 'fs-block-image' ];
+	// Use const instead of let if never reassigned
+	const figureClassNames = [ 'wp-block-image', 'fs-block-image' ];
 	if ( aspectRatio && aspectRatio !== 'none' ) {
 		figureClassNames.push( 'fs-block-image--has-aspect-ratio' );
 		figureClassNames.push( `is-aspect-ratio-${ aspectRatio }` );
@@ -142,13 +213,17 @@ export default function Edit( props ) {
 	}
 	const figureClass = figureClassNames.join( ' ' );
 
+	/**
+	 * Build a React component to mimic the <picture>/<figure> logic.
+	 * Avoid nested ternaries; use if statements.
+	 */
 	function PicturePreview() {
-		// If only default is set, simpler <img>
 		const noBreakpoints = ! hasSmall && ! hasMedium && ! hasLarge;
 
+		// If noBreakpoints
 		if ( noBreakpoints ) {
+			// If no default image
 			if ( ! defaultImageUrl ) {
-				// If no default image, we show a note
 				return (
 					<p>{ __( 'No default image selected.', 'fs-blocks' ) }</p>
 				);
@@ -160,7 +235,7 @@ export default function Edit( props ) {
 						alt={ defaultAlt }
 						style={ { maxWidth: '100%' } }
 					/>
-					{ !! defaultCaption && (
+					{ defaultCaption && (
 						<figcaption
 							dangerouslySetInnerHTML={ {
 								__html: defaultCaption,
@@ -171,58 +246,60 @@ export default function Edit( props ) {
 			);
 		}
 
-		// Otherwise, build pseudo <picture> preview
+		// If breakpoints exist, we do a pseudo <picture> structure
+		let sourceSmall = null;
+		let sourceMedium = null;
+		let sourceLarge = null;
+
+		// Up to 600px
+		if ( hasSmall ) {
+			sourceSmall = (
+				<source media="(max-width: 600px)" srcSet={ smallImageUrl } />
+			);
+		} else if ( hasMedium ) {
+			sourceSmall = (
+				<source media="(max-width: 600px)" srcSet={ mediumImageUrl } />
+			);
+		}
+
+		// 601px–1023px
+		if ( hasMedium && hasSmall ) {
+			sourceMedium = (
+				<source
+					media="(min-width: 601px) and (max-width: 1023px)"
+					srcSet={ mediumImageUrl }
+				/>
+			);
+		} else if ( hasMedium && ! hasSmall ) {
+			sourceMedium = (
+				<source media="(max-width: 1023px)" srcSet={ mediumImageUrl } />
+			);
+		}
+
+		// >= 1024px
+		if ( hasLarge ) {
+			sourceLarge = (
+				<source media="(min-width: 1024px)" srcSet={ largeImageUrl } />
+			);
+		} else if ( hasMedium ) {
+			sourceLarge = (
+				<source media="(min-width: 1024px)" srcSet={ mediumImageUrl } />
+			);
+		}
+
 		return (
 			<figure className={ figureClass }>
 				<picture>
-					{ /* Up to 600px */ }
-					{ hasSmall ? (
-						<source
-							media="(max-width: 600px)"
-							srcSet={ smallImageUrl }
-						/>
-					) : hasMedium ? (
-						<source
-							media="(max-width: 600px)"
-							srcSet={ mediumImageUrl }
-						/>
-					) : null }
-
-					{ /* 601px–1023px */ }
-					{ hasMedium && hasSmall ? (
-						<source
-							media="(min-width: 601px) and (max-width: 1023px)"
-							srcSet={ mediumImageUrl }
-						/>
-					) : hasMedium && ! hasSmall ? (
-						<source
-							media="(max-width: 1023px)"
-							srcSet={ mediumImageUrl }
-						/>
-					) : null }
-
-					{ /* >= 1024px */ }
-					{ hasLarge ? (
-						<source
-							media="(min-width: 1024px)"
-							srcSet={ largeImageUrl }
-						/>
-					) : hasMedium ? (
-						<source
-							media="(min-width: 1024px)"
-							srcSet={ mediumImageUrl }
-						/>
-					) : null }
-
-					{ /* Fallback <img> */ }
+					{ sourceSmall }
+					{ sourceMedium }
+					{ sourceLarge }
 					<img
 						src={ defaultImageUrl || '' }
 						alt={ defaultAlt }
 						style={ { maxWidth: '100%' } }
 					/>
 				</picture>
-
-				{ !! defaultCaption && (
+				{ defaultCaption && (
 					<figcaption
 						dangerouslySetInnerHTML={ { __html: defaultCaption } }
 					/>
@@ -236,9 +313,8 @@ export default function Edit( props ) {
 			<InspectorControls>
 				<PanelBody
 					title={ __( 'Image Settings', 'fs-blocks' ) }
-					initialOpen={ true }
+					initialOpen
 				>
-					{ /* DEFAULT IMAGE */ }
 					<ImageSelector
 						label="Default"
 						imageId={ defaultImageId }
@@ -247,7 +323,6 @@ export default function Edit( props ) {
 						onRemove={ onRemoveImage( 'default' ) }
 					/>
 
-					{ /* If there's NO default image, show a note & let user set fillerAlt */ }
 					{ ! defaultImageId && (
 						<div
 							style={ {
@@ -264,7 +339,7 @@ export default function Edit( props ) {
 							</p>
 							<p>
 								{ __(
-									'A 1×1 transparent filler image will be used. For accessibility, you can provide alt text below.',
+									'A 1×1 transparent filler image will be used. For accessibility, provide alt text below.',
 									'fs-blocks'
 								) }
 							</p>
@@ -282,7 +357,6 @@ export default function Edit( props ) {
 						</div>
 					) }
 
-					{ /* SMALL IMAGE */ }
 					<ImageSelector
 						label="Small"
 						imageId={ smallImageId }
@@ -291,7 +365,6 @@ export default function Edit( props ) {
 						onRemove={ onRemoveImage( 'small' ) }
 					/>
 
-					{ /* MEDIUM IMAGE */ }
 					<ImageSelector
 						label="Medium"
 						imageId={ mediumImageId }
@@ -300,7 +373,6 @@ export default function Edit( props ) {
 						onRemove={ onRemoveImage( 'medium' ) }
 					/>
 
-					{ /* LARGE IMAGE */ }
 					<ImageSelector
 						label="Large"
 						imageId={ largeImageId }
@@ -309,7 +381,6 @@ export default function Edit( props ) {
 						onRemove={ onRemoveImage( 'large' ) }
 					/>
 
-					{ /* ASPECT RATIO */ }
 					<SelectControl
 						label={ __( 'Aspect Ratio', 'fs-blocks' ) }
 						value={ aspectRatio }
@@ -353,7 +424,6 @@ export default function Edit( props ) {
 					/>
 				</PanelBody>
 			</InspectorControls>
-
 			<PicturePreview />
 		</div>
 	);
