@@ -45,6 +45,14 @@
 		"fillerAlt": {
 			"type": "string",
 			"default": ""
+		},
+		"borderClass": {
+			"type": "string",
+			"default": ""
+		},
+		"borderRadiusClass": {
+			"type": "string",
+			"default": ""
 		}
 	},
 	"supports": {

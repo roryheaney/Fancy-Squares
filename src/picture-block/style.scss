@@ -24,6 +24,7 @@
 		img {
 			object-fit: cover; // or 'contain', 'fill', etc. as needed
 			max-width: 100%;
+			height: 100% !important;
 		}
 		// Aspect ratio classes. Each sets a ratio on the container
 		&.is-aspect-ratio-1-1 {

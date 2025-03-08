@@ -47,6 +47,12 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
+// We actually use these to let the user pick border classes
+import {
+	borderOptions,
+	borderRadiusOptions,
+} from '../../data/bootstrap-classes/classes.js';
+
 /**
  * Reusable ImageSelector component
  * Shows a button, image preview (wrapped in <button> for a11y), and a "Remove" button.
@@ -59,7 +65,6 @@ import apiFetch from '@wordpress/api-fetch';
  * @param {Function} props.onRemove       Callback fired when the image is removed.
  */
 function ImageSelector( { label, imageId, imageUrl, onSelect, onRemove } ) {
-	// We'll build the "Select" or "Edit/Replace" label with sprintf
 	const selectLabel = sprintf(
 		/* translators: %s is the breakpoint label, like 'Default' or 'Small' */
 		__( 'Select %s Image', 'fs-blocks' ),
@@ -84,7 +89,6 @@ function ImageSelector( { label, imageId, imageUrl, onSelect, onRemove } ) {
 				value={ imageId }
 				render={ ( { open } ) => {
 					const handleKeyDown = ( event ) => {
-						// Provide a keyboard event for accessibility
 						if ( event.key === 'Enter' || event.key === ' ' ) {
 							open();
 						}
@@ -98,11 +102,6 @@ function ImageSelector( { label, imageId, imageUrl, onSelect, onRemove } ) {
 
 							{ imageUrl && (
 								<>
-									{ /*
-					  Wrap <img> in a <button> so it's interactive.
-					  Alternatively, you could do role="button" + tabIndex=0 on the <img>,
-					  plus onKeyDown, but a <button> is usually simpler.
-					*/ }
 									<button
 										type="button"
 										style={ {
@@ -158,6 +157,9 @@ export default function Edit( props ) {
 		largeImageUrl,
 		aspectRatio,
 		fillerAlt,
+		// NEW attributes for border classes
+		borderClass,
+		borderRadiusClass,
 	} = attributes;
 
 	const blockProps = useBlockProps();
@@ -203,7 +205,6 @@ export default function Edit( props ) {
 	const hasMedium = !! mediumImageUrl;
 	const hasLarge = !! largeImageUrl;
 
-	// Use const instead of let if never reassigned
 	const figureClassNames = [ 'wp-block-image', 'fs-block-image' ];
 	if ( aspectRatio && aspectRatio !== 'none' ) {
 		figureClassNames.push( 'fs-block-image--has-aspect-ratio' );
@@ -211,6 +212,15 @@ export default function Edit( props ) {
 	} else {
 		figureClassNames.push( 'fs-block-image--no-aspect-ratio' );
 	}
+
+	// If user chose a border or radius, append them
+	if ( borderClass ) {
+		figureClassNames.push( borderClass );
+	}
+	if ( borderRadiusClass ) {
+		figureClassNames.push( borderRadiusClass );
+	}
+
 	const figureClass = figureClassNames.join( ' ' );
 
 	/**
@@ -220,9 +230,7 @@ export default function Edit( props ) {
 	function PicturePreview() {
 		const noBreakpoints = ! hasSmall && ! hasMedium && ! hasLarge;
 
-		// If noBreakpoints
 		if ( noBreakpoints ) {
-			// If no default image
 			if ( ! defaultImageUrl ) {
 				return (
 					<p>{ __( 'No default image selected.', 'fs-blocks' ) }</p>
@@ -246,7 +254,6 @@ export default function Edit( props ) {
 			);
 		}
 
-		// If breakpoints exist, we do a pseudo <picture> structure
 		let sourceSmall = null;
 		let sourceMedium = null;
 		let sourceLarge = null;
@@ -420,6 +427,24 @@ export default function Edit( props ) {
 						] }
 						onChange={ ( newVal ) =>
 							setAttributes( { aspectRatio: newVal } )
+						}
+					/>
+
+					{ /* NEW: Border & Border Radius dropdowns */ }
+					<SelectControl
+						label={ __( 'Border', 'fs-blocks' ) }
+						value={ borderClass }
+						options={ borderOptions }
+						onChange={ ( newVal ) =>
+							setAttributes( { borderClass: newVal } )
+						}
+					/>
+					<SelectControl
+						label={ __( 'Border Radius', 'fs-blocks' ) }
+						value={ borderRadiusClass }
+						options={ borderRadiusOptions }
+						onChange={ ( newVal ) =>
+							setAttributes( { borderRadiusClass: newVal } )
 						}
 					/>
 				</PanelBody>

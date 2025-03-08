@@ -9,6 +9,7 @@
  * - Otherwise, alt text & caption are from the Media Library
  */
 
+// Access $attributes
 $defaultId   = ! empty($attributes['defaultImageId']) ? (int) $attributes['defaultImageId'] : 0;
 $defaultUrl  = ! empty($attributes['defaultImageUrl']) ? $attributes['defaultImageUrl'] : '';
 
@@ -17,11 +18,13 @@ $mediumUrl   = ! empty($attributes['mediumImageUrl'])  ? $attributes['mediumImag
 $largeUrl    = ! empty($attributes['largeImageUrl'])   ? $attributes['largeImageUrl']   : '';
 
 $aspect      = ! empty($attributes['aspectRatio'])     ? $attributes['aspectRatio']     : 'none';
-
-// Filler alt if no default image is chosen
 $fillerAlt   = ! empty($attributes['fillerAlt'])       ? $attributes['fillerAlt']       : '';
 
-// If the default URL is empty, we use a 1x1 pixel transparent GIF
+// NEW border classes
+$borderClass = ! empty($attributes['borderClass'])      ? $attributes['borderClass']      : '';
+$radiusClass = ! empty($attributes['borderRadiusClass']) ? $attributes['borderRadiusClass'] : '';
+
+// If the default URL is empty, we use a 1×1 pixel transparent GIF
 if (! $defaultUrl) {
 	$defaultUrl = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 } else {
@@ -49,15 +52,30 @@ if ($defaultId) {
 }
 
 // Build figure classes
+$figureClasses = ['wp-block-image', 'fs-block-image'];
+
 if ($aspect && 'none' !== $aspect) {
-	$figure_class = 'is-aspect-ratio-' . $aspect . ' fs-block-image--has-aspect-ratio';
+	// e.g. aspect="16-9" => "is-aspect-ratio-16-9 fs-block-image--has-aspect-ratio"
+	$figureClasses[] = 'is-aspect-ratio-' . $aspect;
+	$figureClasses[] = 'fs-block-image--has-aspect-ratio';
 } else {
-	$figure_class = 'fs-block-image--no-aspect-ratio';
+	$figureClasses[] = 'fs-block-image--no-aspect-ratio';
 }
+
+// If user selected border classes, append them
+if ($borderClass) {
+	$figureClasses[] = $borderClass;
+}
+if ($radiusClass) {
+	$figureClasses[] = $radiusClass;
+}
+
+// Join them into a single string
+$figure_class = implode(' ', array_map('esc_attr', $figureClasses));
 
 // If only default is set, simpler <figure>:
 if (! $hasSmall && ! $hasMedium && ! $hasLarge) : ?>
-	<figure class="wp-block-image fs-block-image <?php echo esc_attr($figure_class); ?>">
+	<figure class="<?php echo $figure_class; ?>">
 		<img
 			src="<?php echo $defaultUrl; ?>"
 			alt="<?php echo esc_attr($altText); ?>" />
@@ -70,7 +88,7 @@ if (! $hasSmall && ! $hasMedium && ! $hasLarge) : ?>
 endif;
 ?>
 
-<figure class="wp-block-image fs-block-image <?php echo esc_attr($figure_class); ?>">
+<figure class="<?php echo $figure_class; ?>">
 	<picture>
 		<?php // Up to 600px
 		if ($hasSmall) : ?>
