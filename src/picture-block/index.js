@@ -5,7 +5,7 @@ import save from './save';
 
 import './style.scss';
 
-registerBlockType('fs-blocks/dynamic-picture-block', {
-  edit,
-  save,
-});
+registerBlockType( 'fs-blocks/dynamic-picture-block', {
+	edit,
+	save,
+} );
