@@ -33,6 +33,7 @@ This plugin currently add's the css/js to the FE as well, but only for testing p
     - pagination is buttons instead of spans
     - use render.php
 - content wrapper
+- image block with breakpoint image selection for changing art direction as needed. (default/small/medium/large)
 
 ### Road Map
 

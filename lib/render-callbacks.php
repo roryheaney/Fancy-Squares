@@ -240,3 +240,14 @@ function fsblocks_render_slide_block($attributes, $content)
 	include plugin_dir_path(__FILE__) . '../build/carousel-slide/render.php';
 	return ob_get_clean();
 }
+
+
+/**
+ * Callback that includes the raw markup from fs-dynamic-picture-block-render.php.
+ */
+function fs_dynamic_picture_block_render_callback($attributes)
+{
+	ob_start();
+	include plugin_dir_path(__FILE__) . '../build/picture-block/render.php';
+	return ob_get_clean();
+}
