@@ -7,9 +7,11 @@
  * - If $defaultUrl is empty, uses a 1×1 filler image
  * - If $defaultId = 0, we let the user’s fillerAlt override the alt text
  * - Otherwise, alt text & caption are from the Media Library
+ *
+ * Border & rounded classes (and border-style) are applied on the <img> element.
  */
 
-// Access $attributes
+// Gather attributes
 $defaultId   = ! empty($attributes['defaultImageId']) ? (int) $attributes['defaultImageId'] : 0;
 $defaultUrl  = ! empty($attributes['defaultImageUrl']) ? $attributes['defaultImageUrl'] : '';
 
@@ -20,11 +22,11 @@ $largeUrl    = ! empty($attributes['largeImageUrl'])   ? $attributes['largeImage
 $aspect      = ! empty($attributes['aspectRatio'])     ? $attributes['aspectRatio']     : 'none';
 $fillerAlt   = ! empty($attributes['fillerAlt'])       ? $attributes['fillerAlt']       : '';
 
-// NEW border classes
-$borderClass = ! empty($attributes['borderClass'])      ? $attributes['borderClass']      : '';
+// Border & radius classes for the <img>
+$borderClass = ! empty($attributes['borderClass'])       ? $attributes['borderClass']       : '';
 $radiusClass = ! empty($attributes['borderRadiusClass']) ? $attributes['borderRadiusClass'] : '';
 
-// If the default URL is empty, we use a 1×1 pixel transparent GIF
+// If the default URL is empty, use a 1×1 transparent GIF
 if (! $defaultUrl) {
 	$defaultUrl = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 } else {
@@ -35,50 +37,72 @@ $smallUrl  = esc_url($smallUrl);
 $mediumUrl = esc_url($mediumUrl);
 $largeUrl  = esc_url($largeUrl);
 
+// Do we have smaller breakpoints set?
 $hasSmall  = ! empty($smallUrl);
 $hasMedium = ! empty($mediumUrl);
 $hasLarge  = ! empty($largeUrl);
 
-// If there's a real default image, fetch alt/caption from the Media Library
+// Alt text & caption
 $altText = '';
 $caption = '';
 
 if ($defaultId) {
+	// Real default image => fetch alt/caption from Media Library
 	$altText  = get_post_meta($defaultId, '_wp_attachment_image_alt', true) ?: '';
 	$caption  = wp_get_attachment_caption($defaultId) ?: '';
 } else {
-	// No default image => use the user-provided fillerAlt
+	// No default => use the user-provided fillerAlt
 	$altText = $fillerAlt;
 }
 
-// Build figure classes
+/**
+ * Build <figure> classes for aspect ratio or default
+ * (We no longer add border classes here, as user wants them on the <img>)
+ */
 $figureClasses = ['wp-block-image', 'fs-block-image'];
-
 if ($aspect && 'none' !== $aspect) {
-	// e.g. aspect="16-9" => "is-aspect-ratio-16-9 fs-block-image--has-aspect-ratio"
 	$figureClasses[] = 'is-aspect-ratio-' . $aspect;
 	$figureClasses[] = 'fs-block-image--has-aspect-ratio';
 } else {
 	$figureClasses[] = 'fs-block-image--no-aspect-ratio';
 }
-
-// If user selected border classes, append them
-if ($borderClass) {
-	$figureClasses[] = $borderClass;
-}
-if ($radiusClass) {
-	$figureClasses[] = $radiusClass;
-}
-
-// Join them into a single string
 $figure_class = implode(' ', array_map('esc_attr', $figureClasses));
 
-// If only default is set, simpler <figure>:
+/**
+ * Build <img> classes & inline style if we have a border class
+ */
+$imgClasses = [];
+$imgStyle   = '';
+
+if ($borderClass) {
+	$imgClasses[] = $borderClass;
+	// If user selected any border class, add inline style for border
+	$imgStyle = 'border-style: solid;';
+}
+if ($radiusClass) {
+	$imgClasses[] = $radiusClass;
+}
+
+// Convert to final string
+$img_class_str = '';
+if (! empty($imgClasses)) {
+	$img_class_str = ' class="' . esc_attr(implode(' ', $imgClasses)) . '"';
+}
+
+// Build inline style attribute if needed
+$img_style_str = '';
+if ($imgStyle) {
+	$img_style_str = ' style="' . esc_attr($imgStyle) . '"';
+}
+
+/**
+ * Single <img> case: no small/medium/large images
+ */
 if (! $hasSmall && ! $hasMedium && ! $hasLarge) : ?>
 	<figure class="<?php echo $figure_class; ?>">
 		<img
 			src="<?php echo $defaultUrl; ?>"
-			alt="<?php echo esc_attr($altText); ?>" />
+			alt="<?php echo esc_attr($altText); ?>" <?php echo $img_class_str . $img_style_str; ?> />
 		<?php if (! empty($caption)) : ?>
 			<figcaption><?php echo wp_kses_post($caption); ?></figcaption>
 		<?php endif; ?>
@@ -123,10 +147,10 @@ endif;
 				srcset="<?php echo $mediumUrl; ?>" />
 		<?php endif; ?>
 
-		<!-- Fallback <img> -->
+		<!-- Fallback <img> with classes & inline style if there's a border class -->
 		<img
 			src="<?php echo $defaultUrl; ?>"
-			alt="<?php echo esc_attr($altText); ?>" />
+			alt="<?php echo esc_attr($altText); ?>" <?php echo $img_class_str . $img_style_str; ?> />
 	</picture>
 
 	<?php if (! empty($caption)) : ?>

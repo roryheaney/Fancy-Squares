@@ -1043,7 +1043,7 @@ export const zindexOptions = [
 ];
 
 export const borderOptions = [
-	{ label: 'border', value: 'border' },
+	{ label: 'Select A Border', value: '' },
 	{ label: 'border-0', value: 'border-0' },
 	{ label: 'border-top', value: 'border-top' },
 	{ label: 'border-top-0', value: 'border-top-0' },
@@ -1091,7 +1091,7 @@ export const borderOptions = [
 
 // add border-radius options
 export const borderRadiusOptions = [
-	{ label: 'rounded', value: 'rounded' },
+	{ label: 'Selected Rounded Class', value: '' },
 	{ label: 'rounded-0', value: 'rounded-0' },
 	{ label: 'rounded-1', value: 'rounded-1' },
 	{ label: 'rounded-2', value: 'rounded-2' },

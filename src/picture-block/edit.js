@@ -57,12 +57,12 @@ import {
  * Reusable ImageSelector component
  * Shows a button, image preview (wrapped in <button> for a11y), and a "Remove" button.
  *
- * @param {Object} props                  The props object.
- * @param {string} props.label            The label for the image slot, e.g. "Default" or "Small".
- * @param {number} props.imageId          The ID of the selected image in the WordPress Media Library.
- * @param {string} props.imageUrl         The URL of the selected image.
- * @param {Function} props.onSelect       Callback fired when a new image is selected.
- * @param {Function} props.onRemove       Callback fired when the image is removed.
+ * @param {Object} props             The props object.
+ * @param {string} props.label       The label for the image slot, e.g. "Default" or "Small".
+ * @param {number} props.imageId     The ID of the selected image in the WordPress Media Library.
+ * @param {string} props.imageUrl    The URL of the selected image.
+ * @param {Function} props.onSelect  Callback fired when a new image is selected.
+ * @param {Function} props.onRemove  Callback fired when the image is removed.
  */
 function ImageSelector( { label, imageId, imageUrl, onSelect, onRemove } ) {
 	const selectLabel = sprintf(
@@ -71,15 +71,10 @@ function ImageSelector( { label, imageId, imageUrl, onSelect, onRemove } ) {
 		label
 	);
 	const editLabel = sprintf(
-		/* translators: %s is the breakpoint label, like 'Default' or 'Small' */
 		__( 'Edit or Replace %s Image', 'fs-blocks' ),
 		label
 	);
-	const removeLabel = sprintf(
-		/* translators: %s is the breakpoint label, like 'Default' or 'Small' */
-		__( 'Remove %s Image', 'fs-blocks' ),
-		label
-	);
+	const removeLabel = sprintf( __( 'Remove %s Image', 'fs-blocks' ), label );
 
 	return (
 		<MediaUploadCheck>
@@ -89,6 +84,7 @@ function ImageSelector( { label, imageId, imageUrl, onSelect, onRemove } ) {
 				value={ imageId }
 				render={ ( { open } ) => {
 					const handleKeyDown = ( event ) => {
+						// Provide a keyboard event for accessibility
 						if ( event.key === 'Enter' || event.key === ' ' ) {
 							open();
 						}
@@ -205,6 +201,7 @@ export default function Edit( props ) {
 	const hasMedium = !! mediumImageUrl;
 	const hasLarge = !! largeImageUrl;
 
+	// Build figure classes for the aspect ratio (only).
 	const figureClassNames = [ 'wp-block-image', 'fs-block-image' ];
 	if ( aspectRatio && aspectRatio !== 'none' ) {
 		figureClassNames.push( 'fs-block-image--has-aspect-ratio' );
@@ -212,24 +209,39 @@ export default function Edit( props ) {
 	} else {
 		figureClassNames.push( 'fs-block-image--no-aspect-ratio' );
 	}
-
-	// If user chose a border or radius, append them
-	if ( borderClass ) {
-		figureClassNames.push( borderClass );
-	}
-	if ( borderRadiusClass ) {
-		figureClassNames.push( borderRadiusClass );
-	}
-
 	const figureClass = figureClassNames.join( ' ' );
 
 	/**
-	 * Build a React component to mimic the <picture>/<figure> logic.
-	 * Avoid nested ternaries; use if statements.
+	 * Build an <img> class array and inline style
+	 * if the user selected a border class (and we need border-style: solid).
+	 */
+	function getImageProps() {
+		const classes = [];
+		const styleObj = {};
+
+		if ( borderClass ) {
+			classes.push( borderClass );
+			styleObj.borderStyle = 'solid'; // inline style
+		}
+		if ( borderRadiusClass ) {
+			classes.push( borderRadiusClass );
+		}
+
+		return {
+			className: classes.length ? classes.join( ' ' ) : undefined,
+			style: Object.keys( styleObj ).length ? styleObj : undefined,
+		};
+	}
+
+	/**
+	 * Editor preview: replicate the front-end <picture>/<figure>
+	 * but place border & radius classes + inline style on the <img>.
 	 */
 	function PicturePreview() {
-		const noBreakpoints = ! hasSmall && ! hasMedium && ! hasLarge;
+		// Derived props for the <img>
+		const imgProps = getImageProps();
 
+		const noBreakpoints = ! hasSmall && ! hasMedium && ! hasLarge;
 		if ( noBreakpoints ) {
 			if ( ! defaultImageUrl ) {
 				return (
@@ -242,6 +254,7 @@ export default function Edit( props ) {
 						src={ defaultImageUrl }
 						alt={ defaultAlt }
 						style={ { maxWidth: '100%' } }
+						{ ...imgProps }
 					/>
 					{ defaultCaption && (
 						<figcaption
@@ -304,6 +317,7 @@ export default function Edit( props ) {
 						src={ defaultImageUrl || '' }
 						alt={ defaultAlt }
 						style={ { maxWidth: '100%' } }
+						{ ...imgProps }
 					/>
 				</picture>
 				{ defaultCaption && (
@@ -430,7 +444,6 @@ export default function Edit( props ) {
 						}
 					/>
 
-					{ /* NEW: Border & Border Radius dropdowns */ }
 					<SelectControl
 						label={ __( 'Border', 'fs-blocks' ) }
 						value={ borderClass }
