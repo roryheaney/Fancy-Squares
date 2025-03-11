@@ -21,7 +21,7 @@
  *
  * WordPress references:
  *  - @wordpress/block-editor for useBlockProps, InspectorControls, MediaUpload, etc.
- *  - @wordpress/components for UI elements like PanelBody, Button, SelectControl, etc.
+ *  - @wordpress/components for UI elements like PanelBody, Button, TextControl, FormTokenField, etc.
  *  - @wordpress/i18n for translation functions (__ and sprintf).
  *  - @wordpress/api-fetch for retrieving alt/caption data from the REST API.
  *
@@ -40,14 +40,13 @@ import {
 import {
 	PanelBody,
 	Button,
-	SelectControl,
 	TextControl,
+	FormTokenField,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-
-// We actually use these to let the user pick border classes
+// For multi-select border classes as arrays
 import {
 	borderOptions,
 	borderRadiusOptions,
@@ -57,23 +56,22 @@ import {
  * Reusable ImageSelector component
  * Shows a button, image preview (wrapped in <button> for a11y), and a "Remove" button.
  *
- * @param {Object} props             The props object.
- * @param {string} props.label       The label for the image slot, e.g. "Default" or "Small".
- * @param {number} props.imageId     The ID of the selected image in the WordPress Media Library.
- * @param {string} props.imageUrl    The URL of the selected image.
- * @param {Function} props.onSelect  Callback fired when a new image is selected.
- * @param {Function} props.onRemove  Callback fired when the image is removed.
+ * @param {Object} props The props object.
+ * @param {string} props.label The label for the image slot, e.g. "Default" or "Small".
+ * @param {number} props.imageId The ID of the selected image in the WP Media Library.
+ * @param {string} props.imageUrl The URL of the selected image.
+ * @param {Function} props.onSelect Callback fired when a new image is selected.
+ * @param {Function} props.onRemove Callback fired when the image is removed.
  */
 function ImageSelector( { label, imageId, imageUrl, onSelect, onRemove } ) {
-	const selectLabel = sprintf(
-		/* translators: %s is the breakpoint label, like 'Default' or 'Small' */
-		__( 'Select %s Image', 'fs-blocks' ),
-		label
-	);
+	/* translators: %s: The name of the image slot (e.g. "Default" or "Small"). */
+	const selectLabel = sprintf( __( 'Select %s Image', 'fs-blocks' ), label );
+	/* translators: %s: The name of the image slot (e.g. "Default" or "Small"). */
 	const editLabel = sprintf(
 		__( 'Edit or Replace %s Image', 'fs-blocks' ),
 		label
 	);
+	/* translators: %s: The name of the image slot (e.g. "Default" or "Small"). */
 	const removeLabel = sprintf( __( 'Remove %s Image', 'fs-blocks' ), label );
 
 	return (
@@ -153,7 +151,7 @@ export default function Edit( props ) {
 		largeImageUrl,
 		aspectRatio,
 		fillerAlt,
-		// NEW attributes for border classes
+		// These are arrays now
 		borderClass,
 		borderRadiusClass,
 	} = attributes;
@@ -180,28 +178,40 @@ export default function Edit( props ) {
 			} );
 	}, [ defaultImageId ] );
 
-	const onSelectImage = ( breakpoint ) => ( media ) => {
-		if ( ! media?.id || ! media?.url ) {
-			return;
-		}
-		setAttributes( {
-			[ `${ breakpoint }ImageId` ]: media.id,
-			[ `${ breakpoint }ImageUrl` ]: media.url,
-		} );
-	};
+	/**
+	 * @param {string} breakpoint The breakpoint name (e.g. "default", "small").
+	 * @return {(media:Object) => void} A callback that sets the block attributes for that breakpoint.
+	 */
+	function onSelectImage( breakpoint ) {
+		return ( media ) => {
+			if ( ! media?.id || ! media?.url ) {
+				return;
+			}
+			setAttributes( {
+				[ `${ breakpoint }ImageId` ]: media.id,
+				[ `${ breakpoint }ImageUrl` ]: media.url,
+			} );
+		};
+	}
 
-	const onRemoveImage = ( breakpoint ) => () => {
-		setAttributes( {
-			[ `${ breakpoint }ImageId` ]: 0,
-			[ `${ breakpoint }ImageUrl` ]: '',
-		} );
-	};
+	/**
+	 * @param {string} breakpoint The breakpoint name (e.g. "default", "small").
+	 * @return {() => void} A callback that clears the block attributes for that breakpoint.
+	 */
+	function onRemoveImage( breakpoint ) {
+		return () => {
+			setAttributes( {
+				[ `${ breakpoint }ImageId` ]: 0,
+				[ `${ breakpoint }ImageUrl` ]: '',
+			} );
+		};
+	}
 
 	const hasSmall = !! smallImageUrl;
 	const hasMedium = !! mediumImageUrl;
 	const hasLarge = !! largeImageUrl;
 
-	// Build figure classes for the aspect ratio (only).
+	// Build figure classes for aspect ratio only
 	const figureClassNames = [ 'wp-block-image', 'fs-block-image' ];
 	if ( aspectRatio && aspectRatio !== 'none' ) {
 		figureClassNames.push( 'fs-block-image--has-aspect-ratio' );
@@ -211,20 +221,49 @@ export default function Edit( props ) {
 	}
 	const figureClass = figureClassNames.join( ' ' );
 
+	// borderClass and borderRadiusClass are arrays, pass them to FormTokenField
+	// or handle them as arrays in the preview
+	const borderTokens = borderClass || []; // array of strings
+	const radiusTokens = borderRadiusClass || []; // array of strings
+
 	/**
-	 * Build an <img> class array and inline style
-	 * if the user selected a border class (and we need border-style: solid).
+	 * Called when the user changes the border tokens
+	 *
+	 * @param {string[]} tokens The new array of selected border classes
+	 */
+	function onChangeBorderTokens( tokens ) {
+		// store as an array
+		setAttributes( { borderClass: tokens } );
+	}
+
+	/**
+	 * Called when user changes the border radius tokens
+	 *
+	 * @param {string[]} tokens The new array of selected radius classes
+	 */
+	function onChangeRadiusTokens( tokens ) {
+		setAttributes( { borderRadiusClass: tokens } );
+	}
+
+	/**
+	 * Builds props for <img> classes & inline style
+	 * We treat borderClass as an array => each item is e.g. "border-1" or "border-primary"
+	 * If there's anything in borderClass, we do styleObj.borderStyle = 'solid'
+	 *
+	 * @return {{ className?: string, style?: Object }}
 	 */
 	function getImageProps() {
 		const classes = [];
 		const styleObj = {};
 
-		if ( borderClass ) {
-			classes.push( borderClass );
-			styleObj.borderStyle = 'solid'; // inline style
+		// If user picked any border tokens, push them
+		if ( borderClass?.length ) {
+			classes.push( ...borderClass );
+			// If we have any border tokens, do border-style:solid
+			styleObj.borderStyle = 'solid';
 		}
-		if ( borderRadiusClass ) {
-			classes.push( borderRadiusClass );
+		if ( borderRadiusClass?.length ) {
+			classes.push( ...borderRadiusClass );
 		}
 
 		return {
@@ -234,11 +273,12 @@ export default function Edit( props ) {
 	}
 
 	/**
-	 * Editor preview: replicate the front-end <picture>/<figure>
-	 * but place border & radius classes + inline style on the <img>.
+	 * Show a preview with <picture> / <figure>.
+	 * If no breakpoints are used, we just do a single <img>.
+	 *
+	 * @return {JSX.Element}
 	 */
 	function PicturePreview() {
-		// Derived props for the <img>
 		const imgProps = getImageProps();
 
 		const noBreakpoints = ! hasSmall && ! hasMedium && ! hasLarge;
@@ -258,6 +298,7 @@ export default function Edit( props ) {
 					/>
 					{ defaultCaption && (
 						<figcaption
+							// eslint-disable-next-line react/no-danger
 							dangerouslySetInnerHTML={ {
 								__html: defaultCaption,
 							} }
@@ -322,12 +363,17 @@ export default function Edit( props ) {
 				</picture>
 				{ defaultCaption && (
 					<figcaption
+						// eslint-disable-next-line react/no-danger
 						dangerouslySetInnerHTML={ { __html: defaultCaption } }
 					/>
 				) }
 			</figure>
 		);
 	}
+
+	// Suggestions for FormTokenField from the "value" keys in borderOptions
+	const borderSuggestions = borderOptions.map( ( opt ) => opt.value );
+	const radiusSuggestions = borderRadiusOptions.map( ( opt ) => opt.value );
 
 	return (
 		<div { ...blockProps }>
@@ -367,9 +413,14 @@ export default function Edit( props ) {
 							<TextControl
 								label={ __( 'Filler Image Alt', 'fs-blocks' ) }
 								value={ fillerAlt }
-								onChange={ ( val ) =>
-									setAttributes( { fillerAlt: val } )
-								}
+								/**
+								 * Called when user changes the filler alt text
+								 *
+								 * @param {string} val The new alt text
+								 */
+								onChange={ ( val ) => {
+									setAttributes( { fillerAlt: val } );
+								} }
 								placeholder={ __(
 									'e.g. "No image provided"',
 									'fs-blocks'
@@ -402,63 +453,70 @@ export default function Edit( props ) {
 						onRemove={ onRemoveImage( 'large' ) }
 					/>
 
-					<SelectControl
-						label={ __( 'Aspect Ratio', 'fs-blocks' ) }
+					<p style={ { fontWeight: 'bold', marginTop: '1em' } }>
+						{ __( 'Aspect Ratio', 'fs-blocks' ) }
+					</p>
+					<select
 						value={ aspectRatio }
-						options={ [
-							{ label: __( 'None', 'fs-blocks' ), value: 'none' },
-							{
-								label: __( 'Square - 1:1', 'fs-blocks' ),
-								value: '1-1',
-							},
-							{
-								label: __( 'Standard - 4:3', 'fs-blocks' ),
-								value: '4-3',
-							},
-							{
-								label: __( 'Portrait - 3:4', 'fs-blocks' ),
-								value: '3-4',
-							},
-							{
-								label: __( 'Classic - 3:2', 'fs-blocks' ),
-								value: '3-2',
-							},
-							{
-								label: __(
-									'Classic Portrait - 2:3',
-									'fs-blocks'
-								),
-								value: '2-3',
-							},
-							{
-								label: __( 'Wide - 16:9', 'fs-blocks' ),
-								value: '16-9',
-							},
-							{
-								label: __( 'Tall - 9:16', 'fs-blocks' ),
-								value: '9-16',
-							},
-						] }
-						onChange={ ( newVal ) =>
-							setAttributes( { aspectRatio: newVal } )
+						onChange={ ( e ) =>
+							setAttributes( { aspectRatio: e.target.value } )
 						}
+						style={ { maxWidth: '100%' } }
+					>
+						<option value="none">
+							{ __( 'None', 'fs-blocks' ) }
+						</option>
+						<option value="1-1">
+							{ __( 'Square - 1:1', 'fs-blocks' ) }
+						</option>
+						<option value="4-3">
+							{ __( 'Standard - 4:3', 'fs-blocks' ) }
+						</option>
+						<option value="3-4">
+							{ __( 'Portrait - 3:4', 'fs-blocks' ) }
+						</option>
+						<option value="3-2">
+							{ __( 'Classic - 3:2', 'fs-blocks' ) }
+						</option>
+						<option value="2-3">
+							{ __( 'Classic Portrait - 2:3', 'fs-blocks' ) }
+						</option>
+						<option value="16-9">
+							{ __( 'Wide - 16:9', 'fs-blocks' ) }
+						</option>
+						<option value="9-16">
+							{ __( 'Tall - 9:16', 'fs-blocks' ) }
+						</option>
+					</select>
+
+					<p style={ { fontWeight: 'bold', marginTop: '1em' } }>
+						{ __( 'Border Classes', 'fs-blocks' ) }
+					</p>
+					<FormTokenField
+						value={ borderTokens }
+						suggestions={ borderSuggestions }
+						/**
+						 * Called when the user updates the border tokens
+						 *
+						 * @param {string[]} tokens The new array of border classes
+						 */
+						onChange={ onChangeBorderTokens }
+						label={ __( 'Add border classes', 'fs-blocks' ) }
 					/>
 
-					<SelectControl
-						label={ __( 'Border', 'fs-blocks' ) }
-						value={ borderClass }
-						options={ borderOptions }
-						onChange={ ( newVal ) =>
-							setAttributes( { borderClass: newVal } )
-						}
-					/>
-					<SelectControl
-						label={ __( 'Border Radius', 'fs-blocks' ) }
-						value={ borderRadiusClass }
-						options={ borderRadiusOptions }
-						onChange={ ( newVal ) =>
-							setAttributes( { borderRadiusClass: newVal } )
-						}
+					<p style={ { fontWeight: 'bold', marginTop: '1em' } }>
+						{ __( 'Border Radius Classes', 'fs-blocks' ) }
+					</p>
+					<FormTokenField
+						value={ radiusTokens }
+						suggestions={ radiusSuggestions }
+						/**
+						 * Called when the user updates the radius tokens
+						 *
+						 * @param {string[]} tokens The new array of radius classes
+						 */
+						onChange={ onChangeRadiusTokens }
+						label={ __( 'Add radius classes', 'fs-blocks' ) }
 					/>
 				</PanelBody>
 			</InspectorControls>

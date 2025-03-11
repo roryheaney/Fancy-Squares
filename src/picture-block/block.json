@@ -47,12 +47,18 @@
 			"default": ""
 		},
 		"borderClass": {
-			"type": "string",
-			"default": ""
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"default": []
 		},
 		"borderRadiusClass": {
-			"type": "string",
-			"default": ""
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"default": []
 		}
 	},
 	"supports": {

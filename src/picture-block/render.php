@@ -33,6 +33,14 @@ if (! $defaultUrl) {
 	$defaultUrl = esc_url($defaultUrl);
 }
 
+
+$borderClass = ! empty($attributes['borderClass']) && is_array($attributes['borderClass'])
+	? $attributes['borderClass']
+	: [];
+$radiusClass = ! empty($attributes['borderRadiusClass']) && is_array($attributes['borderRadiusClass'])
+	? $attributes['borderRadiusClass']
+	: [];
+
 $smallUrl  = esc_url($smallUrl);
 $mediumUrl = esc_url($mediumUrl);
 $largeUrl  = esc_url($largeUrl);
@@ -74,13 +82,12 @@ $figure_class = implode(' ', array_map('esc_attr', $figureClasses));
 $imgClasses = [];
 $imgStyle   = '';
 
-if ($borderClass) {
-	$imgClasses[] = $borderClass;
-	// If user selected any border class, add inline style for border
-	$imgStyle = 'border-style: solid;';
+if (count($borderClass)) {
+	$imgClasses = array_merge($imgClasses, $borderClass);
+	$imgStyle   = 'border-style: solid;';
 }
-if ($radiusClass) {
-	$imgClasses[] = $radiusClass;
+if (count($radiusClass)) {
+	$imgClasses = array_merge($imgClasses, $radiusClass);
 }
 
 // Convert to final string
