@@ -142,7 +142,7 @@ export default function Edit( { attributes, setAttributes } ) {
 					onChange={ ( val ) =>
 						setAttributes( { alertContent: val } )
 					}
-					placeholder={ __( 'Alert message here...', 'fs-blocks' ) }
+					placeholder={ __( 'Alert message here…', 'fs-blocks' ) }
 				/>
 			</div>
 		</Fragment>

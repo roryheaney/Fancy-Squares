@@ -57,9 +57,13 @@ function fancysquares_fs_blocks_bootstrap_field_render()
 		<option value="bootstrap5" <?php selected($value, 'bootstrap5'); ?>>
 			<?php esc_html_e('Bootstrap 5 (CDN)', 'fs-blocks'); ?>
 		</option>
+		<!-- Add the new "vanilla" option here -->
+		<option value="vanilla" <?php selected($value, 'vanilla'); ?>>
+			<?php esc_html_e('Vanilla (Sans Bootstrap)', 'fs-blocks'); ?>
+		</option>
 	</select>
 	<p class="description">
-		<?php esc_html_e('Choose whether to load Bootstrap 5 CSS/JS in the block editor.', 'fs-blocks'); ?>
+		<?php esc_html_e('Choose whether to load Bootstrap 5 CSS/JS or a vanilla stylesheet in the block editor.', 'fs-blocks'); ?>
 	</p>
 <?php
 }
@@ -107,6 +111,7 @@ function fancysquares_fs_blocks_settings_page_html()
 function fancysquares_fs_blocks_enqueue_editor_iframe_assets()
 {
 	$bootstrap_setting = get_option('fancysquares_fs_blocks_bootstrap', '');
+
 	if ('bootstrap5' === $bootstrap_setting) {
 		wp_enqueue_style(
 			'fancysquares-bootstrap5',
@@ -122,29 +127,65 @@ function fancysquares_fs_blocks_enqueue_editor_iframe_assets()
 			true
 		);
 	}
+	// If "vanilla" is selected, enqueue the "sans-bootstrap.css" file instead
+	elseif ('vanilla' === $bootstrap_setting) {
+		$file_path = plugin_dir_path(__FILE__) . 'build/styles/sans-bootstrap.css';
+		$file_url  = plugin_dir_url(__FILE__) . 'build/styles/sans-bootstrap.css';
+
+		// Use filemtime() for versioning if file exists
+		$version = file_exists($file_path) ? filemtime($file_path) : false;
+
+		wp_enqueue_style(
+			'fancysquares-vanilla',
+			$file_url,
+			array(),
+			$version
+		);
+	}
 }
 add_action('enqueue_block_assets', 'fancysquares_fs_blocks_enqueue_editor_iframe_assets');
 
 /**
- * Enqueue Bootstrap on the front end of the site.
+ * Enqueue styles/scripts on the front end.
  */
 function fancysquares_fs_blocks_enqueue_frontend()
 {
-	wp_enqueue_style(
-		'fancysquares-bootstrap5',
-		'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
-		array(),
-		'5.3.3'
-	);
+	$bootstrap_setting = get_option('fancysquares_fs_blocks_bootstrap', '');
 
-	wp_enqueue_script(
-		'fancysquares-bootstrap5',
-		'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js',
-		array(),
-		'5.3.3',
-		true
-	);
+	// Load Bootstrap if the user chose "bootstrap5"
+	if ('bootstrap5' === $bootstrap_setting) {
+		wp_enqueue_style(
+			'fancysquares-bootstrap5',
+			'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
+			array(),
+			'5.3.3'
+		);
 
+		wp_enqueue_script(
+			'fancysquares-bootstrap5',
+			'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js',
+			array(),
+			'5.3.3',
+			true
+		);
+	}
+	// Otherwise, if the user wants "vanilla", load sans-bootstrap.css
+	elseif ('vanilla' === $bootstrap_setting) {
+		$file_path = plugin_dir_path(__FILE__) . 'build/styles/sans-bootstrap.css';
+		$file_url  = plugin_dir_url(__FILE__) . 'build/styles/sans-bootstrap.css';
+
+		// Use filemtime() for versioning if file exists
+		$version = file_exists($file_path) ? filemtime($file_path) : false;
+
+		wp_enqueue_style(
+			'fancysquares-vanilla',
+			$file_url,
+			array(),
+			// $version
+		);
+	}
+
+	// Swiper scripts/styles (always loaded, or load conditionally as needed)
 	wp_enqueue_style(
 		'fancysquares-swiper',
 		'//cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',

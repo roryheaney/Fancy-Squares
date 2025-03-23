@@ -1,0 +1,32 @@
+// ==========================================
+// File: main.scss
+// ==========================================
+// 1) Reboot
+@use "./scss/reboot";
+
+// 2) The grid (containers, rows, col classes)
+@use "./scss/grid";
+
+// 3) The utility classes (margin, padding, display, etc.)
+@use "./scss/utilities";
+
+/*
+  The moment we “@use” these partials, any top-level CSS
+  they contain is included in our final compiled CSS.
+
+  Run:
+    sass scss/main.scss dist/custom-bootstrap.css
+
+  dist/custom-bootstrap.css now has everything:
+  - .container, .row, .col-*
+  - display utilities
+  - overflow utilities
+  - alignment utilities
+  - margin (incl. negative + auto + breakpoints)
+  - padding
+  - gap
+  - order
+  - position/z-index
+  - borders (basic example)
+  - etc.
+*/

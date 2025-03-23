@@ -1,0 +1,39 @@
+// ==========================================
+// File: _mixins.scss (using @use "sass:map")
+// ==========================================
+
+@use "sass:map";
+@use "settings" as *; // your local settings variables
+
+/// Mixin: media-breakpoint-up($breakpoint)
+/// Checks if `$breakpoint` exists in `$grid-breakpoints`;
+/// if so, wraps `@content` in a `@media` query.
+@mixin media-breakpoint-up($breakpoint) {
+  @if map.has-key($grid-breakpoints, $breakpoint) {
+    @media (min-width: #{map.get($grid-breakpoints, $breakpoint)}) {
+      @content;
+    }
+  } @else {
+    @warn "Breakpoint `#{$breakpoint}` not found in $grid-breakpoints map.";
+  }
+}
+
+/// Mixin: make-col($size)
+/// Creates .col, .col-auto, .col-1..12
+@mixin make-col($size: false) {
+  @if $size == false {
+    // e.g. .col => flexible
+    flex: 1 0 0%;
+    // max-width: 100%;
+  } @else if $size == auto {
+    // e.g. .col-auto => width auto
+    flex: 0 0 auto;
+    width: auto;
+    max-width: none;
+  } @else {
+    // e.g. .col-1..12 => fraction
+    $pct: calc(100% * $size / 12);
+	flex: 0 0 auto;
+    width: #{$pct};
+  }
+}

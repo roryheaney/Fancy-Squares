@@ -4,14 +4,14 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		'.wp-block-cover__video-background[data-src]'
 	);
 
-	// console.log( lazyVideos );
-
+	// eslint-disable-next-line no-undef
 	if ( 'IntersectionObserver' in window ) {
 		const options = {
 			root: null,
 			rootMargin: '200px', // load video ~200px before it appears
 			threshold: 0,
 		};
+		// eslint-disable-next-line no-undef
 		const observer = new IntersectionObserver( ( entries ) => {
 			entries.forEach( ( entry ) => {
 				if ( entry.isIntersecting ) {

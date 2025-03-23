@@ -8,10 +8,12 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		try {
 			config = JSON.parse( data );
 		} catch ( err ) {
+			// eslint-disable-next-line no-console
 			console.warn( 'Invalid JSON in data-swiper:', err );
 		}
 
 		// Initialize Swiper
+		// eslint-disable-next-line no-undef
 		const swiper = new Swiper( el, config );
 
 		// Track whether the user manually paused via the button

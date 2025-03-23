@@ -52,7 +52,7 @@ import {
 	borderRadiusOptions,
 } from '../../data/bootstrap-classes/classes.js';
 
-/**
+/*
  * Reusable ImageSelector component
  * Shows a button, image preview (wrapped in <button> for a11y), and a "Remove" button.
  *
@@ -151,7 +151,6 @@ export default function Edit( props ) {
 		largeImageUrl,
 		aspectRatio,
 		fillerAlt,
-		// These are arrays now
 		borderClass,
 		borderRadiusClass,
 	} = attributes;
@@ -236,7 +235,7 @@ export default function Edit( props ) {
 		setAttributes( { borderClass: tokens } );
 	}
 
-	/**
+	/*
 	 * Called when user changes the border radius tokens
 	 *
 	 * @param {string[]} tokens The new array of selected radius classes
@@ -245,7 +244,7 @@ export default function Edit( props ) {
 		setAttributes( { borderRadiusClass: tokens } );
 	}
 
-	/**
+	/*
 	 * Builds props for <img> classes & inline style
 	 * We treat borderClass as an array => each item is e.g. "border-1" or "border-primary"
 	 * If there's anything in borderClass, we do styleObj.borderStyle = 'solid'
@@ -272,7 +271,7 @@ export default function Edit( props ) {
 		};
 	}
 
-	/**
+	/*
 	 * Show a preview with <picture> / <figure>.
 	 * If no breakpoints are used, we just do a single <img>.
 	 *

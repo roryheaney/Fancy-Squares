@@ -1,0 +1,95 @@
+
+// ==========================================
+// File: _grid.scss
+// ==========================================
+@use "settings" as *;
+@use "mixins" as *;
+
+// -------------------------------------------
+// .container
+// -------------------------------------------
+.container {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: calc($grid-gutter-x / 2);
+  padding-left:  calc($grid-gutter-x / 2);
+
+  @each $bp, $max in $container-max-widths {
+    @include media-breakpoint-up($bp) {
+      max-width: $max;
+    }
+  }
+}
+
+// Optional .container-fluid
+.container-fluid {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: calc($grid-gutter-x / 2);
+  padding-left:  calc($grid-gutter-x / 2);
+}
+
+// -------------------------------------------
+// .row
+// -------------------------------------------
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: calc(-1 * $grid-gutter-x / 2);
+  margin-left:  calc(-1 * $grid-gutter-x / 2);
+
+  // If you want vertical gutters:
+  // margin-top:    calc(-1 * $grid-gutter-y / 2);
+  // margin-bottom: calc(-1 * $grid-gutter-y / 2);
+}
+
+// -------------------------------------------
+// Base col styling (applies to .col-* pattern)
+// -------------------------------------------
+.col,
+[class*="col-"] {
+  position: relative;
+  width: 100%;
+  padding-right: calc($grid-gutter-x / 2);
+  padding-left:  calc($grid-gutter-x / 2);
+
+  // If you want vertical gutters:
+  // padding-top:    ($grid-gutter-y / 2);
+  // padding-bottom: ($grid-gutter-y / 2);
+}
+
+// -------------------------------------------
+// Generate .col, .col-auto, .col-1..12 (no breakpoint)
+// -------------------------------------------
+.col {
+  @include make-col(false);
+}
+.col-auto {
+  @include make-col(auto);
+}
+@for $i from 1 through 12 {
+  .col-#{$i} {
+    @include make-col($i);
+  }
+}
+
+// -------------------------------------------
+// Generate .col-{breakpoint}-{size}
+// -------------------------------------------
+@each $bp, $val in $grid-breakpoints {
+  @if $bp != xs {
+    @include media-breakpoint-up($bp) {
+      .col-#{$bp}-auto {
+        @include make-col(auto);
+      }
+
+      @for $i from 1 through 12 {
+        .col-#{$bp}-#{$i} {
+          @include make-col($i);
+        }
+      }
+    }
+  }
+}

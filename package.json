@@ -12,7 +12,10 @@
 		"lint:js": "wp-scripts lint-js",
 		"packages-update": "wp-scripts packages-update",
 		"plugin-zip": "wp-scripts plugin-zip",
-		"start": "wp-scripts start --webpack-copy-php"
+		"start": "wp-scripts start --webpack-copy-php",
+		"devsass": "sass lib/styles/sans-bootstrap.scss:lib/build/styles/sans-bootstrap.css",
+		"sasswatch": "sass --watch --trace --update lib/styles/sans-bootstrap.scss:lib/build/styles/sans-bootstrap.css",
+		"prodsass": "sass lib/styles/sans-bootstrap.scss:lib/build/styles/sans-bootstrap.css --style=compressed"
 	},
 	"devDependencies": {
 		"@wordpress/scripts": "^30.10.0",

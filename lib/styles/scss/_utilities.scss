@@ -1,0 +1,414 @@
+// ==========================================
+// File: _utilities.scss
+// ==========================================
+@use "settings" as *;
+@use "mixins" as *; // so we can use media-breakpoint-up for breakpoints
+
+// -------------------------------------------
+// A) DISPLAY UTILITIES
+// -------------------------------------------
+// For example: .d-none, .d-sm-block, .d-lg-flex, etc.
+$display-values: (none, block, inline, inline-block, flex, inline-flex, table, table-row, table-cell, grid, inline-grid);
+
+// Base (no breakpoint) => .d-none, .d-block, ...
+@each $val in $display-values {
+  .d-#{$val} { display: $val !important; }
+}
+
+// For breakpoints => .d-sm-none, .d-md-block, etc.
+@each $bp, $bpVal in $grid-breakpoints {
+  @if $bp != xs {
+    @include media-breakpoint-up($bp) {
+      @each $val in $display-values {
+        .d-#{$bp}-#{$val} {
+          display: $val !important;
+        }
+      }
+    }
+  }
+}
+
+// -------------------------------------------
+// B) OVERFLOW UTILITIES
+// -------------------------------------------
+// e.g. .overflow-auto, .overflow-hidden, .overflow-x-auto, etc.
+$overflow-values: (auto, hidden, visible, scroll);
+
+@each $val in $overflow-values {
+  .overflow-#{$val} {
+    overflow: $val !important;
+  }
+  .overflow-x-#{$val} {
+    overflow-x: $val !important;
+  }
+  .overflow-y-#{$val} {
+    overflow-y: $val !important;
+  }
+}
+
+// -------------------------------------------
+// C) SELF-ALIGN (align-self-*)
+// -------------------------------------------
+$align-self-values: (start, center, end, baseline, stretch);
+
+@each $v in $align-self-values {
+  // .align-self-start, .align-self-center, etc.
+  .align-self-#{$v} {
+    align-self: $v !important;
+  }
+
+  // .align-self-md-start, etc.
+  @each $bp, $bpVal in $grid-breakpoints {
+    @if $bp != xs {
+      @include media-breakpoint-up($bp) {
+        .align-self-#{$bp}-#{$v} {
+          align-self: $v !important;
+        }
+      }
+    }
+  }
+}
+
+// -------------------------------------------
+// D) JUSTIFY-CONTENT / ALIGN-ITEMS
+// -------------------------------------------
+$justify-values: (start, end, center, between, around, evenly);
+@each $val in $justify-values {
+  .justify-content-#{$val} {
+    justify-content: #{$val} !important;
+  }
+
+  @each $bp, $bpVal in $grid-breakpoints {
+    @if $bp != xs {
+      @include media-breakpoint-up($bp) {
+        .justify-content-#{$bp}-#{$val} {
+          justify-content: #{$val} !important;
+        }
+      }
+    }
+  }
+}
+
+$align-values: (start, center, end, baseline, stretch);
+@each $val in $align-values {
+  .align-items-#{$val} {
+    align-items: #{$val} !important;
+  }
+  @each $bp, $bpVal in $grid-breakpoints {
+    @if $bp != xs {
+      @include media-breakpoint-up($bp) {
+        .align-items-#{$bp}-#{$val} {
+          align-items: #{$val} !important;
+        }
+      }
+    }
+  }
+}
+
+// -------------------------------------------
+// E) FUNCTION + MIXIN FOR MARGINS (ALL-INCLUSIVE)
+// -------------------------------------------
+
+// Function to convert numeric scale to an actual size
+// (handles negative if $negative: true).
+@function margin-size($value, $negative: false) {
+  @if $value == 0 {
+    @return 0;
+  } @else {
+    $val: $value * $base-spacing-unit; // from settings
+    @if $negative {
+      @return -1 * $val;
+    } @else {
+      @return $val;
+    }
+  }
+}
+
+// Mixin that outputs positive, negative, and auto margin classes
+// for each direction and each breakpoint. This covers all the
+// classes you listed: .ms-auto, .m-5, .mt-xl-10, .me-md-n3, etc.
+@mixin generate-margin-utilities() {
+  // 1) AUTO margins => .ms-auto, .me-sm-auto, etc.
+  @each $dirAbbr, $dirProp in $margin-directions {
+    // No-breakpoint auto => .m-auto, .mt-auto, .ms-auto, etc.
+    .m#{$dirAbbr}-auto {
+      @if $dirProp == "" {
+        margin: auto !important;
+      } @else {
+        margin-#{$dirProp}: auto !important;
+      }
+    }
+
+    // Breakpointed => .ms-sm-auto, .me-md-auto, etc.
+    @each $bp, $bpVal in $grid-breakpoints {
+      @if $bp != xs {
+        @include media-breakpoint-up($bp) {
+          .m#{$dirAbbr}-#{$bp}-auto {
+            @if $dirProp == "" {
+              margin: auto !important;
+            } @else {
+              margin-#{$dirProp}: auto !important;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // 2) POSITIVE margins => .m-0..10, .mt-0..10, etc.
+  @each $dirAbbr, $dirProp in $margin-directions {
+    @each $val in $spacing-scale {
+      .m#{$dirAbbr}-#{$val} {
+        @if $dirProp == "" {
+          margin: margin-size($val, false) !important;
+        } @else {
+          margin-#{$dirProp}: margin-size($val, false) !important;
+        }
+      }
+
+      // Breakpoints => .m-sm-1, .mt-md-2, etc.
+      @each $bp, $bpVal in $grid-breakpoints {
+        @if $bp != xs {
+          @include media-breakpoint-up($bp) {
+            .m#{$dirAbbr}-#{$bp}-#{$val} {
+              @if $dirProp == "" {
+                margin: margin-size($val, false) !important;
+              } @else {
+                margin-#{$dirProp}: margin-size($val, false) !important;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // 3) NEGATIVE margins => .m-n1..n10, .ms-n0..n10, etc.
+  @each $dirAbbr, $dirProp in $margin-directions {
+    @each $val in $spacing-scale {
+      .m#{$dirAbbr}-n#{$val} {
+        @if $dirProp == "" {
+          margin: margin-size($val, true) !important;
+        } @else {
+          margin-#{$dirProp}: margin-size($val, true) !important;
+        }
+      }
+
+      // Breakpoints => .mt-sm-n1, .ms-md-n5, etc.
+      @each $bp, $bpVal in $grid-breakpoints {
+        @if $bp != xs {
+          @include media-breakpoint-up($bp) {
+            .m#{$dirAbbr}-#{$bp}-n#{$val} {
+              @if $dirProp == "" {
+                margin: margin-size($val, true) !important;
+              } @else {
+                margin-#{$dirProp}: margin-size($val, true) !important;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Actually call the mixin => outputs all margin classes
+@include generate-margin-utilities();
+
+// -------------------------------------------
+// F) PADDING UTILITIES (similar approach)
+// -------------------------------------------
+@function padding-size($value) {
+  @return $value * $base-spacing-unit;
+}
+
+@mixin generate-padding-utilities() {
+  @each $dirAbbr, $dirProp in $padding-directions {
+    @each $val in $spacing-scale {
+      // Base: .p-1, .pt-2, .ps-10, etc.
+      .p#{$dirAbbr}-#{$val} {
+        @if $dirProp == "" {
+          padding: padding-size($val) !important;
+        } @else {
+          padding-#{$dirProp}: padding-size($val) !important;
+        }
+      }
+
+      // Breakpoints => .p-sm-1, .pt-md-2, etc.
+      @each $bp, $bpVal in $grid-breakpoints {
+        @if $bp != xs {
+          @include media-breakpoint-up($bp) {
+            .p#{$dirAbbr}-#{$bp}-#{$val} {
+              @if $dirProp == "" {
+                padding: padding-size($val) !important;
+              } @else {
+                padding-#{$dirProp}: padding-size($val) !important;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Output the padding classes
+@include generate-padding-utilities();
+
+// -------------------------------------------
+// G) GAP UTILITIES (row-gap, column-gap, gap)
+// -------------------------------------------
+$gap-scale: 0, 1, 2, 3, 4, 5;
+
+@mixin generate-gap-utilities() {
+  @each $g in $gap-scale {
+    .gap-#{$g} {
+      gap: #{($g * 0.25)}rem !important;
+    }
+    .column-gap-#{$g} {
+      column-gap: #{($g * 0.25)}rem !important;
+    }
+    .row-gap-#{$g} {
+      row-gap: #{($g * 0.25)}rem !important;
+    }
+
+    // Breakpoints => .gap-sm-2, .gap-md-4, etc.
+    @each $bp, $bpVal in $grid-breakpoints {
+      @if $bp != xs {
+        @include media-breakpoint-up($bp) {
+          .gap-#{$bp}-#{$g} {
+            gap: #{($g * 0.25)}rem !important;
+          }
+          .column-gap-#{$bp}-#{$g} {
+            column-gap: #{($g * 0.25)}rem !important;
+          }
+          .row-gap-#{$bp}-#{$g} {
+            row-gap: #{($g * 0.25)}rem !important;
+          }
+        }
+      }
+    }
+  }
+}
+@include generate-gap-utilities();
+
+// -------------------------------------------
+// row-cols Generator
+// -------------------------------------------
+// For .row-cols-1..6 and .row-cols-{bp}-1..6.
+//
+// .row-cols-3 => each direct child of .row gets 100%/3 width
+// .row-cols-md-4 => at md breakpoint or wider => 100%/4
+//
+@mixin generate-row-cols() {
+  @for $i from 1 through 6 {
+    // Base .row-cols-n (no breakpoint)
+    .row-cols-#{$i} {
+      > * {
+        flex: 0 0 auto;
+        width: calc(100% / #{$i});
+      }
+    }
+
+    // For each breakpoint: e.g. .row-cols-sm-2, .row-cols-lg-4, etc.
+    @each $bp, $val in $grid-breakpoints {
+      // Typically skip xs
+      @if $bp != xs {
+        @include media-breakpoint-up($bp) {
+          .row-cols-#{$bp}-#{$i} {
+            > * {
+              flex: 0 0 auto;
+              width: calc(100% / #{$i});
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Include the mixin wherever you want these classes to appear:
+@include generate-row-cols();
+
+
+// -------------------------------------------
+// H) ORDER UTILITIES ( .order-0..5, first, last, etc. )
+// -------------------------------------------
+@for $i from 0 through 5 {
+  .order-#{$i} {
+    order: $i !important;
+  }
+
+  @each $bp, $bpVal in $grid-breakpoints {
+    @if $bp != xs {
+      @include media-breakpoint-up($bp) {
+        .order-#{$bp}-#{$i} {
+          order: $i !important;
+        }
+      }
+    }
+  }
+}
+
+.order-first { order: -1 !important; }
+.order-last  { order: 999 !important; }
+
+@each $bp, $bpVal in $grid-breakpoints {
+  @if $bp != xs {
+    @include media-breakpoint-up($bp) {
+      .order-#{$bp}-first { order: -1 !important; }
+      .order-#{$bp}-last  { order: 999 !important; }
+    }
+  }
+}
+
+// -------------------------------------------
+// I) POSITION & Z-INDEX
+// -------------------------------------------
+.position-static   { position: static !important; }
+.position-relative { position: relative !important; }
+.position-absolute { position: absolute !important; }
+.position-fixed    { position: fixed !important; }
+.position-sticky   { position: sticky !important; }
+
+.top-0    { top: 0 !important; }
+.top-50   { top: 50% !important; }
+.top-100  { top: 100% !important; }
+.bottom-0   { bottom: 0 !important; }
+.bottom-50  { bottom: 50% !important; }
+.bottom-100 { bottom: 100% !important; }
+.start-0   { left: 0 !important; }
+.start-50  { left: 50% !important; }
+.start-100 { left: 100% !important; }
+.end-0    { right: 0 !important; }
+.end-50   { right: 50% !important; }
+.end-100  { right: 100% !important; }
+.translate-middle-x { transform: translateX(-50%) !important; }
+.translate-middle-y { transform: translateY(-50%) !important; }
+
+.z-0   { z-index: 0 !important; }
+.z-1   { z-index: 1 !important; }
+.z-2   { z-index: 2 !important; }
+.z-3   { z-index: 3 !important; }
+.z-n1  { z-index: -1 !important; }
+
+// -------------------------------------------
+// J) BORDERS + BORDER RADIUS
+// (optional, example only — expand as you like)
+// -------------------------------------------
+
+/* Basic border utilities example */
+.border { border: 1px solid currentColor !important; }
+.border-0 { border: 0 !important; }
+.border-top { border-top: 1px solid currentColor !important; }
+.border-top-0 { border-top: 0 !important; }
+// etc...
+
+/* Border-radius (example) */
+.rounded-0 { border-radius: 0 !important; }
+.rounded-1 { border-radius: 0.2rem !important; }
+.rounded-2 { border-radius: 0.4rem !important; }
+.rounded-3 { border-radius: 0.6rem !important; }
+.rounded-pill { border-radius: 50rem !important; }
+.rounded-circle { border-radius: 50% !important; }
+// etc...

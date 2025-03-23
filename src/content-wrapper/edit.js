@@ -33,7 +33,7 @@ const zindexSuggestions = zindexOptions.map( ( o ) => o.value );
 /* ------------------------------------------------------------------------ */
 /*  Utility: Build final class array
 /* ------------------------------------------------------------------------ */
-/**
+/*
  * Merges everything into one final array for 'additionalClasses',
  * always including 'wp-block-fancysquares-content-wrapper-block' as a base.
  *

@@ -1,0 +1,61 @@
+// ==========================================
+// File: _settings.scss
+// ==========================================
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+// -------------------------------------------
+// Breakpoints for responsive design
+// -------------------------------------------
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px
+) !default;
+
+// -------------------------------------------
+// Container max-widths
+// -------------------------------------------
+$container-max-widths: (
+  sm: 540px,
+  md: 720px,
+  lg: 960px,
+  xl: 1140px,
+  xxl: 1320px
+) !default;
+
+// -------------------------------------------
+// Grid gutters
+// -------------------------------------------
+$grid-gutter-x: 1.5rem !default; // horizontal
+$grid-gutter-y: 0      !default; // vertical
+
+// -------------------------------------------
+// Spacing for margin/padding utilities
+// e.g. .m-1 => $base-spacing-unit * 1
+// -------------------------------------------
+$base-spacing-unit: 4px !default;  // e.g., 4px means .m-1 => 4px
+$spacing-scale: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 !default;
+
+// Directions for margin/padding
+$margin-directions: (
+  "": "",      // .m- (all sides)
+  "t": "top",  // .mt-
+  "b": "bottom", // .mb-
+  "s": "left",   // .ms- (LTR; adjust for RTL if needed)
+  "e": "right"   // .me- (LTR)
+) !default;
+
+$padding-directions: (
+  "": "",
+  "t": "top",
+  "b": "bottom",
+  "s": "left",
+  "e": "right"
+) !default;

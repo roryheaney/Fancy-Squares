@@ -32,10 +32,10 @@ const zindexSuggestions = zindexOptions.map( ( o ) => o.value );
 /* ------------------------------------------------------------------------ */
 /*  Utility: Build final class array
 /* ------------------------------------------------------------------------ */
-/**
+/*
  * Merges everything into one final array for 'additionalClasses',
  * always including 'wp-block-fancysquares-container-block' plus
- * 'container' or 'container-fluid'.
+ * 'container' or 'container-fluid'
  *
  * @param {string} containerType  'default' or 'fluid'
  * @param {string[]} displayArr
@@ -53,8 +53,8 @@ function combineAllClasses(
 	positionArr,
 	zindexArr
 ) {
-	// Start with our base block class.
-	// We'll add container or container-fluid below.
+	// Start with our base block class
+	// We'll add container or container-fluid below
 	let final = [ 'wp-block-fancysquares-container-block' ];
 
 	// Remove old references to all known suggestions
