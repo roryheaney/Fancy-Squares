@@ -1,12 +1,82 @@
-/* Front-end styles for the tabs block */
-.fs-tabs {
-	margin-bottom: 1rem;
-  }
+@use '../../lib/styles/scss/mixins' as *;
 
-  .fs-tabs .nav-tabs {
-	margin-bottom: 1rem;
-  }
-  $breakpoints: (
+.wp-block-fs-blocks-tabs {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    margin: 1rem 0;
+
+    .fs-tabs-nav{
+        display: flex;
+        flex-wrap: wrap;
+        padding-left: 0;
+        margin-bottom: 0;
+        list-style: none;
+        border-bottom: 1px solid #dee2e6;
+        margin-bottom: 1rem;
+
+        .fs-tabs-nav-item {
+            .fs-tab {
+                background: transparent;
+                border: none;
+                border-bottom: 2px solid transparent;
+                color: var(--wp-admin-theme-color, #007bff);
+                padding: 0.5rem 1rem;
+                margin-bottom: -1px;
+                transition: color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+
+                &.show,
+				&.is-selected,
+				&.active {
+                    border-bottom-color: currentColor;
+                    font-weight: 500;
+                }
+            }
+        }
+    }
+
+    .fs-tab-content {
+        position: relative;
+
+        .fs-tab-pane:not(.show),
+		.fs-tab-pane:not(.is-selected),
+		.fs-tab-pane:not(.has-child-selected) {
+            display: none;
+        }
+
+        .fs-tab-pane.show,
+		.fs-tab-pane.is-selected,
+		.fs-tab-pane.has-child-selected {
+            animation: fadeIn 0.3s ease;
+            display: block;
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+	.responsive-tabs {
+		.tabs-nav {
+			display: none;
+			@media screen and (min-width: 1024px) {
+				display: flex;
+
+			}
+		}
+		.card-header {
+			display: block;
+			@media screen and (min-width: 1024px) {
+				display: none;
+			}
+		}
+	}
+}
+
+
+$breakpoints: (
     "max-md": "767px",
     "min-md": "768px"
 );
@@ -47,4 +117,28 @@
 			}
         }
     }
+}
+
+.fs-tabs-accordion-responsive {
+	&.fs-accordion {
+		.fs-accordion-item {
+			.fs-accordion-collapse {
+				&.collapse {
+					@include media-breakpoint-up(lg) {
+						height: auto;
+					}
+				}
+			}
+		}
+		.fs-tab-content {
+			.fs-tab-pane {
+				@include media-breakpoint-up(lg) {
+					height: auto;
+				}
+				@include media-breakpoint-down(lg) {
+					display: block;
+				}
+			}
+		}
+	}
 }

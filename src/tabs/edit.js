@@ -81,7 +81,7 @@ export default function Edit( { clientId, attributes, setAttributes } ) {
 			</InspectorControls>
 			<div { ...blockProps }>
 				<div className="wp-block-fs-blocks-tabs-editor">
-					<ul className="tabs-nav">
+					<ul className="fs-tabs-nav">
 						{ childBlocks.map( ( block ) => {
 							const childTabId =
 								block.attributes.tabId || block.clientId;

@@ -17,6 +17,28 @@
     @warn "Breakpoint `#{$breakpoint}` not found in $grid-breakpoints map.";
   }
 }
+// New "media-breakpoint-down" version
+@mixin media-breakpoint-down($breakpoint) {
+	@if map-has-key($grid-breakpoints, $breakpoint) {
+	  $value: map-get($grid-breakpoints, $breakpoint);
+  
+	  @if $value != 0 {
+		@media (max-width: #{subtract($value, 1px)}) {
+		  @content;
+		}
+	  } @else {
+		@warn "Breakpoint `#{$breakpoint}` is 0 in $grid-breakpoints map.";
+	  }
+	} @else {
+	  @warn "Breakpoint `#{$breakpoint}` not found in $grid-breakpoints map.";
+	}
+  }
+
+// Optional "subtract" function if you want a safe 1px offset 
+// to avoid overlapping intervals. This is a simplistic approach:
+@function subtract($value, $sub) {
+	@return calc(#{$value} - #{$sub});
+}
 
 /// Mixin: make-col($size)
 /// Creates .col, .col-auto, .col-1..12

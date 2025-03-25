@@ -1,26 +1,32 @@
 import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
+import { useEffect } from '@wordpress/element';
 
 import './editor.scss';
 
-export default function Edit() {
+export default function Edit( { attributes, setAttributes, clientId } ) {
+	const { blockId } = attributes;
+
+	// 1) On mount, if no blockId is set, store the parent's clientId into blockId
+	useEffect( () => {
+		if ( ! blockId ) {
+			setAttributes( { blockId: clientId } );
+		}
+	}, [ blockId, clientId, setAttributes ] );
+
+	// 2) Provide the usual blockProps
 	const blockProps = useBlockProps( {
-		className: 'accordion',
-		// Add a custom data attribute that bootstrap’s JS might rely on:
-		'data-bs-accordion': true,
+		className: 'fs-accordion',
+		'data-fs-accordion': true,
 	} );
 
-	// Start with one accordion item.
-	// The child block can also have a “templateLock:false” or “template:[]”
-	// if you want the user to freely add items.
+	// 3) A default template with one child accordion-item
 	const TEMPLATE = [
 		[
 			'fs-blocks/accordion-item',
-			// Child block’s initial attributes:
-			{
-				title: __( 'Accordion Item Title', 'fs-blocks' ),
-			},
-			// Child block’s inner block template:
+			// Child block’s initial attributes
+			{ title: __( 'Accordion Item Title', 'fs-blocks' ) },
+			// Inner blocks for that child
 			[ [ 'core/paragraph', { placeholder: 'Accordion content...' } ] ],
 		],
 	];

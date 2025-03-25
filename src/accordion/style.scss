@@ -1,4 +1,56 @@
-.accordion {
-	// Bootstrap typically handles styling,
-	// but you might add custom overrides here
-  }
+.fs-accordion {
+	margin: 1rem 0;
+	.fs-accordion-item {
+		margin-bottom: 1rem;
+
+		.fs-accordion-header {
+			margin: 0;
+
+			.fs-accordion-button {
+			width: 100%;
+			text-align: left;
+			border: none;
+			background: #f8f9fa;
+			padding: 1rem;
+			font-size: 1rem;
+			cursor: pointer;
+
+			&.collapsed {
+				background: #e9ecef;
+			}
+
+			&:focus {
+				outline: 2px solid #0d6efd;
+			}
+			}
+		}
+
+		.fs-accordion-collapse {
+			// Start closed
+			&.collapse {
+				height: 0;
+				overflow: hidden;
+				transition: height 0.3s ease;
+				&.show {
+					height: auto;
+				}
+			}
+			&.show {
+				// "open" state
+				display: block;
+			}
+			&.collapsing {
+				display: block;
+				height: 0;
+				overflow: hidden;
+				transition: height 0.3s ease;
+			}
+
+			.fs-accordion-body {
+				padding: 1rem;
+				background: #fff;
+				border: 1px solid #dee2e6;
+			}
+		}
+	}
+}

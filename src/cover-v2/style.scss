@@ -96,7 +96,7 @@
 	  @media (min-width: 1024px) {
 		.wp-block-cover__background,
 		.wp-block-cover__img-video-wrapper {
-		  --container-width: 480px;
+		  --container-width: 530px;
 		  --negative-margin: calc(var(--container-width) - 50vw - 30px);
 		  left: var(--negative-margin);
 		  right: 0;
@@ -140,7 +140,7 @@
 	  @media (min-width: 1024px) {
 		.wp-block-cover__background,
 		.wp-block-cover__img-video-wrapper {
-		  --container-width: 480px;
+		  --container-width: 530px;
 		  --negative-margin: calc(var(--container-width) - 50vw - 30px);
 		  right: var(--negative-margin);
 		  left: 0;

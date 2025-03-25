@@ -4,61 +4,91 @@ import {
 	useInnerBlocksProps,
 	RichText,
 	BlockControls,
+	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import { ToolbarButton } from '@wordpress/components';
-import { dispatch } from '@wordpress/data';
+import { dispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 export default function Edit( { attributes, setAttributes, clientId } ) {
-	// If there's no stored clientId, set it.
+	const { title, parentAccordionId } = attributes;
+
+	// A) If no stored clientId, set it for this block
 	useEffect( () => {
 		if ( ! attributes.clientId ) {
 			setAttributes( { clientId } );
 		}
 	}, [ clientId, attributes.clientId, setAttributes ] );
 
+	// B) Use the block editor store to find the parent block's attributes
+	const { discoveredParentId } = useSelect(
+		( select ) => {
+			const { getBlockRootClientId, getBlockAttributes } =
+				select( blockEditorStore );
+			const rootId = getBlockRootClientId( clientId );
+
+			// If no parent block found
+			if ( ! rootId ) {
+				return { discoveredParentId: null };
+			}
+
+			// Read the parent block’s attributes; look for blockId
+			const parentAttrs = getBlockAttributes( rootId );
+			if ( parentAttrs && parentAttrs.blockId ) {
+				return { discoveredParentId: parentAttrs.blockId };
+			}
+			return { discoveredParentId: null };
+		},
+		[ clientId ]
+	);
+
+	// C) If we found a parentAccordionId from the store, store it in the child's attributes
+	useEffect( () => {
+		if ( discoveredParentId && discoveredParentId !== parentAccordionId ) {
+			setAttributes( { parentAccordionId: discoveredParentId } );
+		}
+	}, [ discoveredParentId, parentAccordionId, setAttributes ] );
+
+	// D) Normal block props and inner blocks
 	const blockProps = useBlockProps();
 	const innerBlocksProps = useInnerBlocksProps(
-		{ className: 'accordion-body' },
+		{ className: 'fs-accordion-body' },
 		{
-			// Optional: restrict child blocks
 			allowedBlocks: [ 'core/paragraph', 'core/heading', 'core/image' ],
 		}
 	);
 
 	return (
 		<div { ...blockProps }>
-			<div className="accordion-item">
-				<h2 className="accordion-header">
+			<div className="fs-accordion-item">
+				<h2 className="fs-accordion-header">
 					<button
-						className="accordion-button collapsed"
+						className="fs-accordion-button collapsed"
 						type="button"
-						data-bs-toggle="collapse"
-						data-bs-target={ `#accordion-collapse-${ clientId }` }
+						data-fs-toggle="collapse"
+						data-fs-target={ `#fs-accordion-collapse-${ clientId }` }
 						aria-expanded="false"
-						aria-controls={ `accordion-collapse-${ clientId }` }
+						aria-controls={ `fs-accordion-collapse-${ clientId }` }
 					>
 						<RichText
 							tagName="span"
-							value={ attributes.title }
+							value={ title }
 							onChange={ ( newVal ) =>
 								setAttributes( { title: newVal } )
 							}
-							placeholder="Accordion Title"
+							placeholder={ __( 'Accordion Title', 'fs-blocks' ) }
 						/>
 					</button>
 				</h2>
 				<div
-					id={ `accordion-collapse-${ clientId }` }
-					className="accordion-collapse collapse"
-					data-bs-parent="[data-bs-accordion]"
+					id={ `fs-accordion-collapse-${ clientId }` }
+					className="fs-accordion-collapse collapse"
+					/* We'll set data-fs-parent in the server render based on parentAccordionId */
 				>
-					{ /* The child content: using InnerBlocks */ }
 					<div { ...innerBlocksProps } />
 				</div>
 			</div>
 
-			{ /* A small toolbar to remove the entire block */ }
 			<BlockControls>
 				<ToolbarButton
 					icon="trash"
