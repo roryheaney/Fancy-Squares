@@ -18,7 +18,8 @@
     "anchor": true
   },
   "parent": [
-    "core/buttons"
+    "core/buttons",
+    "buttons-custom"
   ],
   "attributes": {
     "buttonText": {

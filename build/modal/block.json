@@ -24,6 +24,10 @@
     "modalTitle": {
       "type": "string",
       "default": ""
+    },
+    "modalPlacement": {
+      "type": "string",
+      "default": "center"
     }
   },
   "editorScript": "file:./index.js",

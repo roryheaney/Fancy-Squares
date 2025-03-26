@@ -26,6 +26,10 @@
     "title": {
       "type": "string",
       "default": ""
+    },
+    "parentAccordionId": {
+      "type": "string",
+      "default": ""
     }
   },
   "editorScript": "file:./index.js",

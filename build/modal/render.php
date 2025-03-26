@@ -1,31 +1,55 @@
 <?php
 /**
- * Modal block server render.
+ * FancySquares Modal block server render.
  *
  * @param array  $attributes The block attributes.
- * @param string $content    The modal's inner content.
+ * @param string $content    The modal's inner content (from <InnerBlocks>).
  */
 
-$modal_id = ! empty( $attributes['modalId'] ) ? sanitize_title( $attributes['modalId'] ) : 'myModal';
-$modal_title = ! empty( $attributes['modalTitle'] ) ? $attributes['modalTitle'] : '';
+$modal_id       = ! empty( $attributes['modalId'] ) ? sanitize_title( $attributes['modalId'] ) : 'myModal';
+$modal_title    = ! empty( $attributes['modalTitle'] ) ? $attributes['modalTitle'] : '';
+$modal_placement = ! empty( $attributes['modalPlacement'] ) ? sanitize_title( $attributes['modalPlacement'] ) : 'center';
+
+// Compose a class name that includes .fs-modal, .fade
+// Also add data-fs-placement if you wish.
+$modal_class = 'fs-modal fade';
 
 ?>
-<div style="max-width: 100%" class="modal fade w-100" id="<?php echo esc_attr( $modal_id ); ?>" tabindex="-1" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
+<div
+  id="<?php echo esc_attr( $modal_id ); ?>"
+  class="<?php echo esc_attr( $modal_class ); ?>"
+  role="dialog"
+  aria-modal="true"
+  tabindex="-1"
+  data-fs-modal="true"
+  data-fs-placement="<?php echo esc_attr( $modal_placement ); ?>"
+>
+	<div class="fs-modal-dialog">
+		<div class="fs-modal-content">
 			<?php if ( $modal_title ) : ?>
-				<div class="modal-header">
-					<h5 class="modal-title"><?php echo esc_html( $modal_title ); ?></h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				<div class="fs-modal-header">
+					<h5 class="fs-modal-title">
+						<?php echo esc_html( $modal_title ); ?>
+					</h5>
+					<button
+						type="button"
+						class="fs-modal-close"
+						data-fs-dismiss="modal"
+						aria-label="<?php esc_attr_e( 'Close', 'fs-blocks' ); ?>"
+					></button>
 				</div>
 			<?php endif; ?>
 
-			<div class="modal-body">
+			<div class="fs-modal-body">
 				<?php echo $content; // InnerBlocks content ?>
 			</div>
 
-			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+			<div class="fs-modal-footer">
+				<button
+					type="button"
+					class="fs-modal-close-btn wp-block-button__link  wp-element-button pt-1 pb-1"
+					data-fs-dismiss="modal"
+				>
 					<?php esc_html_e( 'Close', 'fs-blocks' ); ?>
 				</button>
 			</div>

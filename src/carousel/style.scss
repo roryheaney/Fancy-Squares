@@ -19,7 +19,10 @@
 
 		&-bullet {
 			background-color: #090909;
-			@include focus-visible($size1: .1em, $size2: .25em);
+			@include focus-visible($size1: .1em, $size2: .2em);
+			&-active {
+				@include active-state-implied-focus($size1: .1em, $size2: .2em);
+			}
 		}
 	}
 

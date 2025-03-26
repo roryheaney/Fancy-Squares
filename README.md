@@ -1,6 +1,6 @@
-# Custom Blocks (Fancy Squares, oh my!)
+# Custom Blocks (Fancy Squares, non-bootstrap)
 
-The following blocks are based around Bootstrap 5 components.
+The following blocks are based around Bootstrap 5 components (but does not use Bootstrap, this branch primary focus is on a grid system based on it on custom js components).
 
 That being said, you could change the classes being used inside the data folder to work with the framework of your choice!
 

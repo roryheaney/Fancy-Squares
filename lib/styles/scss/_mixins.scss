@@ -73,6 +73,16 @@
 	}
 }
 
+@mixin active-state-implied-focus (
+	$size1: .2em,
+	$color1: #fff,
+	$size2: .4em,
+	$color2: #000
+) {
+	outline: 0;
+	box-shadow: 0 0 0 #{$size1} #{$color1}, 0 0 0 #{$size2} #{$color2};
+}
+
 
 // now apply it to the :focus-visible pseudo-class for buttons, use the mixin
 button,
