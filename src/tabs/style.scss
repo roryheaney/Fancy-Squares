@@ -88,7 +88,7 @@ $breakpoints: (
         display: none;
     }
 
-    @media (min-width: map-get($breakpoints, "min-md")) {
+    @include media-breakpoint-up(md) {
         .nav-tabs {
             display: flex;
         }
@@ -106,7 +106,7 @@ $breakpoints: (
         }
     }
 
-    @media (max-width: map-get($breakpoints, "max-md")) {
+    @include media-breakpoint-down(md) {
         .tab-pane {
             display: block !important;
             opacity: 1;

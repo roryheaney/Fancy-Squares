@@ -11,7 +11,7 @@
 @mixin media-breakpoint-up($breakpoint) {
 	@if map.has-key($grid-breakpoints, $breakpoint) {
 		@media (min-width: #{map.get($grid-breakpoints, $breakpoint)}) {
-		@content;
+			@content;
 		}
 	} @else {
 		@warn "Breakpoint `#{$breakpoint}` not found in $grid-breakpoints map.";
@@ -19,22 +19,22 @@
 }
 // New "media-breakpoint-down" version
 @mixin media-breakpoint-down($breakpoint) {
-	@if map-has-key($grid-breakpoints, $breakpoint) {
-	$value: map-get($grid-breakpoints, $breakpoint);
+	@if map.has-key($grid-breakpoints, $breakpoint) {
+		$value: map.get($grid-breakpoints, $breakpoint);
 
-	@if $value != 0 {
-		@media (max-width: #{subtract($value, 1px)}) {
-		@content;
+		@if $value != 0 {
+			@media (max-width: #{subtract($value, 1px)}) {
+			@content;
+			}
+		} @else {
+			@warn "Breakpoint `#{$breakpoint}` is 0 in $grid-breakpoints map.";
 		}
-	} @else {
-		@warn "Breakpoint `#{$breakpoint}` is 0 in $grid-breakpoints map.";
-	}
 	} @else {
 		@warn "Breakpoint `#{$breakpoint}` not found in $grid-breakpoints map.";
 	}
 }
 
-// Optional "subtract" function if you want a safe 1px offset 
+// Optional "subtract" function if you want a safe 1px offset
 // to avoid overlapping intervals. This is a simplistic approach:
 @function subtract($value, $sub) {
 	@return calc(#{$value} - #{$sub});
@@ -61,15 +61,21 @@
 }
 
 // focus state mixin/include extend box-shadow: 0 0 0 .2em #000,0 0 0 .4em #fff
-@mixin focus-visible {
-	outline: 0;
-	box-shadow: 0 0 0 .2em #fff, 0 0 0 .4em #000;
+@mixin focus-visible(
+	$size1: .2em,
+	$color1: #fff,
+	$size2: .4em,
+	$color2: #000
+) {
+	&:focus-visible {
+		outline: 0;
+		box-shadow: 0 0 0 #{$size1} #{$color1}, 0 0 0 #{$size2} #{$color2};
+	}
 }
+
 
 // now apply it to the :focus-visible pseudo-class for buttons, use the mixin
 button,
 .wp-element-button {
-	&:focus-visible {
-		@include focus-visible;
-	}
+	@include focus-visible;
 }
