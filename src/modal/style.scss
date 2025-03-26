@@ -1,0 +1,88 @@
+/*
+   style.scss
+   For .fs-modal with fade transitions, .fs-modal-backdrop,
+   plus body lock in .fs-modal-open
+*/
+
+/* Prevent body scroll when a modal is open */
+.fs-modal-open {
+	overflow: hidden;
+  }
+
+  /* The modal container */
+  .fs-modal {
+	position: fixed;
+	inset: 0;
+	display: none;
+	z-index: 1050;
+	align-items: center;
+	justify-content: center;
+	background-color: rgba(0, 0, 0, 0.5);
+	&.fade {
+	  opacity: 0;
+	  transition: opacity 0.3s ease;
+	  &.show {
+		display: flex;
+		opacity: 1;
+	  }
+	}
+
+	/* Optional .fs-modal-dialog structure */
+	.fs-modal-dialog {
+	  max-width: 600px;
+	  background-color: #fff;
+	  border-radius: 4px;
+	  .fs-modal-header,
+	  .fs-modal-body,
+	  .fs-modal-footer {
+		padding: 1rem;
+	  }
+	}
+  }
+
+  /* The backdrop */
+  .fs-modal-backdrop {
+	position: fixed;
+	inset: 0;
+	z-index: 1040; // behind 1050
+	display: none;
+	background: rgba(0, 0, 0, 0.5);
+	&.show {
+	  display: block;
+	}
+  }
+
+  /* data-fs-placement examples from earlier */
+
+  .fs-modal.show:not([data-fs-placement]) {
+	align-items: center;
+	justify-content: center;
+  }
+
+  /* top-center */
+  .fs-modal.show[data-fs-placement="top-center"] {
+	align-items: flex-start;
+	justify-content: center;
+	margin-top: 2rem;
+  }
+
+  /* bottom-center */
+  .fs-modal.show[data-fs-placement="bottom-center"] {
+	align-items: flex-end;
+	justify-content: center;
+	margin-bottom: 2rem;
+  }
+
+  /* top-left */
+  .fs-modal.show[data-fs-placement="top-left"] {
+	align-items: flex-start;
+	justify-content: flex-start;
+	margin: 1rem;
+  }
+
+  /* bottom-right */
+  .fs-modal.show[data-fs-placement="bottom-right"] {
+	align-items: flex-end;
+	justify-content: flex-end;
+	margin: 1rem;
+  }

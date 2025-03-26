@@ -13,7 +13,7 @@
 		"html": false,
 		"anchor": true
 	},
-	"parent": [ "core/buttons" ],
+	"parent": [ "core/buttons", "buttons-custom" ],
 	"attributes": {
 		"buttonText": {
 			"type": "string",

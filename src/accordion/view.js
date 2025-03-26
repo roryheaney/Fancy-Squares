@@ -1,9 +1,10 @@
 // view.js
-// Potentially attach some JS if needed. For example:
-// document.addEventListener('DOMContentLoaded', () => {
-//     console.log('Accordion front-end script loaded');
-// });
 class FancySquaresAccordion {
+	/**
+	 * Initialize the FancySquaresAccordion.
+	 *
+	 * @param {HTMLElement} accordionElement The main container of the accordion.
+	 */
 	constructor( accordionElement ) {
 		this.accordionElement = accordionElement;
 		// Keep track of which panel was last closed
@@ -23,13 +24,15 @@ class FancySquaresAccordion {
 
 	/*
 	 * Decide whether to open or close the panel.
+	 *
+	 * @param {HTMLElement} trigger The toggle button that triggers open/close.
 	 */
 	togglePanel( trigger ) {
 		const targetSelector = trigger.getAttribute( 'data-fs-target' );
 		const panel = document.querySelector( targetSelector );
 		if ( ! panel ) {
 			return;
-		};
+		}
 
 		const isExpanded = trigger.getAttribute( 'aria-expanded' ) === 'true';
 
@@ -62,8 +65,11 @@ class FancySquaresAccordion {
 		}
 	}
 
-	/*
+	/**
 	 * Animate panel open. Dispatch "fsAccordionOpen"/"fsAccordionOpened".
+	 *
+	 * @param {HTMLElement} trigger The element that triggered the open.
+	 * @param {HTMLElement} panel   The panel to open.
 	 */
 	openPanel( trigger, panel ) {
 		// 1) Fire the "fsAccordionOpen" event on the accordion container
@@ -86,7 +92,7 @@ class FancySquaresAccordion {
 		panel.style.height = '0px';
 
 		// Force reflow
-		panel.offsetHeight;
+		void panel.offsetHeight;
 
 		// 4) Now set final height so it animates from 0
 		const panelHeight = panel.scrollHeight;
@@ -118,6 +124,9 @@ class FancySquaresAccordion {
 
 	/**
 	 * Animate panel close. Dispatch "fsAccordionClose"/"fsAccordionClosed".
+	 *
+	 * @param {HTMLElement} trigger The element that triggered the close.
+	 * @param {HTMLElement} panel   The panel to close.
 	 */
 	closePanel( trigger, panel ) {
 		// 1) Fire "fsAccordionClose"
@@ -139,7 +148,7 @@ class FancySquaresAccordion {
 		panel.style.height = panelHeight + 'px';
 
 		// Force reflow
-		panel.offsetHeight;
+		void panel.offsetHeight;
 
 		// 4) Switch to "collapsing" state
 		panel.classList.add( 'collapsing' );

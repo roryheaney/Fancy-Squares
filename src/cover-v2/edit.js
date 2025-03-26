@@ -43,8 +43,14 @@ const bleedCoverSuggestions = bleedCoverOptions.map( ( o ) => o.value ); // <-- 
 /*  Utility functions
 /* ------------------------------------------------------------------------ */
 
+/**
+ * Ensures that our base classes are always present.
+ *
+ * @param {string[]} arr Array of class names.
+ * @return {string[]} Array of class names, guaranteed to include base classes.
+ */
 function ensureBaseClasses( arr ) {
-	let final = [ ...arr ];
+	const final = [ ...arr ];
 	[ 'wp-block-cover', 'wp-block-fancysquares-cover-block' ].forEach(
 		( cls ) => {
 			if ( ! final.includes( cls ) ) {
@@ -55,6 +61,19 @@ function ensureBaseClasses( arr ) {
 	return final;
 }
 
+/*
+ * Builds the final array of classes, ensuring base classes and adding
+ * the classes from each set (display, margin, padding, etc.).
+ *
+ * @param {string[]} orig            - Original class array (including base classes).
+ * @param {string[]} displayArr      - Selected display classes.
+ * @param {string[]} marginArr       - Selected margin classes.
+ * @param {string[]} paddingArr      - Selected padding classes.
+ * @param {string[]} positionArr     - Selected position classes.
+ * @param {string[]} zindexArr       - Selected z-index classes.
+ * @param {string[]} bleedCoverArr   - Selected bleed cover classes.
+ * @return {string[]}                - Final array of classes.
+ */
 function buildClassArray(
 	orig,
 	displayArr,
@@ -62,7 +81,7 @@ function buildClassArray(
 	paddingArr,
 	positionArr,
 	zindexArr,
-	bleedCoverArr // <-- Added to function signature
+	bleedCoverArr
 ) {
 	let final = ensureBaseClasses( orig );
 
@@ -72,10 +91,10 @@ function buildClassArray(
 		...paddingSuggestions,
 		...positionSuggestions,
 		...zindexSuggestions,
-		...bleedCoverSuggestions, // <-- Added here
+		...bleedCoverSuggestions,
 	];
 
-	// Remove classes that belong to any of the known sets
+	// Remove classes that belong to any known set
 	final = final.filter( ( c ) => ! allSuggestions.includes( c ) );
 
 	// Add the selected classes from each set
@@ -85,11 +104,17 @@ function buildClassArray(
 		...paddingArr,
 		...positionArr,
 		...zindexArr,
-		...bleedCoverArr // <-- Added here
+		...bleedCoverArr
 	);
 	return final;
 }
 
+/**
+ * Converts a string to a dash-delimited, lowercase "slug" format
+ *
+ * @param {string} str - Any string to be slugified
+ * @return {string}    - Slugified version
+ */
 function toSlug( str ) {
 	return str
 		.toLowerCase()
@@ -101,6 +126,15 @@ function toSlug( str ) {
 /* ------------------------------------------------------------------------ */
 /*  Edit Component
 /* ------------------------------------------------------------------------ */
+
+/**
+ * The Edit component for the FancySquares Cover Block.
+ *
+ * @param {Object}   props
+ * @param {Object}   props.attributes    - Current block attributes.
+ * @param {Function} props.setAttributes - Function to update block attributes.
+ * @return {JSX.Element} The editor element.
+ */
 export default function Edit( { attributes, setAttributes } ) {
 	const {
 		url,
@@ -311,6 +345,34 @@ export default function Edit( { attributes, setAttributes } ) {
 		bgStyle.backgroundColor = attributes.style.color.background;
 	}
 
+	// ------------------------------------------------------------------------
+	// Decide which media to render (video, image, or nothing) without nesting ternaries.
+	// ------------------------------------------------------------------------
+	let mediaContent = null;
+	if ( url ) {
+		if ( isVideo ) {
+			mediaContent = (
+				<video
+					className="wp-block-cover__video-background"
+					src={ url }
+					autoPlay
+					loop
+					muted
+					playsInline
+				/>
+			);
+		} else {
+			mediaContent = (
+				<img
+					className="wp-block-cover__image-background"
+					src={ url }
+					alt=""
+					loading="lazy"
+				/>
+			);
+		}
+	}
+
 	/* ------------------------------------------------------------------------ */
 	/*  Return Edit markup
 	/* ------------------------------------------------------------------------ */
@@ -431,7 +493,6 @@ export default function Edit( { attributes, setAttributes } ) {
 						suggestions={ zindexSuggestions }
 						onChange={ onChangeZIndex }
 					/>
-					{ /* FormTokenField for Bleed Cover Classes */ }
 					<FormTokenField
 						label={ __( 'Bleed Cover Classes', 'fs-blocks' ) }
 						value={ bleedCoverVals }
@@ -448,23 +509,7 @@ export default function Edit( { attributes, setAttributes } ) {
 					style={ bgStyle }
 				/>
 				<div className="wp-block-cover__img-video-wrapper">
-					{ url && isVideo ? (
-						<video
-							className="wp-block-cover__video-background"
-							src={ url }
-							autoPlay
-							loop
-							muted
-							playsInline
-						/>
-					) : url ? (
-						<img
-							className="wp-block-cover__image-background"
-							src={ url }
-							alt=""
-							loading="lazy"
-						/>
-					) : null }
+					{ mediaContent }
 				</div>
 				<div className="wp-block-cover__inner-container">
 					<InnerBlocks />
