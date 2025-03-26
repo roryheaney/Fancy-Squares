@@ -9,30 +9,30 @@
 /// Checks if `$breakpoint` exists in `$grid-breakpoints`;
 /// if so, wraps `@content` in a `@media` query.
 @mixin media-breakpoint-up($breakpoint) {
-  @if map.has-key($grid-breakpoints, $breakpoint) {
-    @media (min-width: #{map.get($grid-breakpoints, $breakpoint)}) {
-      @content;
-    }
-  } @else {
-    @warn "Breakpoint `#{$breakpoint}` not found in $grid-breakpoints map.";
-  }
+	@if map.has-key($grid-breakpoints, $breakpoint) {
+		@media (min-width: #{map.get($grid-breakpoints, $breakpoint)}) {
+		@content;
+		}
+	} @else {
+		@warn "Breakpoint `#{$breakpoint}` not found in $grid-breakpoints map.";
+	}
 }
 // New "media-breakpoint-down" version
 @mixin media-breakpoint-down($breakpoint) {
 	@if map-has-key($grid-breakpoints, $breakpoint) {
-	  $value: map-get($grid-breakpoints, $breakpoint);
-  
-	  @if $value != 0 {
+	$value: map-get($grid-breakpoints, $breakpoint);
+
+	@if $value != 0 {
 		@media (max-width: #{subtract($value, 1px)}) {
-		  @content;
+		@content;
 		}
-	  } @else {
-		@warn "Breakpoint `#{$breakpoint}` is 0 in $grid-breakpoints map.";
-	  }
 	} @else {
-	  @warn "Breakpoint `#{$breakpoint}` not found in $grid-breakpoints map.";
+		@warn "Breakpoint `#{$breakpoint}` is 0 in $grid-breakpoints map.";
 	}
-  }
+	} @else {
+		@warn "Breakpoint `#{$breakpoint}` not found in $grid-breakpoints map.";
+	}
+}
 
 // Optional "subtract" function if you want a safe 1px offset 
 // to avoid overlapping intervals. This is a simplistic approach:
@@ -43,19 +43,33 @@
 /// Mixin: make-col($size)
 /// Creates .col, .col-auto, .col-1..12
 @mixin make-col($size: false) {
-  @if $size == false {
-    // e.g. .col => flexible
-    flex: 1 0 0%;
-    // max-width: 100%;
-  } @else if $size == auto {
-    // e.g. .col-auto => width auto
-    flex: 0 0 auto;
-    width: auto;
-    max-width: none;
-  } @else {
-    // e.g. .col-1..12 => fraction
-    $pct: calc(100% * $size / 12);
-	flex: 0 0 auto;
-    width: #{$pct};
-  }
+	@if $size == false {
+		// e.g. .col => flexible
+		flex: 1 0 0%;
+		// max-width: 100%;
+	} @else if $size == auto {
+		// e.g. .col-auto => width auto
+		flex: 0 0 auto;
+		width: auto;
+		max-width: none;
+	} @else {
+		// e.g. .col-1..12 => fraction
+		$pct: calc(100% * $size / 12);
+		flex: 0 0 auto;
+		width: #{$pct};
+	}
+}
+
+// focus state mixin/include extend box-shadow: 0 0 0 .2em #000,0 0 0 .4em #fff
+@mixin focus-visible {
+	outline: 0;
+	box-shadow: 0 0 0 .2em #fff, 0 0 0 .4em #000;
+}
+
+// now apply it to the :focus-visible pseudo-class for buttons, use the mixin
+button,
+.wp-element-button {
+	&:focus-visible {
+		@include focus-visible;
+	}
 }
