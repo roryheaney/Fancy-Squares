@@ -8,6 +8,7 @@ import {
 	PanelBody,
 	RangeControl,
 	ToggleControl,
+	// eslint-disable-next-line no-restricted-imports
 	__experimentalNumberControl as NumberControl,
 	Button,
 } from '@wordpress/components';

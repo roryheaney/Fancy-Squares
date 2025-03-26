@@ -13,6 +13,7 @@ import './style.scss';
 
 registerBlockType( metadata.name, {
 	edit: Edit,
+	// eslint-disable-next-line no-unused-vars
 	save: ( { attributes } ) => (
 		<div { ...useBlockProps.save() }>
 			<InnerBlocks.Content />

@@ -43,6 +43,7 @@ import {
 	TextControl,
 	FormTokenField,
 } from '@wordpress/components';
+// for translations
 import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
@@ -68,6 +69,7 @@ function ImageSelector( { label, imageId, imageUrl, onSelect, onRemove } ) {
 	const selectLabel = sprintf( __( 'Select %s Image', 'fs-blocks' ), label );
 	/* translators: %s: The name of the image slot (e.g. "Default" or "Small"). */
 	const editLabel = sprintf(
+		/* translators: %s: The name of the image slot (e.g. "Default" or "Small"). */
 		__( 'Edit or Replace %s Image', 'fs-blocks' ),
 		label
 	);
