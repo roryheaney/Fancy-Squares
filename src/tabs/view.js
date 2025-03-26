@@ -184,7 +184,7 @@ class FancySquaresTabs {
 
 		// Focus the new tab if requested
 		if ( focusTab ) {
-			newTab.focus();
+			newTab.focus( { preventScroll: true } );
 		}
 	}
 

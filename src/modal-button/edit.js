@@ -40,7 +40,11 @@ export default function Edit( { attributes, setAttributes } ) {
 				</PanelBody>
 			</InspectorControls>
 
-			<button type="button" className="btn btn-primary" disabled>
+			<button
+				type="button"
+				className="btn btn-primary wp-block-button__link  wp-element-button"
+				disabled
+			>
 				{ buttonText || __( 'Open Modal', 'fs-blocks' ) }
 			</button>
 			<p className="description">

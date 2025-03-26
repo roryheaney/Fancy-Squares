@@ -31,16 +31,16 @@ $modal_class = 'fs-modal fade';
           <h5 class="fs-modal-title">
             <?php echo esc_html( $modal_title ); ?>
           </h5>
+		  <button
+			type="button"
+			class="fs-modal-close"
+			data-fs-dismiss="modal"
+			aria-label="<?php esc_attr_e( 'Close', 'fs-blocks' ); ?>"
+		  >
+			x
+		  </button>
         </div>
 		<?php endif; ?>
-		<button
-		  type="button"
-		  class="fs-modal-close"
-		  data-fs-dismiss="modal"
-		  aria-label="<?php esc_attr_e( 'Close', 'fs-blocks' ); ?>"
-		>
-		  x
-		</button>
 
       <div class="fs-modal-body">
         <?php echo $content; // InnerBlocks content ?>

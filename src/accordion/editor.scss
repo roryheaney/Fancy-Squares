@@ -11,3 +11,15 @@
 		}
 	}
 }
+
+.fs-accordion {
+	.fs-accordion-item {
+
+		.fs-accordion-collapse {
+			// Start closed
+			&.collapse {
+				height: auto;
+			}
+		}
+	}
+}

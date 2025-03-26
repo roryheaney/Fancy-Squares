@@ -17,12 +17,14 @@ $data_toggle = $modal_id ? 'modal' : '';
 $data_target = $modal_id ? "#{$modal_id}" : '';
 
 ?>
-<button
-	type="button"
-	class="<?php echo esc_attr($button_class); ?>"
-	<?php if ($data_toggle) : ?>
-	data-fs-toggle="<?php echo esc_attr($data_toggle); ?>"
-	data-fs-target="<?php echo esc_attr($data_target); ?>"
-	<?php endif; ?>>
-	<?php echo esc_html($button_text); ?>
-</button>
+<div class="wp-block-button">
+	<button
+		type="button"
+		class="wp-block-button__link  wp-element-button <?php echo esc_attr($button_class); ?>"
+		<?php if ($data_toggle) : ?>
+		data-fs-toggle="<?php echo esc_attr($data_toggle); ?>"
+		data-fs-target="<?php echo esc_attr($data_target); ?>"
+		<?php endif; ?>>
+		<?php echo esc_html($button_text); ?>
+	</button>
+</div>
