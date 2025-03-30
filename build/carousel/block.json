@@ -78,6 +78,10 @@
     "showPlayPauseButton": {
       "type": "boolean",
       "default": false
+    },
+    "autoHeight": {
+      "type": "boolean",
+      "default": false
     }
   },
   "editorScript": "file:./index.js",

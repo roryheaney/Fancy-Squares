@@ -22,6 +22,7 @@ $defaults = array(
 	'fractionalSlidesValue'   => 0.25,
 	'showPlayPauseButton'     => false,
 	'breakpoints'             => array(),
+	'autoHeight'              => false,
 );
 
 // Merge with defaults
@@ -80,6 +81,12 @@ if ($attributes['navigation']) {
 		'nextEl' => '.swiper-button-next',
 		'prevEl' => '.swiper-button-prev'
 	);
+}
+
+// Handle autoHeight
+if ($attributes['autoHeight']) {
+	print_r($attributes['autoHeight']);
+	$swiper_data['autoHeight'] = true;
 }
 
 // Classes for pause/pagination container

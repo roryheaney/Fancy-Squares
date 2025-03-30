@@ -51,6 +51,8 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		// ADA specific feature
 		// New attribute for play/pause button
 		showPlayPauseButton,
+		// auto Height
+		autoHeight,
 	} = attributes;
 
 	const [ localBreakpoints, setLocalBreakpoints ] = useState( breakpoints );
@@ -190,6 +192,15 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 						onChange={ () =>
 							setAttributes( {
 								showPlayPauseButton: ! showPlayPauseButton,
+							} )
+						}
+					/>
+					<ToggleControl
+						label="Enable Auto Height"
+						checked={ autoHeight }
+						onChange={ () =>
+							setAttributes( {
+								autoHeight: ! autoHeight,
 							} )
 						}
 					/>
