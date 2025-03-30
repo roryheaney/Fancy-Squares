@@ -16,10 +16,7 @@ export default function Edit( { clientId, attributes, setAttributes } ) {
 		if ( ! tabId ) {
 			setAttributes( { tabId: clientId } );
 		}
-	}, [ clientId, tabId ] );
-
-	// Use the persistent tabId (or fallback to clientId)
-	const persistentTabId = tabId || clientId;
+	}, [ clientId, tabId, setAttributes ] );
 
 	// Compare the parent's activeTab with the persistentTabId
 	const { isActiveTab } = useSelect(
@@ -30,7 +27,7 @@ export default function Edit( { clientId, attributes, setAttributes } ) {
 			const parentBlock = getBlock( parentClientId );
 			const parentActiveTab = parentBlock?.attributes?.activeTab;
 			return {
-				isActiveTab: parentActiveTab === persistentTabId,
+				isActiveTab: parentActiveTab === ( tabId || clientId ),
 			};
 		},
 		[ clientId, tabId ]

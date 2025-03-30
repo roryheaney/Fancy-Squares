@@ -52,7 +52,7 @@ import {
 	borderRadiusOptions,
 } from '../../data/bootstrap-classes/classes.js';
 
-/**
+/*
  * Reusable ImageSelector component
  * Shows a button, image preview (wrapped in <button> for a11y), and a "Remove" button.
  *

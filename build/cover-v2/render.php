@@ -88,6 +88,7 @@ if (!empty($attributes['backgroundColor'])) {
 						loop
 						muted
 						playsinline
+						tabindex="-1"
 						aria-hidden="true"></video>
 				<?php
 				} else {
@@ -99,6 +100,7 @@ if (!empty($attributes['backgroundColor'])) {
 						loop
 						muted
 						playsinline
+						tabindex="-1"
 						aria-hidden="true"></video>
 				<?php
 				}

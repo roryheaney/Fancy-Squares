@@ -26,7 +26,7 @@ const alignItemsSuggestions = alignItemsOptions.map( ( item ) => item.value );
 const marginSuggestions = marginOptions.map( ( item ) => item.value );
 const paddingSuggestions = paddingOptions.map( ( item ) => item.value );
 
-/**
+/*
  * Utility to combine all selected sets into one final array.
  *
  * @param {string[]} rowArr          The array of row classes.
@@ -144,7 +144,9 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 	 */
 	useEffect( () => {
 		// blockRef.current is the actual <div> node returned by React
-		if ( ! blockRef.current ) return;
+		if ( ! blockRef.current ) {
+			return;
+		}
 
 		// If you want to find the .block-editor-block-list__layout inside our block:
 		const layoutEl = blockRef.current.querySelector(

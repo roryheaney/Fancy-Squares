@@ -5,7 +5,9 @@ export function useActiveTabClass( clientId, activeTab ) {
 		const container = document.querySelector(
 			`[data-block="${ clientId }"]`
 		);
-		if ( ! container ) return;
+		if ( ! container ) {
+			return;
+		}
 
 		// Add/remove active class to tab items
 		container

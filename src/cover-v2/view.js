@@ -12,6 +12,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 			rootMargin: '200px', // load video ~200px before it appears
 			threshold: 0,
 		};
+		// eslint-disable-next-line no-undef
 		const observer = new IntersectionObserver( ( entries ) => {
 			entries.forEach( ( entry ) => {
 				if ( entry.isIntersecting ) {

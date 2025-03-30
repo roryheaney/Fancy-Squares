@@ -44,7 +44,7 @@ const bleedCoverSuggestions = bleedCoverOptions.map( ( o ) => o.value ); // <-- 
 /* ------------------------------------------------------------------------ */
 
 function ensureBaseClasses( arr ) {
-	let final = [ ...arr ];
+	const final = [ ...arr ];
 	[ 'wp-block-cover', 'wp-block-fancysquares-cover-block' ].forEach(
 		( cls ) => {
 			if ( ! final.includes( cls ) ) {
@@ -311,6 +311,34 @@ export default function Edit( { attributes, setAttributes } ) {
 		bgStyle.backgroundColor = attributes.style.color.background;
 	}
 
+	// ------------------------------------------------------------------------
+	// Determine which media element to render (avoid nested ternaries)
+	// ------------------------------------------------------------------------
+	let mediaElement = null;
+	if ( url ) {
+		if ( isVideo ) {
+			mediaElement = (
+				<video
+					className="wp-block-cover__video-background"
+					src={ url }
+					autoPlay
+					loop
+					muted
+					playsInline
+				/>
+			);
+		} else {
+			mediaElement = (
+				<img
+					className="wp-block-cover__image-background"
+					src={ url }
+					alt=""
+					loading="lazy"
+				/>
+			);
+		}
+	}
+
 	/* ------------------------------------------------------------------------ */
 	/*  Return Edit markup
 	/* ------------------------------------------------------------------------ */
@@ -448,23 +476,7 @@ export default function Edit( { attributes, setAttributes } ) {
 					style={ bgStyle }
 				/>
 				<div className="wp-block-cover__img-video-wrapper">
-					{ url && isVideo ? (
-						<video
-							className="wp-block-cover__video-background"
-							src={ url }
-							autoPlay
-							loop
-							muted
-							playsInline
-						/>
-					) : url ? (
-						<img
-							className="wp-block-cover__image-background"
-							src={ url }
-							alt=""
-							loading="lazy"
-						/>
-					) : null }
+					{ mediaElement }
 				</div>
 				<div className="wp-block-cover__inner-container">
 					<InnerBlocks />

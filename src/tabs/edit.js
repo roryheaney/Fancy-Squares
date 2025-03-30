@@ -38,7 +38,7 @@ export default function Edit( { clientId, attributes, setAttributes } ) {
 				childBlocks[ 0 ].attributes.tabId || childBlocks[ 0 ].clientId;
 			setAttributes( { activeTab: firstChildTabId } );
 		}
-	}, [ clientId, childBlocks ] );
+	}, [ clientId, childBlocks, blockId, activeTab, setAttributes ] );
 
 	// Track the previous number of child blocks so we can detect when a new one is added.
 	const previousChildCountRef = useRef( childBlocks.length );
@@ -51,7 +51,7 @@ export default function Edit( { clientId, attributes, setAttributes } ) {
 			selectBlock( newChild.clientId );
 		}
 		previousChildCountRef.current = childBlocks.length;
-	}, [ childBlocks ] );
+	}, [ childBlocks, selectBlock, setAttributes ] );
 
 	// Handle tab click manually (if user clicks on an existing tab)
 	const handleTabClick = ( childBlock ) => {
