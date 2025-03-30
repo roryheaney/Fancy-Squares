@@ -41,6 +41,7 @@ This plugin currently add's the css/js to the FE as well, but only for testing p
 - More blocks types
 - ADA enhancements.
 - Other frameworks (Tailwind, Material, etc).
+- Vanilla version that is based on the BS 5 grid and JS components are based around wcag examples. [Branch](https://github.com/roryheaney/Fancy-Squares/tree/vanilla-bs)
 
 ### Node
 
