@@ -1,4 +1,6 @@
 /* Front-end styles for the tabs block */
+@use "sass:map";
+
 .fs-tabs {
 	margin-bottom: 1rem;
   }
@@ -18,7 +20,7 @@
         display: none;
     }
 
-    @media (min-width: map-get($breakpoints, "min-md")) {
+    @media (min-width: map.get($breakpoints, "min-md")) {
         .nav-tabs {
             display: flex;
         }
@@ -36,7 +38,7 @@
         }
     }
 
-    @media (max-width: map-get($breakpoints, "max-md")) {
+    @media (max-width: map.get($breakpoints, "max-md")) {
         .tab-pane {
             display: block !important;
             opacity: 1;
