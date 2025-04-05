@@ -26,18 +26,24 @@ import {
 	paddingOptions,
 	positionOptions,
 	zindexOptions,
-	bleedCoverOptions, // <-- Added here
+	bleedCoverOptions,
 } from '../../data/bootstrap-classes/classes.js';
 
-/* ------------------------------------------------------------------------ */
-/*  Prepare suggestions arrays
-/* ------------------------------------------------------------------------ */
-const displaySuggestions = displayOptions.map( ( o ) => o.value );
-const marginSuggestions = marginOptions.map( ( o ) => o.value );
-const paddingSuggestions = paddingOptions.map( ( o ) => o.value );
-const positionSuggestions = positionOptions.map( ( o ) => o.value );
-const zindexSuggestions = zindexOptions.map( ( o ) => o.value );
-const bleedCoverSuggestions = bleedCoverOptions.map( ( o ) => o.value ); // <-- Added here
+// Helper function to map class values to their labels for display
+const getLabelsFromValues = ( values, options ) => {
+	return values.map( ( value ) => {
+		const option = options.find( ( opt ) => opt.value === value );
+		return option ? option.label : value; // Fallback to value if no label found
+	} );
+};
+
+// Helper function to map selected labels back to values
+const getValuesFromLabels = ( labels, options ) => {
+	return labels.map( ( label ) => {
+		const option = options.find( ( opt ) => opt.label === label );
+		return option ? option.value : label; // Fallback to label if no value found
+	} );
+};
 
 /* ------------------------------------------------------------------------ */
 /*  Utility functions
@@ -62,30 +68,16 @@ function buildClassArray(
 	paddingArr,
 	positionArr,
 	zindexArr,
-	bleedCoverArr // <-- Added to function signature
+	bleedCoverArr
 ) {
 	let final = ensureBaseClasses( orig );
-
-	const allSuggestions = [
-		...displaySuggestions,
-		...marginSuggestions,
-		...paddingSuggestions,
-		...positionSuggestions,
-		...zindexSuggestions,
-		...bleedCoverSuggestions, // <-- Added here
-	];
-
-	// Remove classes that belong to any of the known sets
-	final = final.filter( ( c ) => ! allSuggestions.includes( c ) );
-
-	// Add the selected classes from each set
 	final.push(
 		...displayArr,
 		...marginArr,
 		...paddingArr,
 		...positionArr,
 		...zindexArr,
-		...bleedCoverArr // <-- Added here
+		...bleedCoverArr
 	);
 	return final;
 }
@@ -103,13 +95,13 @@ function toSlug( str ) {
 /* ------------------------------------------------------------------------ */
 export default function Edit( { attributes, setAttributes } ) {
 	const {
-		url,
-		isVideo,
-		lazyLoadVideo,
-		dimRatio,
-		contentPosition,
-		fullHeight,
-		additionalClasses,
+		url = '',
+		isVideo = false,
+		lazyLoadVideo = false,
+		dimRatio = 50, // Default dimRatio
+		contentPosition = 'center center', // Default content position
+		fullHeight = false,
+		additionalClasses = [],
 	} = attributes;
 
 	useEffect( () => {
@@ -138,93 +130,29 @@ export default function Edit( { attributes, setAttributes } ) {
 	);
 
 	// Helper to find intersection (to pre-populate fields)
-	const intersect = ( arr, list ) =>
-		arr.filter( ( c ) => list.includes( c ) );
+	const intersect = ( arr, options ) =>
+		arr.filter( ( c ) => options.some( ( opt ) => opt.value === c ) );
 
-	const displayVals = intersect( filtered, displaySuggestions );
-	const marginVals = intersect( filtered, marginSuggestions );
-	const paddingVals = intersect( filtered, paddingSuggestions );
-	const positionVals = intersect( filtered, positionSuggestions );
-	const zindexVals = intersect( filtered, zindexSuggestions );
-	const bleedCoverVals = intersect( filtered, bleedCoverSuggestions ); // <-- Bleed cover
+	const displayVals = intersect( filtered, displayOptions );
+	const marginVals = intersect( filtered, marginOptions );
+	const paddingVals = intersect( filtered, paddingOptions );
+	const positionVals = intersect( filtered, positionOptions );
+	const zindexVals = intersect( filtered, zindexOptions );
+	const bleedCoverVals = intersect( filtered, bleedCoverOptions );
 
 	/* ------------------------------------------------------------------------ */
-	/*  onChange handlers for advanced classes
+	/*  onChange handler for advanced classes
 	/* ------------------------------------------------------------------------ */
-	const onChangeDisplay = ( newTokens ) => {
+	const handleTokenChange = ( options, currentVals ) => ( newTokens ) => {
+		const newValues = getValuesFromLabels( newTokens, options );
 		const updated = buildClassArray(
 			additionalClasses,
-			newTokens,
-			marginVals,
-			paddingVals,
-			positionVals,
-			zindexVals,
-			bleedCoverVals
-		);
-		setAttributes( { additionalClasses: updated } );
-	};
-
-	const onChangeMargin = ( newTokens ) => {
-		const updated = buildClassArray(
-			additionalClasses,
-			displayVals,
-			newTokens,
-			paddingVals,
-			positionVals,
-			zindexVals,
-			bleedCoverVals
-		);
-		setAttributes( { additionalClasses: updated } );
-	};
-
-	const onChangePadding = ( newTokens ) => {
-		const updated = buildClassArray(
-			additionalClasses,
-			displayVals,
-			marginVals,
-			newTokens,
-			positionVals,
-			zindexVals,
-			bleedCoverVals
-		);
-		setAttributes( { additionalClasses: updated } );
-	};
-
-	const onChangePosition = ( newTokens ) => {
-		const updated = buildClassArray(
-			additionalClasses,
-			displayVals,
-			marginVals,
-			paddingVals,
-			newTokens,
-			zindexVals,
-			bleedCoverVals
-		);
-		setAttributes( { additionalClasses: updated } );
-	};
-
-	const onChangeZIndex = ( newTokens ) => {
-		const updated = buildClassArray(
-			additionalClasses,
-			displayVals,
-			marginVals,
-			paddingVals,
-			positionVals,
-			newTokens,
-			bleedCoverVals
-		);
-		setAttributes( { additionalClasses: updated } );
-	};
-
-	const onChangeBleedCover = ( newTokens ) => {
-		const updated = buildClassArray(
-			additionalClasses,
-			displayVals,
-			marginVals,
-			paddingVals,
-			positionVals,
-			zindexVals,
-			newTokens
+			options === displayOptions ? newValues : displayVals,
+			options === marginOptions ? newValues : marginVals,
+			options === paddingOptions ? newValues : paddingVals,
+			options === positionOptions ? newValues : positionVals,
+			options === zindexOptions ? newValues : zindexVals,
+			options === bleedCoverOptions ? newValues : bleedCoverVals
 		);
 		setAttributes( { additionalClasses: updated } );
 	};
@@ -259,7 +187,6 @@ export default function Edit( { attributes, setAttributes } ) {
 	/*  Build block classes
 	/* ------------------------------------------------------------------------ */
 	const editorClasses = [ ...additionalClasses ];
-
 	if ( contentPosition ) {
 		const slug = toSlug( contentPosition );
 		editorClasses.push( `is-position-${ slug }` );
@@ -273,9 +200,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		style: fullHeight ? { minHeight: '100vh' } : {},
 	} );
 
-	// ------------------------------------------------------------------------
-	// Compute background element classes and inline styles.
-	// ------------------------------------------------------------------------
+	// Background element classes and styles
 	const bgClasses = [ 'wp-block-cover__background' ];
 	if ( dimRatio !== 100 ) {
 		bgClasses.push( 'has-background-dim' );
@@ -291,53 +216,35 @@ export default function Edit( { attributes, setAttributes } ) {
 
 	const bgStyle = {
 		opacity: dimRatio / 100,
+		...( attributes.style?.color?.gradient && {
+			backgroundImage: attributes.style.color.gradient,
+		} ),
+		...( attributes.background && { background: attributes.background } ),
+		...( attributes.style?.color?.background && {
+			backgroundColor: attributes.style.color.background,
+		} ),
 	};
 
-	if (
-		attributes.style &&
-		attributes.style.color &&
-		attributes.style.color.gradient
-	) {
-		bgStyle.backgroundImage = attributes.style.color.gradient;
-	}
-	if ( attributes.background ) {
-		bgStyle.background = attributes.background;
-	}
-	if (
-		attributes.style &&
-		attributes.style.color &&
-		attributes.style.color.background
-	) {
-		bgStyle.backgroundColor = attributes.style.color.background;
-	}
-
-	// ------------------------------------------------------------------------
-	// Determine which media element to render (avoid nested ternaries)
-	// ------------------------------------------------------------------------
-	let mediaElement = null;
-	if ( url ) {
-		if ( isVideo ) {
-			mediaElement = (
-				<video
-					className="wp-block-cover__video-background"
-					src={ url }
-					autoPlay
-					loop
-					muted
-					playsInline
-				/>
-			);
-		} else {
-			mediaElement = (
-				<img
-					className="wp-block-cover__image-background"
-					src={ url }
-					alt=""
-					loading="lazy"
-				/>
-			);
-		}
-	}
+	// Media element rendering
+	const mediaElement = url ? (
+		isVideo ? (
+			<video
+				className="wp-block-cover__video-background"
+				src={ url }
+				autoPlay
+				loop
+				muted
+				playsInline
+			/>
+		) : (
+			<img
+				className="wp-block-cover__image-background"
+				src={ url }
+				alt=""
+				loading="lazy"
+			/>
+		)
+	) : null;
 
 	/* ------------------------------------------------------------------------ */
 	/*  Return Edit markup
@@ -431,40 +338,77 @@ export default function Edit( { attributes, setAttributes } ) {
 				>
 					<FormTokenField
 						label={ __( 'Display Classes', 'fs-blocks' ) }
-						value={ displayVals }
-						suggestions={ displaySuggestions }
-						onChange={ onChangeDisplay }
+						value={ getLabelsFromValues(
+							displayVals,
+							displayOptions
+						) }
+						suggestions={ displayOptions.map( ( o ) => o.label ) }
+						onChange={ handleTokenChange(
+							displayOptions,
+							displayVals
+						) }
 					/>
 					<FormTokenField
 						label={ __( 'Margin Classes', 'fs-blocks' ) }
-						value={ marginVals }
-						suggestions={ marginSuggestions }
-						onChange={ onChangeMargin }
+						value={ getLabelsFromValues(
+							marginVals,
+							marginOptions
+						) }
+						suggestions={ marginOptions.map( ( o ) => o.label ) }
+						onChange={ handleTokenChange(
+							marginOptions,
+							marginVals
+						) }
 					/>
 					<FormTokenField
 						label={ __( 'Padding Classes', 'fs-blocks' ) }
-						value={ paddingVals }
-						suggestions={ paddingSuggestions }
-						onChange={ onChangePadding }
+						value={ getLabelsFromValues(
+							paddingVals,
+							paddingOptions
+						) }
+						suggestions={ paddingOptions.map( ( o ) => o.label ) }
+						onChange={ handleTokenChange(
+							paddingOptions,
+							paddingVals
+						) }
 					/>
 					<FormTokenField
 						label={ __( 'Position Classes', 'fs-blocks' ) }
-						value={ positionVals }
-						suggestions={ positionSuggestions }
-						onChange={ onChangePosition }
+						value={ getLabelsFromValues(
+							positionVals,
+							positionOptions
+						) }
+						suggestions={ positionOptions.map( ( o ) => o.label ) }
+						onChange={ handleTokenChange(
+							positionOptions,
+							positionVals
+						) }
 					/>
 					<FormTokenField
 						label={ __( 'Z-Index Classes', 'fs-blocks' ) }
-						value={ zindexVals }
-						suggestions={ zindexSuggestions }
-						onChange={ onChangeZIndex }
+						value={ getLabelsFromValues(
+							zindexVals,
+							zindexOptions
+						) }
+						suggestions={ zindexOptions.map( ( o ) => o.label ) }
+						onChange={ handleTokenChange(
+							zindexOptions,
+							zindexVals
+						) }
 					/>
-					{ /* FormTokenField for Bleed Cover Classes */ }
 					<FormTokenField
 						label={ __( 'Bleed Cover Classes', 'fs-blocks' ) }
-						value={ bleedCoverVals }
-						suggestions={ bleedCoverSuggestions }
-						onChange={ onChangeBleedCover }
+						value={ getLabelsFromValues(
+							bleedCoverVals,
+							bleedCoverOptions
+						) }
+						suggestions={ bleedCoverOptions.map(
+							( o ) => o.label
+						) }
+						onChange={ handleTokenChange(
+							bleedCoverOptions,
+							bleedCoverVals
+						) }
 					/>
 				</PanelBody>
 			</InspectorControls>

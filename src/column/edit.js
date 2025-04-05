@@ -11,13 +11,7 @@ import {
 import { __ } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
 
-const singleChoiceOptions = [
-	{ label: __( 'Default', 'fs-blocks' ), value: '' },
-	{ label: __( 'Test', 'fs-blocks' ), value: 'test' },
-	{ label: __( 'Fancy', 'fs-blocks' ), value: 'fancy' },
-];
-
-// Import everything you need:
+// Import Bootstrap class options
 import {
 	columnOptions,
 	marginOptions,
@@ -29,16 +23,31 @@ import {
 
 import './editor.scss';
 
-// Convert each array of { label, value } to just [ 'col', 'col-auto', ... ] for FormTokenField suggestions.
-const columnSuggestions = columnOptions.map( ( o ) => o.value );
-const marginSuggestions = marginOptions.map( ( o ) => o.value );
-const displaySuggestions = displayOptions.map( ( o ) => o.value );
-const orderSuggestions = orderOptions.map( ( o ) => o.value );
-const alignItemsSuggestions = selfAlignmentOptions.map( ( o ) => o.value );
-const columnOffsetSuggestions = columnOffsetOptions.map( ( o ) => o.value );
+// Single-choice options for the dropdown
+const singleChoiceOptions = [
+	{ label: __( 'Default', 'fs-blocks' ), value: '' },
+	{ label: __( 'Test', 'fs-blocks' ), value: 'test' },
+	{ label: __( 'Fancy', 'fs-blocks' ), value: 'fancy' },
+];
 
-// Merge everything into one final array
-function combineAllClasses(
+// Helper function to map class values to their labels for display
+const getLabelsFromValues = ( values, options ) => {
+	return values.map( ( value ) => {
+		const option = options.find( ( opt ) => opt.value === value );
+		return option ? option.label : value; // Fallback to value if no label found
+	} );
+};
+
+// Helper function to map selected labels back to values
+const getValuesFromLabels = ( labels, options ) => {
+	return labels.map( ( label ) => {
+		const option = options.find( ( opt ) => opt.label === label );
+		return option ? option.value : label; // Fallback to label if no value found
+	} );
+};
+
+// Combine all classes into a single array
+const combineAllClasses = (
 	singularSelectClass,
 	columnArr,
 	marginArr,
@@ -46,36 +55,52 @@ function combineAllClasses(
 	orderArr,
 	alignArr,
 	offsetArr
-) {
+) => {
 	const final = [];
-	if ( singularSelectClass ) {
-		final.push( singularSelectClass );
-	}
-	final.push( ...columnArr );
-	final.push( ...marginArr );
-	final.push( ...displayArr );
-	final.push( ...orderArr );
-	final.push( ...alignArr );
-	final.push( ...offsetArr );
+	if ( singularSelectClass ) final.push( singularSelectClass );
+	final.push(
+		...columnArr,
+		...marginArr,
+		...displayArr,
+		...orderArr,
+		...alignArr,
+		...offsetArr
+	);
 	return final;
-}
+};
 
 export default function Edit( { attributes, setAttributes } ) {
 	const {
-		singularSelectClass,
-		columnOptions: columnValues,
-		marginOptions: marginValues,
-		displayOptions: displayValues,
-		orderOptions: orderValues,
-		selfAlignmentOptions: alignItemsValues,
-		columnOffsetOptions: columnOffsetValues,
-		additionalClasses,
+		singularSelectClass = '',
+		columnOptions: columnValues = [],
+		marginOptions: marginValues = [],
+		displayOptions: displayValues = [],
+		orderOptions: orderValues = [],
+		selfAlignmentOptions: alignItemsValues = [],
+		columnOffsetOptions: columnOffsetValues = [],
+		additionalClasses = [],
 	} = attributes;
 
-	// Single-choice dropdown
+	// Reusable onChange handler for all FormTokenFields
+	const handleTokenChange = ( fieldKey, options ) => ( newTokens ) => {
+		const newValues = getValuesFromLabels( newTokens, options );
+		setAttributes( { [ fieldKey ]: newValues } );
+		const updatedClasses = combineAllClasses(
+			singularSelectClass,
+			fieldKey === 'columnOptions' ? newValues : columnValues,
+			fieldKey === 'marginOptions' ? newValues : marginValues,
+			fieldKey === 'displayOptions' ? newValues : displayValues,
+			fieldKey === 'orderOptions' ? newValues : orderValues,
+			fieldKey === 'selfAlignmentOptions' ? newValues : alignItemsValues,
+			fieldKey === 'columnOffsetOptions' ? newValues : columnOffsetValues
+		);
+		setAttributes( { additionalClasses: updatedClasses } );
+	};
+
+	// Single-choice dropdown handler
 	const onChangeSelect = ( newVal ) => {
 		setAttributes( { singularSelectClass: newVal } );
-		const updated = combineAllClasses(
+		const updatedClasses = combineAllClasses(
 			newVal,
 			columnValues,
 			marginValues,
@@ -84,100 +109,10 @@ export default function Edit( { attributes, setAttributes } ) {
 			alignItemsValues,
 			columnOffsetValues
 		);
-		setAttributes( { additionalClasses: updated } );
+		setAttributes( { additionalClasses: updatedClasses } );
 	};
 
-	// Column multi-select
-	const onChangeColumnOptions = ( newTokens ) => {
-		setAttributes( { columnOptions: newTokens } );
-		const updated = combineAllClasses(
-			singularSelectClass,
-			newTokens,
-			marginValues,
-			displayValues,
-			orderValues,
-			alignItemsValues,
-			columnOffsetValues
-		);
-		setAttributes( { additionalClasses: updated } );
-	};
-
-	// Margin multi-select
-	const onChangeMarginOptions = ( newTokens ) => {
-		setAttributes( { marginOptions: newTokens } );
-		const updated = combineAllClasses(
-			singularSelectClass,
-			columnValues,
-			newTokens,
-			displayValues,
-			orderValues,
-			alignItemsValues,
-			columnOffsetValues
-		);
-		setAttributes( { additionalClasses: updated } );
-	};
-
-	// Display multi-select
-	const onChangeDisplayOptions = ( newTokens ) => {
-		setAttributes( { displayOptions: newTokens } );
-		const updated = combineAllClasses(
-			singularSelectClass,
-			columnValues,
-			marginValues,
-			newTokens,
-			orderValues,
-			alignItemsValues,
-			columnOffsetValues
-		);
-		setAttributes( { additionalClasses: updated } );
-	};
-
-	// Order multi-select
-	const onChangeOrderOptions = ( newTokens ) => {
-		setAttributes( { orderOptions: newTokens } );
-		const updated = combineAllClasses(
-			singularSelectClass,
-			columnValues,
-			marginValues,
-			displayValues,
-			newTokens,
-			alignItemsValues,
-			columnOffsetValues
-		);
-		setAttributes( { additionalClasses: updated } );
-	};
-
-	// Align Items multi-select
-	const onChangeSelfAlignmentOptions = ( newTokens ) => {
-		setAttributes( { selfAlignmentOptions: newTokens } );
-		const updated = combineAllClasses(
-			singularSelectClass,
-			columnValues,
-			marginValues,
-			displayValues,
-			orderValues,
-			newTokens,
-			columnOffsetValues
-		);
-		setAttributes( { additionalClasses: updated } );
-	};
-
-	// Column Offset multi-select
-	const onChangeColumnOffsetOptions = ( newTokens ) => {
-		setAttributes( { columnOffsetOptions: newTokens } );
-		const updated = combineAllClasses(
-			singularSelectClass,
-			columnValues,
-			marginValues,
-			displayValues,
-			orderValues,
-			alignItemsValues,
-			newTokens
-		);
-		setAttributes( { additionalClasses: updated } );
-	};
-
-	// Combine everything for the editor preview
+	// Prepare class string for preview
 	const previewClassString = [
 		'wp-block-fancysquares-column-block',
 		...additionalClasses,
@@ -203,54 +138,94 @@ export default function Edit( { attributes, setAttributes } ) {
 
 					<FormTokenField
 						label={ __( 'Column Classes', 'fs-blocks' ) }
-						value={ columnValues }
-						suggestions={ columnSuggestions }
-						onChange={ onChangeColumnOptions }
+						value={ getLabelsFromValues(
+							columnValues,
+							columnOptions
+						) }
+						suggestions={ columnOptions.map( ( o ) => o.label ) }
+						onChange={ handleTokenChange(
+							'columnOptions',
+							columnOptions
+						) }
 					/>
 
 					<hr />
 
 					<FormTokenField
 						label={ __( 'Margin Classes', 'fs-blocks' ) }
-						value={ marginValues }
-						suggestions={ marginSuggestions }
-						onChange={ onChangeMarginOptions }
+						value={ getLabelsFromValues(
+							marginValues,
+							marginOptions
+						) }
+						suggestions={ marginOptions.map( ( o ) => o.label ) }
+						onChange={ handleTokenChange(
+							'marginOptions',
+							marginOptions
+						) }
 					/>
 
 					<hr />
 
 					<FormTokenField
 						label={ __( 'Display Classes', 'fs-blocks' ) }
-						value={ displayValues }
-						suggestions={ displaySuggestions }
-						onChange={ onChangeDisplayOptions }
+						value={ getLabelsFromValues(
+							displayValues,
+							displayOptions
+						) }
+						suggestions={ displayOptions.map( ( o ) => o.label ) }
+						onChange={ handleTokenChange(
+							'displayOptions',
+							displayOptions
+						) }
 					/>
 
 					<hr />
 
 					<FormTokenField
 						label={ __( 'Order Classes', 'fs-blocks' ) }
-						value={ orderValues }
-						suggestions={ orderSuggestions }
-						onChange={ onChangeOrderOptions }
+						value={ getLabelsFromValues(
+							orderValues,
+							orderOptions
+						) }
+						suggestions={ orderOptions.map( ( o ) => o.label ) }
+						onChange={ handleTokenChange(
+							'orderOptions',
+							orderOptions
+						) }
 					/>
 
 					<hr />
 
 					<FormTokenField
 						label={ __( 'Self Align Item Classes', 'fs-blocks' ) }
-						value={ alignItemsValues }
-						suggestions={ alignItemsSuggestions }
-						onChange={ onChangeSelfAlignmentOptions }
+						value={ getLabelsFromValues(
+							alignItemsValues,
+							selfAlignmentOptions
+						) }
+						suggestions={ selfAlignmentOptions.map(
+							( o ) => o.label
+						) }
+						onChange={ handleTokenChange(
+							'selfAlignmentOptions',
+							selfAlignmentOptions
+						) }
 					/>
 
 					<hr />
 
 					<FormTokenField
 						label={ __( 'Column Offset Classes', 'fs-blocks' ) }
-						value={ columnOffsetValues }
-						suggestions={ columnOffsetSuggestions }
-						onChange={ onChangeColumnOffsetOptions }
+						value={ getLabelsFromValues(
+							columnOffsetValues,
+							columnOffsetOptions
+						) }
+						suggestions={ columnOffsetOptions.map(
+							( o ) => o.label
+						) }
+						onChange={ handleTokenChange(
+							'columnOffsetOptions',
+							columnOffsetOptions
+						) }
 					/>
 				</PanelBody>
 			</InspectorControls>

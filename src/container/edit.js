@@ -20,14 +20,21 @@ import {
 	zindexOptions,
 } from '../../data/bootstrap-classes/classes.js';
 
-/* ------------------------------------------------------------------------ */
-/*  Convert to plain string suggestions
-/* ------------------------------------------------------------------------ */
-const displaySuggestions = displayOptions.map( ( o ) => o.value );
-const marginSuggestions = marginOptions.map( ( o ) => o.value );
-const paddingSuggestions = paddingOptions.map( ( o ) => o.value );
-const positionSuggestions = positionOptions.map( ( o ) => o.value );
-const zindexSuggestions = zindexOptions.map( ( o ) => o.value );
+// Helper function to map class values to their labels for display
+const getLabelsFromValues = ( values, options ) => {
+	return values.map( ( value ) => {
+		const option = options.find( ( opt ) => opt.value === value );
+		return option ? option.label : value; // Fallback to value if no label found
+	} );
+};
+
+// Helper function to map selected labels back to values
+const getValuesFromLabels = ( labels, options ) => {
+	return labels.map( ( label ) => {
+		const option = options.find( ( opt ) => opt.label === label );
+		return option ? option.value : label; // Fallback to label if no value found
+	} );
+};
 
 /* ------------------------------------------------------------------------ */
 /*  Utility: Build final class array
@@ -36,14 +43,6 @@ const zindexSuggestions = zindexOptions.map( ( o ) => o.value );
  * Merges everything into one final array for 'additionalClasses',
  * always including 'wp-block-fancysquares-container-block' plus
  * 'container' or 'container-fluid'.
- *
- * @param {string} containerType  'default' or 'fluid'
- * @param {string[]} displayArr
- * @param {string[]} marginArr
- * @param {string[]} paddingArr
- * @param {string[]} positionArr
- * @param {string[]} zindexArr
- * @return {string[]} The unified array of class names
  */
 function combineAllClasses(
 	containerType,
@@ -53,30 +52,10 @@ function combineAllClasses(
 	positionArr,
 	zindexArr
 ) {
-	// Start with our base block class.
-	// We'll add container or container-fluid below.
-	let final = [ 'wp-block-fancysquares-container-block' ];
-
-	// Remove old references to all known suggestions
-	const allSuggestions = [
-		...displaySuggestions,
-		...marginSuggestions,
-		...paddingSuggestions,
-		...positionSuggestions,
-		...zindexSuggestions,
-	];
-
-	// Filter out any existing known classes (so we can re-apply fresh)
-	final = final.filter( ( c ) => ! allSuggestions.includes( c ) );
-
-	// Decide which container type to add
-	if ( containerType === 'fluid' ) {
-		final.push( 'container-fluid' );
-	} else {
-		final.push( 'container' );
-	}
-
-	// Now add any user-chosen classes
+	const final = [ 'wp-block-fancysquares-container-block' ];
+	// Add container type
+	final.push( containerType === 'fluid' ? 'container-fluid' : 'container' );
+	// Add user-chosen classes
 	final.push(
 		...displayArr,
 		...marginArr,
@@ -84,7 +63,6 @@ function combineAllClasses(
 		...positionArr,
 		...zindexArr
 	);
-
 	return final;
 }
 
@@ -92,10 +70,10 @@ function combineAllClasses(
 /*  Edit Component
 /* ------------------------------------------------------------------------ */
 export default function Edit( { attributes, setAttributes } ) {
-	const { additionalClasses } = attributes;
+	const { additionalClasses = [] } = attributes;
 
 	/**
-	 * If the block is brand new (additionalClasses is empty), set defaults.
+	 * Set default classes if the block is new
 	 */
 	useEffect( () => {
 		if ( additionalClasses.length === 0 ) {
@@ -108,14 +86,12 @@ export default function Edit( { attributes, setAttributes } ) {
 		}
 	}, [ additionalClasses.length, setAttributes ] );
 
-	// 1) Determine container type by seeing if 'container-fluid' is present
-	//    or else 'container' is present
-	let containerType = 'default'; // means 'container'
-	if ( additionalClasses.includes( 'container-fluid' ) ) {
-		containerType = 'fluid';
-	}
+	// Determine container type
+	const containerType = additionalClasses.includes( 'container-fluid' )
+		? 'fluid'
+		: 'default';
 
-	// 2) Filter out always-present classes so we can parse the user-chosen tokens
+	// Filter out base classes to get user-chosen tokens
 	const filtered = additionalClasses.filter(
 		( cls ) =>
 			cls !== 'wp-block-fancysquares-container-block' &&
@@ -123,19 +99,32 @@ export default function Edit( { attributes, setAttributes } ) {
 			cls !== 'container-fluid'
 	);
 
-	// 3) Identify which are display, margin, padding, position, zindex
-	const intersect = ( arr, suggestions ) =>
-		arr.filter( ( c ) => suggestions.includes( c ) );
+	// Identify user-chosen classes
+	const intersect = ( arr, options ) =>
+		arr.filter( ( c ) => options.some( ( opt ) => opt.value === c ) );
 
-	const displayVals = intersect( filtered, displaySuggestions );
-	const marginVals = intersect( filtered, marginSuggestions );
-	const paddingVals = intersect( filtered, paddingSuggestions );
-	const positionVals = intersect( filtered, positionSuggestions );
-	const zindexVals = intersect( filtered, zindexSuggestions );
+	const displayVals = intersect( filtered, displayOptions );
+	const marginVals = intersect( filtered, marginOptions );
+	const paddingVals = intersect( filtered, paddingOptions );
+	const positionVals = intersect( filtered, positionOptions );
+	const zindexVals = intersect( filtered, zindexOptions );
 
 	/* ----------------------------------------------------------------------
-	   onChange handlers
+	   onChange handler
 	---------------------------------------------------------------------- */
+	const handleTokenChange = ( options, currentVals ) => ( newTokens ) => {
+		const newValues = getValuesFromLabels( newTokens, options );
+		const updated = combineAllClasses(
+			containerType,
+			options === displayOptions ? newValues : displayVals,
+			options === marginOptions ? newValues : marginVals,
+			options === paddingOptions ? newValues : paddingVals,
+			options === positionOptions ? newValues : positionVals,
+			options === zindexOptions ? newValues : zindexVals
+		);
+		setAttributes( { additionalClasses: updated } );
+	};
+
 	const onChangeContainerType = ( newVal ) => {
 		const updated = combineAllClasses(
 			newVal,
@@ -144,66 +133,6 @@ export default function Edit( { attributes, setAttributes } ) {
 			paddingVals,
 			positionVals,
 			zindexVals
-		);
-		setAttributes( { additionalClasses: updated } );
-	};
-
-	const onChangeDisplay = ( newTokens ) => {
-		const updated = combineAllClasses(
-			containerType,
-			newTokens,
-			marginVals,
-			paddingVals,
-			positionVals,
-			zindexVals
-		);
-		setAttributes( { additionalClasses: updated } );
-	};
-
-	const onChangeMargin = ( newTokens ) => {
-		const updated = combineAllClasses(
-			containerType,
-			displayVals,
-			newTokens,
-			paddingVals,
-			positionVals,
-			zindexVals
-		);
-		setAttributes( { additionalClasses: updated } );
-	};
-
-	const onChangePadding = ( newTokens ) => {
-		const updated = combineAllClasses(
-			containerType,
-			displayVals,
-			marginVals,
-			newTokens,
-			positionVals,
-			zindexVals
-		);
-		setAttributes( { additionalClasses: updated } );
-	};
-
-	const onChangePosition = ( newTokens ) => {
-		const updated = combineAllClasses(
-			containerType,
-			displayVals,
-			marginVals,
-			paddingVals,
-			newTokens,
-			zindexVals
-		);
-		setAttributes( { additionalClasses: updated } );
-	};
-
-	const onChangeZIndex = ( newTokens ) => {
-		const updated = combineAllClasses(
-			containerType,
-			displayVals,
-			marginVals,
-			paddingVals,
-			positionVals,
-			newTokens
 		);
 		setAttributes( { additionalClasses: updated } );
 	};
@@ -223,7 +152,7 @@ export default function Edit( { attributes, setAttributes } ) {
 				>
 					<SelectControl
 						label={ __( 'Container Type', 'fs-blocks' ) }
-						value={ containerType } // 'default' or 'fluid'
+						value={ containerType }
 						options={ [
 							{
 								label: __( 'Default (container)', 'fs-blocks' ),
@@ -243,33 +172,63 @@ export default function Edit( { attributes, setAttributes } ) {
 
 					<FormTokenField
 						label={ __( 'Display Classes', 'fs-blocks' ) }
-						value={ displayVals }
-						suggestions={ displaySuggestions }
-						onChange={ onChangeDisplay }
+						value={ getLabelsFromValues(
+							displayVals,
+							displayOptions
+						) }
+						suggestions={ displayOptions.map( ( o ) => o.label ) }
+						onChange={ handleTokenChange(
+							displayOptions,
+							displayVals
+						) }
 					/>
 					<FormTokenField
 						label={ __( 'Margin Classes', 'fs-blocks' ) }
-						value={ marginVals }
-						suggestions={ marginSuggestions }
-						onChange={ onChangeMargin }
+						value={ getLabelsFromValues(
+							marginVals,
+							marginOptions
+						) }
+						suggestions={ marginOptions.map( ( o ) => o.label ) }
+						onChange={ handleTokenChange(
+							marginOptions,
+							marginVals
+						) }
 					/>
 					<FormTokenField
 						label={ __( 'Padding Classes', 'fs-blocks' ) }
-						value={ paddingVals }
-						suggestions={ paddingSuggestions }
-						onChange={ onChangePadding }
+						value={ getLabelsFromValues(
+							paddingVals,
+							paddingOptions
+						) }
+						suggestions={ paddingOptions.map( ( o ) => o.label ) }
+						onChange={ handleTokenChange(
+							paddingOptions,
+							paddingVals
+						) }
 					/>
 					<FormTokenField
 						label={ __( 'Position Classes', 'fs-blocks' ) }
-						value={ positionVals }
-						suggestions={ positionSuggestions }
-						onChange={ onChangePosition }
+						value={ getLabelsFromValues(
+							positionVals,
+							positionOptions
+						) }
+						suggestions={ positionOptions.map( ( o ) => o.label ) }
+						onChange={ handleTokenChange(
+							positionOptions,
+							positionVals
+						) }
 					/>
 					<FormTokenField
 						label={ __( 'Z-Index Classes', 'fs-blocks' ) }
-						value={ zindexVals }
-						suggestions={ zindexSuggestions }
-						onChange={ onChangeZIndex }
+						value={ getLabelsFromValues(
+							zindexVals,
+							zindexOptions
+						) }
+						suggestions={ zindexOptions.map( ( o ) => o.label ) }
+						onChange={ handleTokenChange(
+							zindexOptions,
+							zindexVals
+						) }
 					/>
 				</PanelBody>
 			</InspectorControls>
