@@ -14,10 +14,6 @@
  *    shows how breakpoints and captions will appear.
  *  - Basic accessibility features, such as wrapping the preview
  *    image in a button for keyboard interaction.
- *
- * The goal is to mirror the block’s dynamic rendering logic
- * on the front end, ensuring editors can see an approximate representation
- * before publishing.
  */
 
 import {
@@ -31,6 +27,7 @@ import {
 	Button,
 	TextControl,
 	FormTokenField,
+	CheckboxControl,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
@@ -39,20 +36,23 @@ import {
 	borderOptions,
 	borderRadiusOptions,
 } from '../../data/bootstrap-classes/classes.js';
+import './editor.scss';
 
-// Helper function to map class values to their labels for display
-const getLabelsFromValues = ( values, options ) => {
+// Helper function to map class values to their labels or values based on mode
+const getDisplayValues = ( values, options, showValues ) => {
 	return values.map( ( value ) => {
 		const option = options.find( ( opt ) => opt.value === value );
-		return option ? option.label : value; // Fallback to value if no label found
+		return option ? ( showValues ? option.value : option.label ) : value;
 	} );
 };
 
-// Helper function to map selected labels back to values
-const getValuesFromLabels = ( labels, options ) => {
-	return labels.map( ( label ) => {
-		const option = options.find( ( opt ) => opt.label === label );
-		return option ? option.value : label; // Fallback to label if no value found
+// Helper function to map selected labels or values back to values
+const getValuesFromDisplay = ( displayValues, options, showValues ) => {
+	return displayValues.map( ( display ) => {
+		const option = options.find( ( opt ) =>
+			showValues ? opt.value === display : opt.label === display
+		);
+		return option ? option.value : display;
 	} );
 };
 
@@ -147,10 +147,11 @@ export default function Edit( props ) {
 		borderRadiusClass = [],
 	} = attributes;
 
-	const blockProps = useBlockProps();
-
+	const [ showValues, setShowValues ] = useState( false ); // Local state for checkbox
 	const [ defaultAlt, setDefaultAlt ] = useState( '' );
 	const [ defaultCaption, setDefaultCaption ] = useState( '' );
+
+	const blockProps = useBlockProps();
 
 	useEffect( () => {
 		if ( ! defaultImageId ) {
@@ -171,9 +172,7 @@ export default function Edit( props ) {
 
 	function onSelectImage( breakpoint ) {
 		return ( media ) => {
-			if ( ! media?.id || ! media?.url ) {
-				return;
-			}
+			if ( ! media?.id || ! media?.url ) return;
 			setAttributes( {
 				[ `${ breakpoint }ImageId` ]: media.id,
 				[ `${ breakpoint }ImageUrl` ]: media.url,
@@ -208,12 +207,20 @@ export default function Edit( props ) {
 
 	// Handle border and radius tokens
 	const onChangeBorderTokens = ( tokens ) => {
-		const newValues = getValuesFromLabels( tokens, borderOptions );
+		const newValues = getValuesFromDisplay(
+			tokens,
+			borderOptions,
+			showValues
+		);
 		setAttributes( { borderClass: newValues } );
 	};
 
 	const onChangeRadiusTokens = ( tokens ) => {
-		const newValues = getValuesFromLabels( tokens, borderRadiusOptions );
+		const newValues = getValuesFromDisplay(
+			tokens,
+			borderRadiusOptions,
+			showValues
+		);
 		setAttributes( { borderRadiusClass: newValues } );
 	};
 
@@ -330,6 +337,17 @@ export default function Edit( props ) {
 					title={ __( 'Image Settings', 'fs-blocks' ) }
 					initialOpen
 				>
+					<CheckboxControl
+						label={ __( 'Show Values', 'fs-blocks' ) }
+						checked={ showValues }
+						onChange={ setShowValues }
+						help={ __(
+							'Display Bootstrap class names instead of labels.',
+							'fs-blocks'
+						) }
+						style={ { marginBottom: '20px' } }
+					/>
+
 					<ImageSelector
 						label="Default"
 						imageId={ defaultImageId }
@@ -432,35 +450,83 @@ export default function Edit( props ) {
 						</option>
 					</select>
 
-					<p style={ { fontWeight: 'bold', marginTop: '1em' } }>
-						{ __( 'Border Classes', 'fs-blocks' ) }
-					</p>
-					<FormTokenField
-						value={ getLabelsFromValues(
-							borderClass,
-							borderOptions
-						) }
-						suggestions={ borderOptions.map(
-							( opt ) => opt.label
-						) }
-						onChange={ onChangeBorderTokens }
-						label={ __( 'Add border classes', 'fs-blocks' ) }
-					/>
+					<div style={ { marginTop: '1em', marginBottom: '20px' } }>
+						<p style={ { fontWeight: 'bold' } }>
+							{ __( 'Border Classes', 'fs-blocks' ) }
+						</p>
+						<FormTokenField
+							value={ getDisplayValues(
+								borderClass,
+								borderOptions,
+								showValues
+							) }
+							suggestions={ borderOptions.map( ( opt ) =>
+								showValues ? opt.value : opt.label
+							) }
+							onChange={ onChangeBorderTokens }
+							label={ __( 'Add border classes', 'fs-blocks' ) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Border Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ borderOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
 
-					<p style={ { fontWeight: 'bold', marginTop: '1em' } }>
-						{ __( 'Border Radius Classes', 'fs-blocks' ) }
-					</p>
-					<FormTokenField
-						value={ getLabelsFromValues(
-							borderRadiusClass,
-							borderRadiusOptions
-						) }
-						suggestions={ borderRadiusOptions.map(
-							( opt ) => opt.label
-						) }
-						onChange={ onChangeRadiusTokens }
-						label={ __( 'Add radius classes', 'fs-blocks' ) }
-					/>
+					<div style={ { marginBottom: '20px' } }>
+						<p style={ { fontWeight: 'bold' } }>
+							{ __( 'Border Radius Classes', 'fs-blocks' ) }
+						</p>
+						<FormTokenField
+							value={ getDisplayValues(
+								borderRadiusClass,
+								borderRadiusOptions,
+								showValues
+							) }
+							suggestions={ borderRadiusOptions.map( ( opt ) =>
+								showValues ? opt.value : opt.label
+							) }
+							onChange={ onChangeRadiusTokens }
+							label={ __( 'Add radius classes', 'fs-blocks' ) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Border Radius Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ borderRadiusOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
 				</PanelBody>
 			</InspectorControls>
 			<PicturePreview />

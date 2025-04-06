@@ -3,9 +3,13 @@ import {
 	InnerBlocks,
 	useBlockProps,
 } from '@wordpress/block-editor';
-import { PanelBody, FormTokenField } from '@wordpress/components';
+import {
+	PanelBody,
+	FormTokenField,
+	CheckboxControl,
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { Fragment, useEffect, useRef } from '@wordpress/element';
+import { Fragment, useEffect, useRef, useState } from '@wordpress/element';
 import './editor.scss';
 
 import {
@@ -16,19 +20,21 @@ import {
 	paddingOptions,
 } from '../../data/bootstrap-classes/classes.js';
 
-// Helper function to map class values to their labels for display
-const getLabelsFromValues = ( values, options ) => {
+// Helper function to map class values to their labels or values based on mode
+const getDisplayValues = ( values, options, showValues ) => {
 	return values.map( ( value ) => {
 		const option = options.find( ( opt ) => opt.value === value );
-		return option ? option.label : value; // Fallback to value if no label found
+		return option ? ( showValues ? option.value : option.label ) : value;
 	} );
 };
 
-// Helper function to map selected labels back to values
-const getValuesFromLabels = ( labels, options ) => {
-	return labels.map( ( label ) => {
-		const option = options.find( ( opt ) => opt.label === label );
-		return option ? option.value : label; // Fallback to label if no value found
+// Helper function to map selected labels or values back to values
+const getValuesFromDisplay = ( displayValues, options, showValues ) => {
+	return displayValues.map( ( display ) => {
+		const option = options.find( ( opt ) =>
+			showValues ? opt.value === display : opt.label === display
+		);
+		return option ? option.value : display;
 	} );
 };
 
@@ -63,9 +69,15 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		additionalClasses = [],
 	} = attributes;
 
+	const [ showValues, setShowValues ] = useState( false ); // Local state for checkbox
+
 	// Reusable onChange handler for all FormTokenFields
 	const handleTokenChange = ( fieldKey, options ) => ( newTokens ) => {
-		const newValues = getValuesFromLabels( newTokens, options );
+		const newValues = getValuesFromDisplay(
+			newTokens,
+			options,
+			showValues
+		);
 		setAttributes( { [ fieldKey ]: newValues } );
 		const updatedClasses = combineAllClasses(
 			fieldKey === 'rowOptions' ? newValues : rowValues,
@@ -86,9 +98,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 	const blockRef = useRef();
 
 	useEffect( () => {
-		if ( ! blockRef.current ) {
-			return;
-		}
+		if ( ! blockRef.current ) return;
 
 		const layoutEl = blockRef.current.querySelector(
 			'.block-editor-inner-blocks > .block-editor-block-list__layout'
@@ -118,15 +128,27 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 					title={ __( 'Row Settings', 'fs-blocks' ) }
 					initialOpen={ true }
 				>
+					<CheckboxControl
+						label={ __( 'Show Values', 'fs-blocks' ) }
+						checked={ showValues }
+						onChange={ setShowValues }
+						help={ __(
+							'Display Bootstrap class names instead of labels.',
+							'fs-blocks'
+						) }
+						style={ { marginBottom: '20px' } }
+					/>
+
 					<div style={ { marginBottom: '20px' } }>
 						<FormTokenField
 							label={ __( 'Row Classes', 'fs-blocks' ) }
-							value={ getLabelsFromValues(
+							value={ getDisplayValues(
 								rowValues,
-								rowOptions
+								rowOptions,
+								showValues
 							) }
-							suggestions={ rowOptions.map(
-								( item ) => item.label
+							suggestions={ rowOptions.map( ( item ) =>
+								showValues ? item.value : item.label
 							) }
 							onChange={ handleTokenChange(
 								'rowOptions',
@@ -145,7 +167,9 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 								} }
 							>
 								{ rowOptions.map( ( item ) => (
-									<li key={ item.value }>{ item.label }</li>
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
 								) ) }
 							</ul>
 						</details>
@@ -157,12 +181,14 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 								'Justify Content Classes',
 								'fs-blocks'
 							) }
-							value={ getLabelsFromValues(
+							value={ getDisplayValues(
 								justifyValues,
-								justifyContentOptions
+								justifyContentOptions,
+								showValues
 							) }
 							suggestions={ justifyContentOptions.map(
-								( item ) => item.label
+								( item ) =>
+									showValues ? item.value : item.label
 							) }
 							onChange={ handleTokenChange(
 								'justifyContentOptions',
@@ -184,7 +210,9 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 								} }
 							>
 								{ justifyContentOptions.map( ( item ) => (
-									<li key={ item.value }>{ item.label }</li>
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
 								) ) }
 							</ul>
 						</details>
@@ -193,12 +221,13 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 					<div style={ { marginBottom: '20px' } }>
 						<FormTokenField
 							label={ __( 'Align Items Classes', 'fs-blocks' ) }
-							value={ getLabelsFromValues(
+							value={ getDisplayValues(
 								alignValues,
-								alignItemsOptions
+								alignItemsOptions,
+								showValues
 							) }
-							suggestions={ alignItemsOptions.map(
-								( item ) => item.label
+							suggestions={ alignItemsOptions.map( ( item ) =>
+								showValues ? item.value : item.label
 							) }
 							onChange={ handleTokenChange(
 								'alignItemsOptions',
@@ -220,7 +249,9 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 								} }
 							>
 								{ alignItemsOptions.map( ( item ) => (
-									<li key={ item.value }>{ item.label }</li>
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
 								) ) }
 							</ul>
 						</details>
@@ -229,12 +260,13 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 					<div style={ { marginBottom: '20px' } }>
 						<FormTokenField
 							label={ __( 'Margin Classes', 'fs-blocks' ) }
-							value={ getLabelsFromValues(
+							value={ getDisplayValues(
 								marginValues,
-								marginOptions
+								marginOptions,
+								showValues
 							) }
-							suggestions={ marginOptions.map(
-								( item ) => item.label
+							suggestions={ marginOptions.map( ( item ) =>
+								showValues ? item.value : item.label
 							) }
 							onChange={ handleTokenChange(
 								'marginOptions',
@@ -256,7 +288,9 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 								} }
 							>
 								{ marginOptions.map( ( item ) => (
-									<li key={ item.value }>{ item.label }</li>
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
 								) ) }
 							</ul>
 						</details>
@@ -265,12 +299,13 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 					<div style={ { marginBottom: '20px' } }>
 						<FormTokenField
 							label={ __( 'Padding Classes', 'fs-blocks' ) }
-							value={ getLabelsFromValues(
+							value={ getDisplayValues(
 								paddingValues,
-								paddingOptions
+								paddingOptions,
+								showValues
 							) }
-							suggestions={ paddingOptions.map(
-								( item ) => item.label
+							suggestions={ paddingOptions.map( ( item ) =>
+								showValues ? item.value : item.label
 							) }
 							onChange={ handleTokenChange(
 								'paddingOptions',
@@ -292,7 +327,9 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 								} }
 							>
 								{ paddingOptions.map( ( item ) => (
-									<li key={ item.value }>{ item.label }</li>
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
 								) ) }
 							</ul>
 						</details>

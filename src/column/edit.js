@@ -7,9 +7,10 @@ import {
 	PanelBody,
 	SelectControl,
 	FormTokenField,
+	CheckboxControl,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { Fragment } from '@wordpress/element';
+import { Fragment, useState } from '@wordpress/element';
 
 // Import Bootstrap class options
 import {
@@ -30,19 +31,21 @@ const singleChoiceOptions = [
 	{ label: __( 'Fancy', 'fs-blocks' ), value: 'fancy' },
 ];
 
-// Helper function to map class values to their labels for display
-const getLabelsFromValues = ( values, options ) => {
+// Helper function to map class values to their labels or values based on mode
+const getDisplayValues = ( values, options, showValues ) => {
 	return values.map( ( value ) => {
 		const option = options.find( ( opt ) => opt.value === value );
-		return option ? option.label : value; // Fallback to value if no label found
+		return option ? ( showValues ? option.value : option.label ) : value;
 	} );
 };
 
-// Helper function to map selected labels back to values
-const getValuesFromLabels = ( labels, options ) => {
-	return labels.map( ( label ) => {
-		const option = options.find( ( opt ) => opt.label === label );
-		return option ? option.value : label; // Fallback to label if no value found
+// Helper function to map selected labels or values back to values
+const getValuesFromDisplay = ( displayValues, options, showValues ) => {
+	return displayValues.map( ( display ) => {
+		const option = options.find( ( opt ) =>
+			showValues ? opt.value === display : opt.label === display
+		);
+		return option ? option.value : display;
 	} );
 };
 
@@ -81,9 +84,15 @@ export default function Edit( { attributes, setAttributes } ) {
 		additionalClasses = [],
 	} = attributes;
 
+	const [ showValues, setShowValues ] = useState( false ); // Local state for checkbox
+
 	// Reusable onChange handler for all FormTokenFields
 	const handleTokenChange = ( fieldKey, options ) => ( newTokens ) => {
-		const newValues = getValuesFromLabels( newTokens, options );
+		const newValues = getValuesFromDisplay(
+			newTokens,
+			options,
+			showValues
+		);
 		setAttributes( { [ fieldKey ]: newValues } );
 		const updatedClasses = combineAllClasses(
 			singularSelectClass,
@@ -127,6 +136,17 @@ export default function Edit( { attributes, setAttributes } ) {
 					title={ __( 'Column Settings', 'fs-blocks' ) }
 					initialOpen={ true }
 				>
+					<CheckboxControl
+						label={ __( 'Show Values', 'fs-blocks' ) }
+						checked={ showValues }
+						onChange={ setShowValues }
+						help={ __(
+							'Display Bootstrap class names instead of labels.',
+							'fs-blocks'
+						) }
+						style={ { marginBottom: '20px' } }
+					/>
+
 					<SelectControl
 						label={ __( 'Singular Select Class', 'fs-blocks' ) }
 						value={ singularSelectClass }
@@ -136,97 +156,239 @@ export default function Edit( { attributes, setAttributes } ) {
 
 					<hr />
 
-					<FormTokenField
-						label={ __( 'Column Classes', 'fs-blocks' ) }
-						value={ getLabelsFromValues(
-							columnValues,
-							columnOptions
-						) }
-						suggestions={ columnOptions.map( ( o ) => o.label ) }
-						onChange={ handleTokenChange(
-							'columnOptions',
-							columnOptions
-						) }
-					/>
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Column Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								columnValues,
+								columnOptions,
+								showValues
+							) }
+							suggestions={ columnOptions.map( ( o ) =>
+								showValues ? o.value : o.label
+							) }
+							onChange={ handleTokenChange(
+								'columnOptions',
+								columnOptions
+							) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Column Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ columnOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
 
-					<hr />
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Margin Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								marginValues,
+								marginOptions,
+								showValues
+							) }
+							suggestions={ marginOptions.map( ( o ) =>
+								showValues ? o.value : o.label
+							) }
+							onChange={ handleTokenChange(
+								'marginOptions',
+								marginOptions
+							) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Margin Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ marginOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
 
-					<FormTokenField
-						label={ __( 'Margin Classes', 'fs-blocks' ) }
-						value={ getLabelsFromValues(
-							marginValues,
-							marginOptions
-						) }
-						suggestions={ marginOptions.map( ( o ) => o.label ) }
-						onChange={ handleTokenChange(
-							'marginOptions',
-							marginOptions
-						) }
-					/>
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Display Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								displayValues,
+								displayOptions,
+								showValues
+							) }
+							suggestions={ displayOptions.map( ( o ) =>
+								showValues ? o.value : o.label
+							) }
+							onChange={ handleTokenChange(
+								'displayOptions',
+								displayOptions
+							) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Display Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ displayOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
 
-					<hr />
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Order Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								orderValues,
+								orderOptions,
+								showValues
+							) }
+							suggestions={ orderOptions.map( ( o ) =>
+								showValues ? o.value : o.label
+							) }
+							onChange={ handleTokenChange(
+								'orderOptions',
+								orderOptions
+							) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __( 'Available Order Classes', 'fs-blocks' ) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ orderOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
 
-					<FormTokenField
-						label={ __( 'Display Classes', 'fs-blocks' ) }
-						value={ getLabelsFromValues(
-							displayValues,
-							displayOptions
-						) }
-						suggestions={ displayOptions.map( ( o ) => o.label ) }
-						onChange={ handleTokenChange(
-							'displayOptions',
-							displayOptions
-						) }
-					/>
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __(
+								'Self Align Item Classes',
+								'fs-blocks'
+							) }
+							value={ getDisplayValues(
+								alignItemsValues,
+								selfAlignmentOptions,
+								showValues
+							) }
+							suggestions={ selfAlignmentOptions.map( ( o ) =>
+								showValues ? o.value : o.label
+							) }
+							onChange={ handleTokenChange(
+								'selfAlignmentOptions',
+								selfAlignmentOptions
+							) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Self Align Item Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ selfAlignmentOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
 
-					<hr />
-
-					<FormTokenField
-						label={ __( 'Order Classes', 'fs-blocks' ) }
-						value={ getLabelsFromValues(
-							orderValues,
-							orderOptions
-						) }
-						suggestions={ orderOptions.map( ( o ) => o.label ) }
-						onChange={ handleTokenChange(
-							'orderOptions',
-							orderOptions
-						) }
-					/>
-
-					<hr />
-
-					<FormTokenField
-						label={ __( 'Self Align Item Classes', 'fs-blocks' ) }
-						value={ getLabelsFromValues(
-							alignItemsValues,
-							selfAlignmentOptions
-						) }
-						suggestions={ selfAlignmentOptions.map(
-							( o ) => o.label
-						) }
-						onChange={ handleTokenChange(
-							'selfAlignmentOptions',
-							selfAlignmentOptions
-						) }
-					/>
-
-					<hr />
-
-					<FormTokenField
-						label={ __( 'Column Offset Classes', 'fs-blocks' ) }
-						value={ getLabelsFromValues(
-							columnOffsetValues,
-							columnOffsetOptions
-						) }
-						suggestions={ columnOffsetOptions.map(
-							( o ) => o.label
-						) }
-						onChange={ handleTokenChange(
-							'columnOffsetOptions',
-							columnOffsetOptions
-						) }
-					/>
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Column Offset Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								columnOffsetValues,
+								columnOffsetOptions,
+								showValues
+							) }
+							suggestions={ columnOffsetOptions.map( ( o ) =>
+								showValues ? o.value : o.label
+							) }
+							onChange={ handleTokenChange(
+								'columnOffsetOptions',
+								columnOffsetOptions
+							) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Column Offset Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ columnOffsetOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
 				</PanelBody>
 			</InspectorControls>
 

@@ -15,9 +15,10 @@ import {
 	ToolbarGroup,
 	Dropdown,
 	AlignmentMatrixControl,
+	CheckboxControl,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { Fragment, useEffect } from '@wordpress/element';
+import { Fragment, useEffect, useState } from '@wordpress/element';
 
 import './editor.scss';
 import {
@@ -29,19 +30,21 @@ import {
 	bleedCoverOptions,
 } from '../../data/bootstrap-classes/classes.js';
 
-// Helper function to map class values to their labels for display
-const getLabelsFromValues = ( values, options ) => {
+// Helper function to map class values to their labels or values based on mode
+const getDisplayValues = ( values, options, showValues ) => {
 	return values.map( ( value ) => {
 		const option = options.find( ( opt ) => opt.value === value );
-		return option ? option.label : value; // Fallback to value if no label found
+		return option ? ( showValues ? option.value : option.label ) : value;
 	} );
 };
 
-// Helper function to map selected labels back to values
-const getValuesFromLabels = ( labels, options ) => {
-	return labels.map( ( label ) => {
-		const option = options.find( ( opt ) => opt.label === label );
-		return option ? option.value : label; // Fallback to label if no value found
+// Helper function to map selected labels or values back to values
+const getValuesFromDisplay = ( displayValues, options, showValues ) => {
+	return displayValues.map( ( display ) => {
+		const option = options.find( ( opt ) =>
+			showValues ? opt.value === display : opt.label === display
+		);
+		return option ? option.value : display;
 	} );
 };
 
@@ -98,11 +101,13 @@ export default function Edit( { attributes, setAttributes } ) {
 		url = '',
 		isVideo = false,
 		lazyLoadVideo = false,
-		dimRatio = 50, // Default dimRatio
-		contentPosition = 'center center', // Default content position
+		dimRatio = 50,
+		contentPosition = 'center center',
 		fullHeight = false,
 		additionalClasses = [],
 	} = attributes;
+
+	const [ showValues, setShowValues ] = useState( false ); // Local state for checkbox
 
 	useEffect( () => {
 		if ( additionalClasses.length === 0 ) {
@@ -144,7 +149,11 @@ export default function Edit( { attributes, setAttributes } ) {
 	/*  onChange handler for advanced classes
 	/* ------------------------------------------------------------------------ */
 	const handleTokenChange = ( options, currentVals ) => ( newTokens ) => {
-		const newValues = getValuesFromLabels( newTokens, options );
+		const newValues = getValuesFromDisplay(
+			newTokens,
+			options,
+			showValues
+		);
 		const updated = buildClassArray(
 			additionalClasses,
 			options === displayOptions ? newValues : displayVals,
@@ -336,80 +345,250 @@ export default function Edit( { attributes, setAttributes } ) {
 					title={ __( 'Advanced Classes', 'fs-blocks' ) }
 					initialOpen={ true }
 				>
-					<FormTokenField
-						label={ __( 'Display Classes', 'fs-blocks' ) }
-						value={ getLabelsFromValues(
-							displayVals,
-							displayOptions
+					<CheckboxControl
+						label={ __( 'Show Values', 'fs-blocks' ) }
+						checked={ showValues }
+						onChange={ setShowValues }
+						help={ __(
+							'Display Bootstrap class names instead of labels.',
+							'fs-blocks'
 						) }
-						suggestions={ displayOptions.map( ( o ) => o.label ) }
-						onChange={ handleTokenChange(
-							displayOptions,
-							displayVals
-						) }
+						style={ { marginBottom: '20px' } }
 					/>
-					<FormTokenField
-						label={ __( 'Margin Classes', 'fs-blocks' ) }
-						value={ getLabelsFromValues(
-							marginVals,
-							marginOptions
-						) }
-						suggestions={ marginOptions.map( ( o ) => o.label ) }
-						onChange={ handleTokenChange(
-							marginOptions,
-							marginVals
-						) }
-					/>
-					<FormTokenField
-						label={ __( 'Padding Classes', 'fs-blocks' ) }
-						value={ getLabelsFromValues(
-							paddingVals,
-							paddingOptions
-						) }
-						suggestions={ paddingOptions.map( ( o ) => o.label ) }
-						onChange={ handleTokenChange(
-							paddingOptions,
-							paddingVals
-						) }
-					/>
-					<FormTokenField
-						label={ __( 'Position Classes', 'fs-blocks' ) }
-						value={ getLabelsFromValues(
-							positionVals,
-							positionOptions
-						) }
-						suggestions={ positionOptions.map( ( o ) => o.label ) }
-						onChange={ handleTokenChange(
-							positionOptions,
-							positionVals
-						) }
-					/>
-					<FormTokenField
-						label={ __( 'Z-Index Classes', 'fs-blocks' ) }
-						value={ getLabelsFromValues(
-							zindexVals,
-							zindexOptions
-						) }
-						suggestions={ zindexOptions.map( ( o ) => o.label ) }
-						onChange={ handleTokenChange(
-							zindexOptions,
-							zindexVals
-						) }
-					/>
-					<FormTokenField
-						label={ __( 'Bleed Cover Classes', 'fs-blocks' ) }
-						value={ getLabelsFromValues(
-							bleedCoverVals,
-							bleedCoverOptions
-						) }
-						suggestions={ bleedCoverOptions.map(
-							( o ) => o.label
-						) }
-						onChange={ handleTokenChange(
-							bleedCoverOptions,
-							bleedCoverVals
-						) }
-					/>
+
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Display Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								displayVals,
+								displayOptions,
+								showValues
+							) }
+							suggestions={ displayOptions.map( ( o ) =>
+								showValues ? o.value : o.label
+							) }
+							onChange={ handleTokenChange(
+								displayOptions,
+								displayVals
+							) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Display Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ displayOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
+
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Margin Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								marginVals,
+								marginOptions,
+								showValues
+							) }
+							suggestions={ marginOptions.map( ( o ) =>
+								showValues ? o.value : o.label
+							) }
+							onChange={ handleTokenChange(
+								marginOptions,
+								marginVals
+							) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Margin Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ marginOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
+
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Padding Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								paddingVals,
+								paddingOptions,
+								showValues
+							) }
+							suggestions={ paddingOptions.map( ( o ) =>
+								showValues ? o.value : o.label
+							) }
+							onChange={ handleTokenChange(
+								paddingOptions,
+								paddingVals
+							) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Padding Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ paddingOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
+
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Position Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								positionVals,
+								positionOptions,
+								showValues
+							) }
+							suggestions={ positionOptions.map( ( o ) =>
+								showValues ? o.value : o.label
+							) }
+							onChange={ handleTokenChange(
+								positionOptions,
+								positionVals
+							) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Position Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ positionOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
+
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Z-Index Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								zindexVals,
+								zindexOptions,
+								showValues
+							) }
+							suggestions={ zindexOptions.map( ( o ) =>
+								showValues ? o.value : o.label
+							) }
+							onChange={ handleTokenChange(
+								zindexOptions,
+								zindexVals
+							) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Z-Index Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ zindexOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
+
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Bleed Cover Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								bleedCoverVals,
+								bleedCoverOptions,
+								showValues
+							) }
+							suggestions={ bleedCoverOptions.map( ( o ) =>
+								showValues ? o.value : o.label
+							) }
+							onChange={ handleTokenChange(
+								bleedCoverOptions,
+								bleedCoverVals
+							) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Bleed Cover Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ bleedCoverOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
 				</PanelBody>
 			</InspectorControls>
 
