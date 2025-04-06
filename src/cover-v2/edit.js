@@ -34,7 +34,13 @@ import {
 const getDisplayValues = ( values, options, showValues ) => {
 	return values.map( ( value ) => {
 		const option = options.find( ( opt ) => opt.value === value );
-		return option ? ( showValues ? option.value : option.label ) : value;
+		if ( option ) {
+			if ( showValues ) {
+				return option.value;
+			}
+			return option.label;
+		}
+		return value; // Fallback if no matching option is found
 	} );
 };
 
@@ -44,7 +50,10 @@ const getValuesFromDisplay = ( displayValues, options, showValues ) => {
 		const option = options.find( ( opt ) =>
 			showValues ? opt.value === display : opt.label === display
 		);
-		return option ? option.value : display;
+		if ( option ) {
+			return option.value;
+		}
+		return display; // Fallback if no matching option is found
 	} );
 };
 
@@ -73,7 +82,7 @@ function buildClassArray(
 	zindexArr,
 	bleedCoverArr
 ) {
-	let final = ensureBaseClasses( orig );
+	const final = ensureBaseClasses( orig );
 	final.push(
 		...displayArr,
 		...marginArr,
@@ -148,7 +157,7 @@ export default function Edit( { attributes, setAttributes } ) {
 	/* ------------------------------------------------------------------------ */
 	/*  onChange handler for advanced classes
 	/* ------------------------------------------------------------------------ */
-	const handleTokenChange = ( options, currentVals ) => ( newTokens ) => {
+	const handleTokenChange = ( options ) => ( newTokens ) => {
 		const newValues = getValuesFromDisplay(
 			newTokens,
 			options,
@@ -235,6 +244,7 @@ export default function Edit( { attributes, setAttributes } ) {
 	};
 
 	// Media element rendering
+	// eslint-disable-next-line no-nested-ternary
 	const mediaElement = url ? (
 		isVideo ? (
 			<video
@@ -367,10 +377,7 @@ export default function Edit( { attributes, setAttributes } ) {
 							suggestions={ displayOptions.map( ( o ) =>
 								showValues ? o.value : o.label
 							) }
-							onChange={ handleTokenChange(
-								displayOptions,
-								displayVals
-							) }
+							onChange={ handleTokenChange( displayOptions ) }
 						/>
 						<details style={ { marginTop: '5px' } }>
 							<summary>
@@ -406,10 +413,7 @@ export default function Edit( { attributes, setAttributes } ) {
 							suggestions={ marginOptions.map( ( o ) =>
 								showValues ? o.value : o.label
 							) }
-							onChange={ handleTokenChange(
-								marginOptions,
-								marginVals
-							) }
+							onChange={ handleTokenChange( marginOptions ) }
 						/>
 						<details style={ { marginTop: '5px' } }>
 							<summary>
@@ -445,10 +449,7 @@ export default function Edit( { attributes, setAttributes } ) {
 							suggestions={ paddingOptions.map( ( o ) =>
 								showValues ? o.value : o.label
 							) }
-							onChange={ handleTokenChange(
-								paddingOptions,
-								paddingVals
-							) }
+							onChange={ handleTokenChange( paddingOptions ) }
 						/>
 						<details style={ { marginTop: '5px' } }>
 							<summary>
@@ -484,10 +485,7 @@ export default function Edit( { attributes, setAttributes } ) {
 							suggestions={ positionOptions.map( ( o ) =>
 								showValues ? o.value : o.label
 							) }
-							onChange={ handleTokenChange(
-								positionOptions,
-								positionVals
-							) }
+							onChange={ handleTokenChange( positionOptions ) }
 						/>
 						<details style={ { marginTop: '5px' } }>
 							<summary>
@@ -523,10 +521,7 @@ export default function Edit( { attributes, setAttributes } ) {
 							suggestions={ zindexOptions.map( ( o ) =>
 								showValues ? o.value : o.label
 							) }
-							onChange={ handleTokenChange(
-								zindexOptions,
-								zindexVals
-							) }
+							onChange={ handleTokenChange( zindexOptions ) }
 						/>
 						<details style={ { marginTop: '5px' } }>
 							<summary>
@@ -562,10 +557,7 @@ export default function Edit( { attributes, setAttributes } ) {
 							suggestions={ bleedCoverOptions.map( ( o ) =>
 								showValues ? o.value : o.label
 							) }
-							onChange={ handleTokenChange(
-								bleedCoverOptions,
-								bleedCoverVals
-							) }
+							onChange={ handleTokenChange( bleedCoverOptions ) }
 						/>
 						<details style={ { marginTop: '5px' } }>
 							<summary>

@@ -35,7 +35,13 @@ const singleChoiceOptions = [
 const getDisplayValues = ( values, options, showValues ) => {
 	return values.map( ( value ) => {
 		const option = options.find( ( opt ) => opt.value === value );
-		return option ? ( showValues ? option.value : option.label ) : value;
+		if ( option ) {
+			if ( showValues ) {
+				return option.value;
+			}
+			return option.label;
+		}
+		return value; // Fallback if no matching option is found
 	} );
 };
 
@@ -45,7 +51,10 @@ const getValuesFromDisplay = ( displayValues, options, showValues ) => {
 		const option = options.find( ( opt ) =>
 			showValues ? opt.value === display : opt.label === display
 		);
-		return option ? option.value : display;
+		if ( option ) {
+			return option.value;
+		}
+		return display; // Fallback if no matching option is found
 	} );
 };
 
@@ -60,7 +69,9 @@ const combineAllClasses = (
 	offsetArr
 ) => {
 	const final = [];
-	if ( singularSelectClass ) final.push( singularSelectClass );
+	if ( singularSelectClass ) {
+		final.push( singularSelectClass );
+	}
 	final.push(
 		...columnArr,
 		...marginArr,
