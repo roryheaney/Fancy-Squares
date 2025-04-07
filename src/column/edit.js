@@ -10,7 +10,7 @@ import {
 	CheckboxControl,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { Fragment, useEffect, useRef, useState } from '@wordpress/element';
+import { Fragment, useRef, useState } from '@wordpress/element';
 // Import Bootstrap class options
 import {
 	columnOptions,
@@ -93,29 +93,6 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 	const [ showValues, setShowValues ] = useState( false );
 
 	const blockRef = useRef();
-
-	useEffect( () => {
-		if ( ! blockRef.current ) {
-			return;
-		}
-
-		const layoutEl = blockRef.current.querySelector(
-			'.block-editor-inner-blocks > .block-editor-block-list__layout'
-		);
-		const parentEl = blockRef.current.querySelector(
-			'.block-editor-inner-blocks'
-		);
-
-		if ( layoutEl ) {
-			const mergedEditorClasses = [
-				'block-editor-block-list__layout',
-				'wp-block-fancysquares-column-block',
-				...additionalClasses,
-			].join( ' ' );
-			layoutEl.className = mergedEditorClasses;
-			parentEl.className += ' wp-block-fancysquares-column-block-admin';
-		}
-	}, [ additionalClasses, clientId ] );
 
 	const handleTokenChange = ( fieldKey, options ) => ( newTokens ) => {
 		const newValues = getValuesFromDisplay(
