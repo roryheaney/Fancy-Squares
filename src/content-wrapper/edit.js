@@ -10,19 +10,25 @@ import {
 	CheckboxControl,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { Fragment, useEffect, useState } from '@wordpress/element';
+import { Fragment, useEffect, useRef, useState } from '@wordpress/element';
 
 import {
-	displayOptions,
+	columnOptions,
 	marginOptions,
-	paddingOptions,
-	positionOptions,
-	zindexOptions,
+	displayOptions,
+	orderOptions,
+	selfAlignmentOptions,
+	columnOffsetOptions,
 } from '../../data/bootstrap-classes/classes.js';
 
 import './editor.scss';
 
-// Helper function to map class values to their labels or values based on mode
+const singleChoiceOptions = [
+	{ label: __( 'Default', 'fs-blocks' ), value: '' },
+	{ label: __( 'Test', 'fs-blocks' ), value: 'test' },
+	{ label: __( 'Fancy', 'fs-blocks' ), value: 'fancy' },
+];
+
 const getDisplayValues = ( values, options, showValues ) => {
 	return values.map( ( value ) => {
 		const option = options.find( ( opt ) => opt.value === value );
@@ -32,11 +38,10 @@ const getDisplayValues = ( values, options, showValues ) => {
 			}
 			return option.label;
 		}
-		return value; // Fallback if no matching option is found
+		return value;
 	} );
 };
 
-// Helper function to map selected labels or values back to values
 const getValuesFromDisplay = ( displayValues, options, showValues ) => {
 	return displayValues.map( ( display ) => {
 		const option = options.find( ( opt ) =>
@@ -45,10 +50,9 @@ const getValuesFromDisplay = ( displayValues, options, showValues ) => {
 		if ( option ) {
 			return option.value;
 		}
-		return display; // Fallback if no matching option is found
+		return display;
 	} );
 };
-
 /* ------------------------------------------------------------------------ */
 /*  Utility: Build final class array
 /* ------------------------------------------------------------------------ */
@@ -56,96 +60,118 @@ const getValuesFromDisplay = ( displayValues, options, showValues ) => {
  * Merges everything into one final array for 'additionalClasses',
  * always including 'wp-block-fancysquares-content-wrapper-block' as a base.
  */
-function combineAllClasses(
-	elementTag, // Not used in class generation but kept for consistency
-	displayArr,
+const combineAllClasses = (
+	singularSelectClass,
+	columnArr,
 	marginArr,
-	paddingArr,
-	positionArr,
-	zindexArr
-) {
-	const final = [ 'wp-block-fancysquares-content-wrapper-block' ];
+	displayArr,
+	orderArr,
+	alignArr,
+	offsetArr
+) => {
+	const final = [];
+	if ( singularSelectClass ) {
+		final.push( singularSelectClass );
+	}
 	final.push(
-		...displayArr,
+		...columnArr,
 		...marginArr,
-		...paddingArr,
-		...positionArr,
-		...zindexArr
+		...displayArr,
+		...orderArr,
+		...alignArr,
+		...offsetArr
 	);
 	return final;
-}
-
+};
 /* ------------------------------------------------------------------------ */
 /*  Edit Component
 /* ------------------------------------------------------------------------ */
-export default function Edit( { attributes, setAttributes } ) {
-	const { elementTag = 'div', additionalClasses = [] } = attributes;
-	const [ showValues, setShowValues ] = useState( false ); // Local state for checkbox
+export default function Edit( { attributes, setAttributes, clientId } ) {
+	const {
+		singularSelectClass = '',
+		columnOptions: columnValues = [],
+		marginOptions: marginValues = [],
+		displayOptions: displayValues = [],
+		orderOptions: orderValues = [],
+		selfAlignmentOptions: alignItemsValues = [],
+		columnOffsetOptions: columnOffsetValues = [],
+		additionalClasses = [],
+	} = attributes;
 
-	/**
-	 * Set default classes if the block is new
-	 */
+	const [ showValues, setShowValues ] = useState( false );
+
+	const blockRef = useRef();
+
 	useEffect( () => {
-		if ( additionalClasses.length === 0 ) {
-			setAttributes( {
-				additionalClasses: [
-					'wp-block-fancysquares-content-wrapper-block',
-				],
-			} );
+		if ( ! blockRef.current ) {
+			return;
 		}
-	}, [ additionalClasses.length, setAttributes ] );
 
-	// Filter out the base class to get user-chosen tokens
-	const filtered = additionalClasses.filter(
-		( cls ) => cls !== 'wp-block-fancysquares-content-wrapper-block'
-	);
+		const layoutEl = blockRef.current.querySelector(
+			'.block-editor-inner-blocks > .block-editor-block-list__layout'
+		);
+		const parentEl = blockRef.current.querySelector(
+			'.block-editor-inner-blocks'
+		);
 
-	// Identify user-chosen classes
-	const intersect = ( arr, options ) =>
-		arr.filter( ( c ) => options.some( ( opt ) => opt.value === c ) );
-
-	const displayVals = intersect( filtered, displayOptions );
-	const marginVals = intersect( filtered, marginOptions );
-	const paddingVals = intersect( filtered, paddingOptions );
-	const positionVals = intersect( filtered, positionOptions );
-	const zindexVals = intersect( filtered, zindexOptions );
-
+		if ( layoutEl ) {
+			const mergedEditorClasses = [
+				'block-editor-block-list__layout',
+				'wp-block-fancysquares-column-block',
+				...additionalClasses,
+			].join( ' ' );
+			layoutEl.className = mergedEditorClasses;
+			parentEl.className += ' wp-block-fancysquares-column-block-admin';
+		}
+	}, [ additionalClasses, clientId ] );
 	/* ----------------------------------------------------------------------
 	   onChange handlers
 	---------------------------------------------------------------------- */
-	const handleTokenChange = ( options ) => ( newTokens ) => {
+	const handleTokenChange = ( fieldKey, options ) => ( newTokens ) => {
 		const newValues = getValuesFromDisplay(
 			newTokens,
 			options,
 			showValues
 		);
-		const updated = combineAllClasses(
-			elementTag,
-			options === displayOptions ? newValues : displayVals,
-			options === marginOptions ? newValues : marginVals,
-			options === paddingOptions ? newValues : paddingVals,
-			options === positionOptions ? newValues : positionVals,
-			options === zindexOptions ? newValues : zindexVals
+		setAttributes( { [ fieldKey ]: newValues } );
+		const updatedClasses = combineAllClasses(
+			singularSelectClass,
+			fieldKey === 'columnOptions' ? newValues : columnValues,
+			fieldKey === 'marginOptions' ? newValues : marginValues,
+			fieldKey === 'displayOptions' ? newValues : displayValues,
+			fieldKey === 'orderOptions' ? newValues : orderValues,
+			fieldKey === 'selfAlignmentOptions' ? newValues : alignItemsValues,
+			fieldKey === 'columnOffsetOptions' ? newValues : columnOffsetValues
 		);
-		setAttributes( { additionalClasses: updated } );
+		setAttributes( { additionalClasses: updatedClasses } );
 	};
 
-	const onChangeElementTag = ( newTag ) => {
-		setAttributes( { elementTag: newTag } );
-		// No need to update classes, as elementTag only affects render.php
+	const onChangeSelect = ( newVal ) => {
+		setAttributes( { singularSelectClass: newVal } );
+		const updatedClasses = combineAllClasses(
+			newVal,
+			columnValues,
+			marginValues,
+			displayValues,
+			orderValues,
+			alignItemsValues,
+			columnOffsetValues
+		);
+		setAttributes( { additionalClasses: updatedClasses } );
 	};
 
-	/* ----------------------------------------------------------------------
-	   Build our final className and pass to useBlockProps
-	---------------------------------------------------------------------- */
-	const previewClasses = additionalClasses.join( ' ' );
-	const blockProps = useBlockProps( { className: previewClasses } );
+	const previewClassString = [
+		'wp-block-fancysquares-column-block',
+		...additionalClasses,
+	].join( ' ' );
+
+	const blockProps = useBlockProps();
 
 	return (
 		<Fragment>
 			<InspectorControls>
 				<PanelBody
-					title={ __( 'Wrapper Settings', 'fs-blocks' ) }
+					title={ __( 'Column Settings', 'fs-blocks' ) }
 					initialOpen={ true }
 				>
 					<CheckboxControl
@@ -158,38 +184,33 @@ export default function Edit( { attributes, setAttributes } ) {
 						) }
 						style={ { marginBottom: '20px' } }
 					/>
-
 					<SelectControl
-						label={ __( 'Element Tag', 'fs-blocks' ) }
-						value={ elementTag }
-						options={ [
-							{ label: __( 'Div', 'fs-blocks' ), value: 'div' },
-							{
-								label: __( 'Section', 'fs-blocks' ),
-								value: 'section',
-							},
-						] }
-						onChange={ onChangeElementTag }
+						label={ __( 'Singular Select Class', 'fs-blocks' ) }
+						value={ singularSelectClass }
+						options={ singleChoiceOptions }
+						onChange={ onChangeSelect }
 					/>
 					<hr />
-
 					<div style={ { marginBottom: '20px' } }>
 						<FormTokenField
-							label={ __( 'Display Classes', 'fs-blocks' ) }
+							label={ __( 'Column Classes', 'fs-blocks' ) }
 							value={ getDisplayValues(
-								displayVals,
-								displayOptions,
+								columnValues,
+								columnOptions,
 								showValues
 							) }
-							suggestions={ displayOptions.map( ( o ) =>
+							suggestions={ columnOptions.map( ( o ) =>
 								showValues ? o.value : o.label
 							) }
-							onChange={ handleTokenChange( displayOptions ) }
+							onChange={ handleTokenChange(
+								'columnOptions',
+								columnOptions
+							) }
 						/>
 						<details style={ { marginTop: '5px' } }>
 							<summary>
 								{ __(
-									'Available Display Classes',
+									'Available Column Classes',
 									'fs-blocks'
 								) }
 							</summary>
@@ -200,7 +221,7 @@ export default function Edit( { attributes, setAttributes } ) {
 									margin: '5px 0',
 								} }
 							>
-								{ displayOptions.map( ( item ) => (
+								{ columnOptions.map( ( item ) => (
 									<li key={ item.value }>
 										{ showValues ? item.value : item.label }
 									</li>
@@ -208,19 +229,21 @@ export default function Edit( { attributes, setAttributes } ) {
 							</ul>
 						</details>
 					</div>
-
 					<div style={ { marginBottom: '20px' } }>
 						<FormTokenField
 							label={ __( 'Margin Classes', 'fs-blocks' ) }
 							value={ getDisplayValues(
-								marginVals,
+								marginValues,
 								marginOptions,
 								showValues
 							) }
 							suggestions={ marginOptions.map( ( o ) =>
 								showValues ? o.value : o.label
 							) }
-							onChange={ handleTokenChange( marginOptions ) }
+							onChange={ handleTokenChange(
+								'marginOptions',
+								marginOptions
+							) }
 						/>
 						<details style={ { marginTop: '5px' } }>
 							<summary>
@@ -244,24 +267,26 @@ export default function Edit( { attributes, setAttributes } ) {
 							</ul>
 						</details>
 					</div>
-
 					<div style={ { marginBottom: '20px' } }>
 						<FormTokenField
-							label={ __( 'Padding Classes', 'fs-blocks' ) }
+							label={ __( 'Display Classes', 'fs-blocks' ) }
 							value={ getDisplayValues(
-								paddingVals,
-								paddingOptions,
+								displayValues,
+								displayOptions,
 								showValues
 							) }
-							suggestions={ paddingOptions.map( ( o ) =>
+							suggestions={ displayOptions.map( ( o ) =>
 								showValues ? o.value : o.label
 							) }
-							onChange={ handleTokenChange( paddingOptions ) }
+							onChange={ handleTokenChange(
+								'displayOptions',
+								displayOptions
+							) }
 						/>
 						<details style={ { marginTop: '5px' } }>
 							<summary>
 								{ __(
-									'Available Padding Classes',
+									'Available Display Classes',
 									'fs-blocks'
 								) }
 							</summary>
@@ -272,7 +297,7 @@ export default function Edit( { attributes, setAttributes } ) {
 									margin: '5px 0',
 								} }
 							>
-								{ paddingOptions.map( ( item ) => (
+								{ displayOptions.map( ( item ) => (
 									<li key={ item.value }>
 										{ showValues ? item.value : item.label }
 									</li>
@@ -280,26 +305,25 @@ export default function Edit( { attributes, setAttributes } ) {
 							</ul>
 						</details>
 					</div>
-
 					<div style={ { marginBottom: '20px' } }>
 						<FormTokenField
-							label={ __( 'Position Classes', 'fs-blocks' ) }
+							label={ __( 'Order Classes', 'fs-blocks' ) }
 							value={ getDisplayValues(
-								positionVals,
-								positionOptions,
+								orderValues,
+								orderOptions,
 								showValues
 							) }
-							suggestions={ positionOptions.map( ( o ) =>
+							suggestions={ orderOptions.map( ( o ) =>
 								showValues ? o.value : o.label
 							) }
-							onChange={ handleTokenChange( positionOptions ) }
+							onChange={ handleTokenChange(
+								'orderOptions',
+								orderOptions
+							) }
 						/>
 						<details style={ { marginTop: '5px' } }>
 							<summary>
-								{ __(
-									'Available Position Classes',
-									'fs-blocks'
-								) }
+								{ __( 'Available Order Classes', 'fs-blocks' ) }
 							</summary>
 							<ul
 								style={ {
@@ -308,7 +332,7 @@ export default function Edit( { attributes, setAttributes } ) {
 									margin: '5px 0',
 								} }
 							>
-								{ positionOptions.map( ( item ) => (
+								{ orderOptions.map( ( item ) => (
 									<li key={ item.value }>
 										{ showValues ? item.value : item.label }
 									</li>
@@ -316,24 +340,29 @@ export default function Edit( { attributes, setAttributes } ) {
 							</ul>
 						</details>
 					</div>
-
 					<div style={ { marginBottom: '20px' } }>
 						<FormTokenField
-							label={ __( 'Z-Index Classes', 'fs-blocks' ) }
+							label={ __(
+								'Self Align Item Classes',
+								'fs-blocks'
+							) }
 							value={ getDisplayValues(
-								zindexVals,
-								zindexOptions,
+								alignItemsValues,
+								selfAlignmentOptions,
 								showValues
 							) }
-							suggestions={ zindexOptions.map( ( o ) =>
+							suggestions={ selfAlignmentOptions.map( ( o ) =>
 								showValues ? o.value : o.label
 							) }
-							onChange={ handleTokenChange( zindexOptions ) }
+							onChange={ handleTokenChange(
+								'selfAlignmentOptions',
+								selfAlignmentOptions
+							) }
 						/>
 						<details style={ { marginTop: '5px' } }>
 							<summary>
 								{ __(
-									'Available Z-Index Classes',
+									'Available Self Align Item Classes',
 									'fs-blocks'
 								) }
 							</summary>
@@ -344,7 +373,45 @@ export default function Edit( { attributes, setAttributes } ) {
 									margin: '5px 0',
 								} }
 							>
-								{ zindexOptions.map( ( item ) => (
+								{ selfAlignmentOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Column Offset Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								columnOffsetValues,
+								columnOffsetOptions,
+								showValues
+							) }
+							suggestions={ columnOffsetOptions.map( ( o ) =>
+								showValues ? o.value : o.label
+							) }
+							onChange={ handleTokenChange(
+								'columnOffsetOptions',
+								columnOffsetOptions
+							) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Column Offset Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ columnOffsetOptions.map( ( item ) => (
 									<li key={ item.value }>
 										{ showValues ? item.value : item.label }
 									</li>
@@ -354,9 +421,23 @@ export default function Edit( { attributes, setAttributes } ) {
 					</div>
 				</PanelBody>
 			</InspectorControls>
-
-			<div { ...blockProps }>
-				<InnerBlocks />
+			<div
+				{ ...blockProps }
+				className={ previewClassString }
+				ref={ blockRef }
+			>
+				<InnerBlocks
+					template={ [
+						[
+							'core/heading',
+							{ placeholder: 'Enter heading text...' },
+						],
+						[
+							'core/paragraph',
+							{ placeholder: 'Enter paragraph text...' },
+						],
+					] }
+				/>
 			</div>
 		</Fragment>
 	);

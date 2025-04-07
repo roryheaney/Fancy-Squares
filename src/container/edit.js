@@ -10,7 +10,7 @@ import {
 	CheckboxControl,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { Fragment, useEffect, useState } from '@wordpress/element';
+import { Fragment, useEffect, useRef, useState } from '@wordpress/element';
 import './editor.scss';
 
 import {
@@ -20,7 +20,6 @@ import {
 	positionOptions,
 	zindexOptions,
 } from '../../data/bootstrap-classes/classes.js';
-
 // Helper function to map class values to their labels or values based on mode
 const getDisplayValues = ( values, options, showValues ) => {
 	return values.map( ( value ) => {
@@ -34,7 +33,6 @@ const getDisplayValues = ( values, options, showValues ) => {
 		return value; // Fallback if no matching option is found
 	} );
 };
-
 // Helper function to map selected labels or values back to values
 const getValuesFromDisplay = ( displayValues, options, showValues ) => {
 	return displayValues.map( ( display ) => {
@@ -47,7 +45,6 @@ const getValuesFromDisplay = ( displayValues, options, showValues ) => {
 		return display; // Fallback if no matching option is found
 	} );
 };
-
 /* ------------------------------------------------------------------------ */
 /*  Utility: Build final class array
 /* ------------------------------------------------------------------------ */
@@ -65,13 +62,11 @@ function combineAllClasses(
 	zindexArr
 ) {
 	const final = [ 'wp-block-fancysquares-container-block' ];
-	// Add container type
 	if ( containerType === 'fluid' ) {
 		final.push( 'container-fluid' );
 	} else {
 		final.push( 'container' );
 	}
-	// Add user-chosen classes
 	final.push(
 		...displayArr,
 		...marginArr,
@@ -85,10 +80,11 @@ function combineAllClasses(
 /* ------------------------------------------------------------------------ */
 /*  Edit Component
 /* ------------------------------------------------------------------------ */
-export default function Edit( { attributes, setAttributes } ) {
+export default function Edit( { attributes, setAttributes, clientId } ) {
 	const { additionalClasses = [] } = attributes;
-	const [ showValues, setShowValues ] = useState( false ); // Local state for checkbox
+	const [ showValues, setShowValues ] = useState( false );
 
+	const blockRef = useRef();
 	/**
 	 * Set default classes if the block is new
 	 */
@@ -103,12 +99,34 @@ export default function Edit( { attributes, setAttributes } ) {
 		}
 	}, [ additionalClasses.length, setAttributes ] );
 
-	// Determine container type
+	useEffect( () => {
+		if ( ! blockRef.current ) {
+			return;
+		}
+
+		const layoutEl = blockRef.current.querySelector(
+			'.block-editor-inner-blocks > .block-editor-block-list__layout'
+		);
+		const parentEl = blockRef.current.querySelector(
+			'.block-editor-inner-blocks'
+		);
+
+		if ( layoutEl ) {
+			const mergedEditorClasses = [
+				'block-editor-block-list__layout',
+				'wp-block-fancysquares-container-block',
+				...additionalClasses,
+			].join( ' ' );
+			layoutEl.className = mergedEditorClasses;
+			parentEl.className +=
+				' wp-block-fancysquares-container-block-admin';
+		}
+	}, [ additionalClasses, clientId ] );
+
 	const containerType = additionalClasses.includes( 'container-fluid' )
 		? 'fluid'
 		: 'default';
 
-	// Filter out base classes to get user-chosen tokens
 	const filtered = additionalClasses.filter(
 		( cls ) =>
 			cls !== 'wp-block-fancysquares-container-block' &&
@@ -116,7 +134,6 @@ export default function Edit( { attributes, setAttributes } ) {
 			cls !== 'container-fluid'
 	);
 
-	// Identify user-chosen classes
 	const intersect = ( arr, options ) =>
 		arr.filter( ( c ) => options.some( ( opt ) => opt.value === c ) );
 
@@ -125,7 +142,6 @@ export default function Edit( { attributes, setAttributes } ) {
 	const paddingVals = intersect( filtered, paddingOptions );
 	const positionVals = intersect( filtered, positionOptions );
 	const zindexVals = intersect( filtered, zindexOptions );
-
 	/* ----------------------------------------------------------------------
 	   onChange handler
 	---------------------------------------------------------------------- */
@@ -157,12 +173,11 @@ export default function Edit( { attributes, setAttributes } ) {
 		);
 		setAttributes( { additionalClasses: updated } );
 	};
-
 	/* ----------------------------------------------------------------------
 	   BlockProps / Preview
 	---------------------------------------------------------------------- */
-	const blockProps = useBlockProps();
 	const previewClasses = additionalClasses.join( ' ' );
+	const blockProps = useBlockProps();
 
 	return (
 		<Fragment>
@@ -181,7 +196,6 @@ export default function Edit( { attributes, setAttributes } ) {
 						) }
 						style={ { marginBottom: '20px' } }
 					/>
-
 					<SelectControl
 						label={ __( 'Container Type', 'fs-blocks' ) }
 						value={ containerType }
@@ -201,7 +215,6 @@ export default function Edit( { attributes, setAttributes } ) {
 						onChange={ onChangeContainerType }
 					/>
 					<hr />
-
 					<div style={ { marginBottom: '20px' } }>
 						<FormTokenField
 							label={ __( 'Display Classes', 'fs-blocks' ) }
@@ -237,7 +250,6 @@ export default function Edit( { attributes, setAttributes } ) {
 							</ul>
 						</details>
 					</div>
-
 					<div style={ { marginBottom: '20px' } }>
 						<FormTokenField
 							label={ __( 'Margin Classes', 'fs-blocks' ) }
@@ -273,7 +285,6 @@ export default function Edit( { attributes, setAttributes } ) {
 							</ul>
 						</details>
 					</div>
-
 					<div style={ { marginBottom: '20px' } }>
 						<FormTokenField
 							label={ __( 'Padding Classes', 'fs-blocks' ) }
@@ -309,7 +320,6 @@ export default function Edit( { attributes, setAttributes } ) {
 							</ul>
 						</details>
 					</div>
-
 					<div style={ { marginBottom: '20px' } }>
 						<FormTokenField
 							label={ __( 'Position Classes', 'fs-blocks' ) }
@@ -345,7 +355,6 @@ export default function Edit( { attributes, setAttributes } ) {
 							</ul>
 						</details>
 					</div>
-
 					<div style={ { marginBottom: '20px' } }>
 						<FormTokenField
 							label={ __( 'Z-Index Classes', 'fs-blocks' ) }
@@ -383,8 +392,11 @@ export default function Edit( { attributes, setAttributes } ) {
 					</div>
 				</PanelBody>
 			</InspectorControls>
-
-			<div { ...blockProps } className={ previewClasses }>
+			<div
+				{ ...blockProps }
+				className={ previewClasses }
+				ref={ blockRef }
+			>
 				<InnerBlocks
 					allowedBlocks={ [
 						'fs-blocks/row-block',

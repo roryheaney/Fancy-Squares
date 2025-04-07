@@ -10,8 +10,7 @@ import {
 	CheckboxControl,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { Fragment, useState } from '@wordpress/element';
-
+import { Fragment, useEffect, useRef, useState } from '@wordpress/element';
 // Import Bootstrap class options
 import {
 	columnOptions,
@@ -23,14 +22,12 @@ import {
 } from '../../data/bootstrap-classes/classes.js';
 
 import './editor.scss';
-
 // Single-choice options for the dropdown
 const singleChoiceOptions = [
 	{ label: __( 'Default', 'fs-blocks' ), value: '' },
 	{ label: __( 'Test', 'fs-blocks' ), value: 'test' },
 	{ label: __( 'Fancy', 'fs-blocks' ), value: 'fancy' },
 ];
-
 // Helper function to map class values to their labels or values based on mode
 const getDisplayValues = ( values, options, showValues ) => {
 	return values.map( ( value ) => {
@@ -44,7 +41,6 @@ const getDisplayValues = ( values, options, showValues ) => {
 		return value; // Fallback if no matching option is found
 	} );
 };
-
 // Helper function to map selected labels or values back to values
 const getValuesFromDisplay = ( displayValues, options, showValues ) => {
 	return displayValues.map( ( display ) => {
@@ -57,7 +53,6 @@ const getValuesFromDisplay = ( displayValues, options, showValues ) => {
 		return display; // Fallback if no matching option is found
 	} );
 };
-
 // Combine all classes into a single array
 const combineAllClasses = (
 	singularSelectClass,
@@ -83,7 +78,7 @@ const combineAllClasses = (
 	return final;
 };
 
-export default function Edit( { attributes, setAttributes } ) {
+export default function Edit( { attributes, setAttributes, clientId } ) {
 	const {
 		singularSelectClass = '',
 		columnOptions: columnValues = [],
@@ -95,9 +90,33 @@ export default function Edit( { attributes, setAttributes } ) {
 		additionalClasses = [],
 	} = attributes;
 
-	const [ showValues, setShowValues ] = useState( false ); // Local state for checkbox
+	const [ showValues, setShowValues ] = useState( false );
 
-	// Reusable onChange handler for all FormTokenFields
+	const blockRef = useRef();
+
+	useEffect( () => {
+		if ( ! blockRef.current ) {
+			return;
+		}
+
+		const layoutEl = blockRef.current.querySelector(
+			'.block-editor-inner-blocks > .block-editor-block-list__layout'
+		);
+		const parentEl = blockRef.current.querySelector(
+			'.block-editor-inner-blocks'
+		);
+
+		if ( layoutEl ) {
+			const mergedEditorClasses = [
+				'block-editor-block-list__layout',
+				'wp-block-fancysquares-column-block',
+				...additionalClasses,
+			].join( ' ' );
+			layoutEl.className = mergedEditorClasses;
+			parentEl.className += ' wp-block-fancysquares-column-block-admin';
+		}
+	}, [ additionalClasses, clientId ] );
+
 	const handleTokenChange = ( fieldKey, options ) => ( newTokens ) => {
 		const newValues = getValuesFromDisplay(
 			newTokens,
@@ -116,7 +135,6 @@ export default function Edit( { attributes, setAttributes } ) {
 		);
 		setAttributes( { additionalClasses: updatedClasses } );
 	};
-
 	// Single-choice dropdown handler
 	const onChangeSelect = ( newVal ) => {
 		setAttributes( { singularSelectClass: newVal } );
@@ -131,7 +149,6 @@ export default function Edit( { attributes, setAttributes } ) {
 		);
 		setAttributes( { additionalClasses: updatedClasses } );
 	};
-
 	// Prepare class string for preview
 	const previewClassString = [
 		'wp-block-fancysquares-column-block',
@@ -157,16 +174,13 @@ export default function Edit( { attributes, setAttributes } ) {
 						) }
 						style={ { marginBottom: '20px' } }
 					/>
-
 					<SelectControl
 						label={ __( 'Singular Select Class', 'fs-blocks' ) }
 						value={ singularSelectClass }
 						options={ singleChoiceOptions }
 						onChange={ onChangeSelect }
 					/>
-
 					<hr />
-
 					<div style={ { marginBottom: '20px' } }>
 						<FormTokenField
 							label={ __( 'Column Classes', 'fs-blocks' ) }
@@ -205,7 +219,6 @@ export default function Edit( { attributes, setAttributes } ) {
 							</ul>
 						</details>
 					</div>
-
 					<div style={ { marginBottom: '20px' } }>
 						<FormTokenField
 							label={ __( 'Margin Classes', 'fs-blocks' ) }
@@ -244,7 +257,6 @@ export default function Edit( { attributes, setAttributes } ) {
 							</ul>
 						</details>
 					</div>
-
 					<div style={ { marginBottom: '20px' } }>
 						<FormTokenField
 							label={ __( 'Display Classes', 'fs-blocks' ) }
@@ -283,7 +295,6 @@ export default function Edit( { attributes, setAttributes } ) {
 							</ul>
 						</details>
 					</div>
-
 					<div style={ { marginBottom: '20px' } }>
 						<FormTokenField
 							label={ __( 'Order Classes', 'fs-blocks' ) }
@@ -319,7 +330,6 @@ export default function Edit( { attributes, setAttributes } ) {
 							</ul>
 						</details>
 					</div>
-
 					<div style={ { marginBottom: '20px' } }>
 						<FormTokenField
 							label={ __(
@@ -361,7 +371,6 @@ export default function Edit( { attributes, setAttributes } ) {
 							</ul>
 						</details>
 					</div>
-
 					<div style={ { marginBottom: '20px' } }>
 						<FormTokenField
 							label={ __( 'Column Offset Classes', 'fs-blocks' ) }
@@ -402,8 +411,11 @@ export default function Edit( { attributes, setAttributes } ) {
 					</div>
 				</PanelBody>
 			</InspectorControls>
-
-			<div { ...blockProps } className={ previewClassString }>
+			<div
+				{ ...blockProps }
+				className={ previewClassString }
+				ref={ blockRef }
+			>
 				<InnerBlocks
 					template={ [
 						[
