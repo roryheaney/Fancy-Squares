@@ -3,12 +3,15 @@ import {
 	InnerBlocks,
 	useBlockProps,
 } from '@wordpress/block-editor';
-import { PanelBody, FormTokenField } from '@wordpress/components';
+import {
+	PanelBody,
+	FormTokenField,
+	CheckboxControl,
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { Fragment, useEffect, useRef } from '@wordpress/element';
+import { Fragment, useEffect, useRef, useState } from '@wordpress/element';
 import './editor.scss';
 
-// Import your class definition arrays
 import {
 	rowOptions,
 	justifyContentOptions,
@@ -17,24 +20,35 @@ import {
 	paddingOptions,
 } from '../../data/bootstrap-classes/classes.js';
 
-// Convert each array of { label, value } to an array of strings for FormTokenField suggestions
-const rowSuggestions = rowOptions.map( ( item ) => item.value );
-const justifyContentSuggestions = justifyContentOptions.map(
-	( item ) => item.value
-);
-const alignItemsSuggestions = alignItemsOptions.map( ( item ) => item.value );
-const marginSuggestions = marginOptions.map( ( item ) => item.value );
-const paddingSuggestions = paddingOptions.map( ( item ) => item.value );
+// Helper function to map class values to their labels or values based on mode
+const getDisplayValues = ( values, options, showValues ) => {
+	return values.map( ( value ) => {
+		const option = options.find( ( opt ) => opt.value === value );
+		if ( option ) {
+			if ( showValues ) {
+				return option.value;
+			}
+			return option.label;
+		}
+		return value; // Fallback if no matching option is found
+	} );
+};
+
+// Helper function to map selected labels or values back to values
+const getValuesFromDisplay = ( displayValues, options, showValues ) => {
+	return displayValues.map( ( display ) => {
+		const option = options.find( ( opt ) =>
+			showValues ? opt.value === display : opt.label === display
+		);
+		if ( option ) {
+			return option.value;
+		}
+		return display; // Fallback if no matching option is found
+	} );
+};
 
 /*
  * Utility to combine all selected sets into one final array.
- *
- * @param {string[]} rowArr          The array of row classes.
- * @param {string[]} justifyArr      The array of justify-content classes.
- * @param {string[]} alignArr        The array of align-items classes.
- * @param {string[]} marginArr       The array of margin classes.
- * @param {string[]} paddingArr      The array of padding classes.
- * @return {string[]}                A merged array of all classes.
  */
 function combineAllClasses(
 	rowArr,
@@ -52,84 +66,38 @@ function combineAllClasses(
 	];
 }
 
-// Define which child blocks are allowed.
 const ALLOWED_BLOCKS = [ 'fs-blocks/column-block' ];
 
 export default function Edit( { attributes, setAttributes, clientId } ) {
 	const {
-		rowOptions: rowValues,
-		justifyContentOptions: justifyValues,
-		alignItemsOptions: alignValues,
-		marginOptions: marginValues,
-		paddingOptions: paddingValues,
-		additionalClasses,
+		rowOptions: rowValues = [],
+		justifyContentOptions: justifyValues = [],
+		alignItemsOptions: alignValues = [],
+		marginOptions: marginValues = [],
+		paddingOptions: paddingValues = [],
+		additionalClasses = [],
 	} = attributes;
 
-	// For each token field, update its attribute + re-merge everything.
-	const onChangeRowOptions = ( newTokens ) => {
-		setAttributes( { rowOptions: newTokens } );
-		const merged = combineAllClasses(
+	const [ showValues, setShowValues ] = useState( false ); // Local state for checkbox
+
+	// Reusable onChange handler for all FormTokenFields
+	const handleTokenChange = ( fieldKey, options ) => ( newTokens ) => {
+		const newValues = getValuesFromDisplay(
 			newTokens,
-			justifyValues,
-			alignValues,
-			marginValues,
-			paddingValues
+			options,
+			showValues
 		);
-		setAttributes( { additionalClasses: merged } );
+		setAttributes( { [ fieldKey ]: newValues } );
+		const updatedClasses = combineAllClasses(
+			fieldKey === 'rowOptions' ? newValues : rowValues,
+			fieldKey === 'justifyContentOptions' ? newValues : justifyValues,
+			fieldKey === 'alignItemsOptions' ? newValues : alignValues,
+			fieldKey === 'marginOptions' ? newValues : marginValues,
+			fieldKey === 'paddingOptions' ? newValues : paddingValues
+		);
+		setAttributes( { additionalClasses: updatedClasses } );
 	};
 
-	const onChangeJustifyContentOptions = ( newTokens ) => {
-		setAttributes( { justifyContentOptions: newTokens } );
-		const merged = combineAllClasses(
-			rowValues,
-			newTokens,
-			alignValues,
-			marginValues,
-			paddingValues
-		);
-		setAttributes( { additionalClasses: merged } );
-	};
-
-	const onChangeAlignItemsOptions = ( newTokens ) => {
-		setAttributes( { alignItemsOptions: newTokens } );
-		const merged = combineAllClasses(
-			rowValues,
-			justifyValues,
-			newTokens,
-			marginValues,
-			paddingValues
-		);
-		setAttributes( { additionalClasses: merged } );
-	};
-
-	const onChangeMarginOptions = ( newTokens ) => {
-		setAttributes( { marginOptions: newTokens } );
-		const merged = combineAllClasses(
-			rowValues,
-			justifyValues,
-			alignValues,
-			newTokens,
-			paddingValues
-		);
-		setAttributes( { additionalClasses: merged } );
-	};
-
-	const onChangePaddingOptions = ( newTokens ) => {
-		setAttributes( { paddingOptions: newTokens } );
-		const merged = combineAllClasses(
-			rowValues,
-			justifyValues,
-			alignValues,
-			marginValues,
-			newTokens
-		);
-		setAttributes( { additionalClasses: merged } );
-	};
-
-	/**
-	 * The preview class for our main <div> in the editor.
-	 * Always "row" + the user-chosen classes.
-	 */
 	const previewClassString = [
 		'wp-block-fancysquares-row-block',
 		'row',
@@ -138,27 +106,19 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 
 	const blockRef = useRef();
 
-	/**
-	 * Whenever additionalClasses changes, update the row classes on the
-	 * "layout" container for this specific block ID.
-	 */
 	useEffect( () => {
-		// blockRef.current is the actual <div> node returned by React
 		if ( ! blockRef.current ) {
 			return;
 		}
 
-		// If you want to find the .block-editor-block-list__layout inside our block:
 		const layoutEl = blockRef.current.querySelector(
 			'.block-editor-inner-blocks > .block-editor-block-list__layout'
 		);
-
 		const parentEl = blockRef.current.querySelector(
 			'.block-editor-inner-blocks'
 		);
 
 		if ( layoutEl ) {
-			// We'll merge the "row" + our additional classes into one string.
 			const mergedEditorClasses = [
 				'block-editor-block-list__layout',
 				'wp-block-fancysquares-row-block',
@@ -179,36 +139,212 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 					title={ __( 'Row Settings', 'fs-blocks' ) }
 					initialOpen={ true }
 				>
-					<FormTokenField
-						label={ __( 'Row Classes', 'fs-blocks' ) }
-						value={ rowValues }
-						suggestions={ rowSuggestions }
-						onChange={ onChangeRowOptions }
+					<CheckboxControl
+						label={ __( 'Show Values', 'fs-blocks' ) }
+						checked={ showValues }
+						onChange={ setShowValues }
+						help={ __(
+							'Display Bootstrap class names instead of labels.',
+							'fs-blocks'
+						) }
+						style={ { marginBottom: '20px' } }
 					/>
-					<FormTokenField
-						label={ __( 'Justify Content Classes', 'fs-blocks' ) }
-						value={ justifyValues }
-						suggestions={ justifyContentSuggestions }
-						onChange={ onChangeJustifyContentOptions }
-					/>
-					<FormTokenField
-						label={ __( 'Align Items Classes', 'fs-blocks' ) }
-						value={ alignValues }
-						suggestions={ alignItemsSuggestions }
-						onChange={ onChangeAlignItemsOptions }
-					/>
-					<FormTokenField
-						label={ __( 'Margin Classes', 'fs-blocks' ) }
-						value={ marginValues }
-						suggestions={ marginSuggestions }
-						onChange={ onChangeMarginOptions }
-					/>
-					<FormTokenField
-						label={ __( 'Padding Classes', 'fs-blocks' ) }
-						value={ paddingValues }
-						suggestions={ paddingSuggestions }
-						onChange={ onChangePaddingOptions }
-					/>
+
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Row Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								rowValues,
+								rowOptions,
+								showValues
+							) }
+							suggestions={ rowOptions.map( ( item ) =>
+								showValues ? item.value : item.label
+							) }
+							onChange={ handleTokenChange(
+								'rowOptions',
+								rowOptions
+							) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __( 'Available Row Classes', 'fs-blocks' ) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ rowOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
+
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __(
+								'Justify Content Classes',
+								'fs-blocks'
+							) }
+							value={ getDisplayValues(
+								justifyValues,
+								justifyContentOptions,
+								showValues
+							) }
+							suggestions={ justifyContentOptions.map(
+								( item ) =>
+									showValues ? item.value : item.label
+							) }
+							onChange={ handleTokenChange(
+								'justifyContentOptions',
+								justifyContentOptions
+							) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Justify Content Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ justifyContentOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
+
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Align Items Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								alignValues,
+								alignItemsOptions,
+								showValues
+							) }
+							suggestions={ alignItemsOptions.map( ( item ) =>
+								showValues ? item.value : item.label
+							) }
+							onChange={ handleTokenChange(
+								'alignItemsOptions',
+								alignItemsOptions
+							) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Align Items Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ alignItemsOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
+
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Margin Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								marginValues,
+								marginOptions,
+								showValues
+							) }
+							suggestions={ marginOptions.map( ( item ) =>
+								showValues ? item.value : item.label
+							) }
+							onChange={ handleTokenChange(
+								'marginOptions',
+								marginOptions
+							) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Margin Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ marginOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
+
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Padding Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								paddingValues,
+								paddingOptions,
+								showValues
+							) }
+							suggestions={ paddingOptions.map( ( item ) =>
+								showValues ? item.value : item.label
+							) }
+							onChange={ handleTokenChange(
+								'paddingOptions',
+								paddingOptions
+							) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Padding Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ paddingOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
 				</PanelBody>
 			</InspectorControls>
 

@@ -14,21 +14,6 @@
  *    shows how breakpoints and captions will appear.
  *  - Basic accessibility features, such as wrapping the preview
  *    image in a button for keyboard interaction.
- *
- * The goal is to mirror the block’s dynamic rendering logic
- * on the front end, ensuring editors can see an approximate representation
- * before publishing.
- *
- * WordPress references:
- *  - @wordpress/block-editor for useBlockProps, InspectorControls, MediaUpload, etc.
- *  - @wordpress/components for UI elements like PanelBody, Button, TextControl, FormTokenField, etc.
- *  - @wordpress/i18n for translation functions (__ and sprintf).
- *  - @wordpress/api-fetch for retrieving alt/caption data from the REST API.
- *
- * For the final output, this block uses a separate render.php file (server-side)
- * to produce the <picture> element and handle alt text/caption logic.
- * The server-side logic ensures any updates to attachments in the Media Library
- * automatically reflect on the front end.
  */
 
 import {
@@ -42,36 +27,57 @@ import {
 	Button,
 	TextControl,
 	FormTokenField,
+	CheckboxControl,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-// For multi-select border classes as arrays
 import {
 	borderOptions,
 	borderRadiusOptions,
 } from '../../data/bootstrap-classes/classes.js';
+import './editor.scss';
+
+// Helper function to map class values to their labels or values based on mode
+const getDisplayValues = ( values, options, showValues ) => {
+	return values.map( ( value ) => {
+		const option = options.find( ( opt ) => opt.value === value );
+		if ( option ) {
+			if ( showValues ) {
+				return option.value;
+			}
+			return option.label;
+		}
+		return value; // Fallback if no matching option is found
+	} );
+};
+
+// Helper function to map selected labels or values back to values
+const getValuesFromDisplay = ( displayValues, options, showValues ) => {
+	return displayValues.map( ( display ) => {
+		const option = options.find( ( opt ) =>
+			showValues ? opt.value === display : opt.label === display
+		);
+		if ( option ) {
+			return option.value;
+		}
+		return display; // Fallback if no matching option is found
+	} );
+};
 
 /*
  * Reusable ImageSelector component
- * Shows a button, image preview (wrapped in <button> for a11y), and a "Remove" button.
- *
- * @param {Object} props The props object.
- * @param {string} props.label The label for the image slot, e.g. "Default" or "Small".
- * @param {number} props.imageId The ID of the selected image in the WP Media Library.
- * @param {string} props.imageUrl The URL of the selected image.
- * @param {Function} props.onSelect Callback fired when a new image is selected.
- * @param {Function} props.onRemove Callback fired when the image is removed.
  */
 function ImageSelector( { label, imageId, imageUrl, onSelect, onRemove } ) {
-	/* translators: %s: The name of the image slot (e.g. "Default" or "Small"). */
+	// Translators: %s is the label of the image (e.g., "Default", "Small").
 	const selectLabel = sprintf( __( 'Select %s Image', 'fs-blocks' ), label );
-	/* translators: %s: The name of the image slot (e.g. "Default" or "Small"). */
+	// Translators: %s is the label of the image (e.g., "Default", "Small").
 	const editLabel = sprintf(
+		// Translators: %s is the label of the image (e.g., "Default", "Small").
 		__( 'Edit or Replace %s Image', 'fs-blocks' ),
 		label
 	);
-	/* translators: %s: The name of the image slot (e.g. "Default" or "Small"). */
+	// Translators: %s is the label of the image (e.g., "Default", "Small").
 	const removeLabel = sprintf( __( 'Remove %s Image', 'fs-blocks' ), label );
 
 	return (
@@ -82,7 +88,6 @@ function ImageSelector( { label, imageId, imageUrl, onSelect, onRemove } ) {
 				value={ imageId }
 				render={ ( { open } ) => {
 					const handleKeyDown = ( event ) => {
-						// Provide a keyboard event for accessibility
 						if ( event.key === 'Enter' || event.key === ' ' ) {
 							open();
 						}
@@ -141,25 +146,25 @@ function ImageSelector( { label, imageId, imageUrl, onSelect, onRemove } ) {
 export default function Edit( props ) {
 	const { attributes, setAttributes } = props;
 	const {
-		defaultImageId,
-		defaultImageUrl,
-		smallImageId,
-		smallImageUrl,
-		mediumImageId,
-		mediumImageUrl,
-		largeImageId,
-		largeImageUrl,
-		aspectRatio,
-		fillerAlt,
-		// These are arrays now
-		borderClass,
-		borderRadiusClass,
+		defaultImageId = 0,
+		defaultImageUrl = '',
+		smallImageId = 0,
+		smallImageUrl = '',
+		mediumImageId = 0,
+		mediumImageUrl = '',
+		largeImageId = 0,
+		largeImageUrl = '',
+		aspectRatio = 'none',
+		fillerAlt = '',
+		borderClass = [],
+		borderRadiusClass = [],
 	} = attributes;
 
-	const blockProps = useBlockProps();
-
+	const [ showValues, setShowValues ] = useState( false ); // Local state for checkbox
 	const [ defaultAlt, setDefaultAlt ] = useState( '' );
 	const [ defaultCaption, setDefaultCaption ] = useState( '' );
+
+	const blockProps = useBlockProps();
 
 	useEffect( () => {
 		if ( ! defaultImageId ) {
@@ -178,10 +183,6 @@ export default function Edit( props ) {
 			} );
 	}, [ defaultImageId ] );
 
-	/**
-	 * @param {string} breakpoint The breakpoint name (e.g. "default", "small").
-	 * @return {(media:Object) => void} A callback that sets the block attributes for that breakpoint.
-	 */
 	function onSelectImage( breakpoint ) {
 		return ( media ) => {
 			if ( ! media?.id || ! media?.url ) {
@@ -194,10 +195,6 @@ export default function Edit( props ) {
 		};
 	}
 
-	/**
-	 * @param {string} breakpoint The breakpoint name (e.g. "default", "small").
-	 * @return {() => void} A callback that clears the block attributes for that breakpoint.
-	 */
 	function onRemoveImage( breakpoint ) {
 		return () => {
 			setAttributes( {
@@ -211,55 +208,43 @@ export default function Edit( props ) {
 	const hasMedium = !! mediumImageUrl;
 	const hasLarge = !! largeImageUrl;
 
-	// Build figure classes for aspect ratio only
+	// Build figure classes for aspect ratio
 	const figureClassNames = [ 'wp-block-image', 'fs-block-image' ];
 	if ( aspectRatio && aspectRatio !== 'none' ) {
-		figureClassNames.push( 'fs-block-image--has-aspect-ratio' );
-		figureClassNames.push( `is-aspect-ratio-${ aspectRatio }` );
+		figureClassNames.push(
+			'fs-block-image--has-aspect-ratio',
+			`is-aspect-ratio-${ aspectRatio }`
+		);
 	} else {
 		figureClassNames.push( 'fs-block-image--no-aspect-ratio' );
 	}
 	const figureClass = figureClassNames.join( ' ' );
 
-	// borderClass and borderRadiusClass are arrays, pass them to FormTokenField
-	// or handle them as arrays in the preview
-	const borderTokens = borderClass || []; // array of strings
-	const radiusTokens = borderRadiusClass || []; // array of strings
+	// Handle border and radius tokens
+	const onChangeBorderTokens = ( tokens ) => {
+		const newValues = getValuesFromDisplay(
+			tokens,
+			borderOptions,
+			showValues
+		);
+		setAttributes( { borderClass: newValues } );
+	};
 
-	/**
-	 * Called when the user changes the border tokens
-	 *
-	 * @param {string[]} tokens The new array of selected border classes
-	 */
-	function onChangeBorderTokens( tokens ) {
-		// store as an array
-		setAttributes( { borderClass: tokens } );
-	}
+	const onChangeRadiusTokens = ( tokens ) => {
+		const newValues = getValuesFromDisplay(
+			tokens,
+			borderRadiusOptions,
+			showValues
+		);
+		setAttributes( { borderRadiusClass: newValues } );
+	};
 
-	/**
-	 * Called when user changes the border radius tokens
-	 *
-	 * @param {string[]} tokens The new array of selected radius classes
-	 */
-	function onChangeRadiusTokens( tokens ) {
-		setAttributes( { borderRadiusClass: tokens } );
-	}
-
-	/**
-	 * Builds props for <img> classes & inline style
-	 * We treat borderClass as an array => each item is e.g. "border-1" or "border-primary"
-	 * If there's anything in borderClass, we do styleObj.borderStyle = 'solid'
-	 *
-	 * @return {{ className?: string, style?: Object }}
-	 */
 	function getImageProps() {
 		const classes = [];
 		const styleObj = {};
 
-		// If user picked any border tokens, push them
 		if ( borderClass?.length ) {
 			classes.push( ...borderClass );
-			// If we have any border tokens, do border-style:solid
 			styleObj.borderStyle = 'solid';
 		}
 		if ( borderRadiusClass?.length ) {
@@ -272,16 +257,10 @@ export default function Edit( props ) {
 		};
 	}
 
-	/**
-	 * Show a preview with <picture> / <figure>.
-	 * If no breakpoints are used, we just do a single <img>.
-	 *
-	 * @return {JSX.Element}
-	 */
 	function PicturePreview() {
 		const imgProps = getImageProps();
-
 		const noBreakpoints = ! hasSmall && ! hasMedium && ! hasLarge;
+
 		if ( noBreakpoints ) {
 			if ( ! defaultImageUrl ) {
 				return (
@@ -298,7 +277,6 @@ export default function Edit( props ) {
 					/>
 					{ defaultCaption && (
 						<figcaption
-							// eslint-disable-next-line react/no-danger
 							dangerouslySetInnerHTML={ {
 								__html: defaultCaption,
 							} }
@@ -312,7 +290,6 @@ export default function Edit( props ) {
 		let sourceMedium = null;
 		let sourceLarge = null;
 
-		// Up to 600px
 		if ( hasSmall ) {
 			sourceSmall = (
 				<source media="(max-width: 600px)" srcSet={ smallImageUrl } />
@@ -323,7 +300,6 @@ export default function Edit( props ) {
 			);
 		}
 
-		// 601px–1023px
 		if ( hasMedium && hasSmall ) {
 			sourceMedium = (
 				<source
@@ -337,7 +313,6 @@ export default function Edit( props ) {
 			);
 		}
 
-		// >= 1024px
 		if ( hasLarge ) {
 			sourceLarge = (
 				<source media="(min-width: 1024px)" srcSet={ largeImageUrl } />
@@ -363,17 +338,12 @@ export default function Edit( props ) {
 				</picture>
 				{ defaultCaption && (
 					<figcaption
-						// eslint-disable-next-line react/no-danger
 						dangerouslySetInnerHTML={ { __html: defaultCaption } }
 					/>
 				) }
 			</figure>
 		);
 	}
-
-	// Suggestions for FormTokenField from the "value" keys in borderOptions
-	const borderSuggestions = borderOptions.map( ( opt ) => opt.value );
-	const radiusSuggestions = borderRadiusOptions.map( ( opt ) => opt.value );
 
 	return (
 		<div { ...blockProps }>
@@ -382,6 +352,17 @@ export default function Edit( props ) {
 					title={ __( 'Image Settings', 'fs-blocks' ) }
 					initialOpen
 				>
+					<CheckboxControl
+						label={ __( 'Show Values', 'fs-blocks' ) }
+						checked={ showValues }
+						onChange={ setShowValues }
+						help={ __(
+							'Display Bootstrap class names instead of labels.',
+							'fs-blocks'
+						) }
+						style={ { marginBottom: '20px' } }
+					/>
+
 					<ImageSelector
 						label="Default"
 						imageId={ defaultImageId }
@@ -413,14 +394,9 @@ export default function Edit( props ) {
 							<TextControl
 								label={ __( 'Filler Image Alt', 'fs-blocks' ) }
 								value={ fillerAlt }
-								/**
-								 * Called when user changes the filler alt text
-								 *
-								 * @param {string} val The new alt text
-								 */
-								onChange={ ( val ) => {
-									setAttributes( { fillerAlt: val } );
-								} }
+								onChange={ ( val ) =>
+									setAttributes( { fillerAlt: val } )
+								}
 								placeholder={ __(
 									'e.g. "No image provided"',
 									'fs-blocks'
@@ -489,35 +465,83 @@ export default function Edit( props ) {
 						</option>
 					</select>
 
-					<p style={ { fontWeight: 'bold', marginTop: '1em' } }>
-						{ __( 'Border Classes', 'fs-blocks' ) }
-					</p>
-					<FormTokenField
-						value={ borderTokens }
-						suggestions={ borderSuggestions }
-						/**
-						 * Called when the user updates the border tokens
-						 *
-						 * @param {string[]} tokens The new array of border classes
-						 */
-						onChange={ onChangeBorderTokens }
-						label={ __( 'Add border classes', 'fs-blocks' ) }
-					/>
+					<div style={ { marginTop: '1em', marginBottom: '20px' } }>
+						<p style={ { fontWeight: 'bold' } }>
+							{ __( 'Border Classes', 'fs-blocks' ) }
+						</p>
+						<FormTokenField
+							value={ getDisplayValues(
+								borderClass,
+								borderOptions,
+								showValues
+							) }
+							suggestions={ borderOptions.map( ( opt ) =>
+								showValues ? opt.value : opt.label
+							) }
+							onChange={ onChangeBorderTokens }
+							label={ __( 'Add border classes', 'fs-blocks' ) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Border Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ borderOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
 
-					<p style={ { fontWeight: 'bold', marginTop: '1em' } }>
-						{ __( 'Border Radius Classes', 'fs-blocks' ) }
-					</p>
-					<FormTokenField
-						value={ radiusTokens }
-						suggestions={ radiusSuggestions }
-						/**
-						 * Called when the user updates the radius tokens
-						 *
-						 * @param {string[]} tokens The new array of radius classes
-						 */
-						onChange={ onChangeRadiusTokens }
-						label={ __( 'Add radius classes', 'fs-blocks' ) }
-					/>
+					<div style={ { marginBottom: '20px' } }>
+						<p style={ { fontWeight: 'bold' } }>
+							{ __( 'Border Radius Classes', 'fs-blocks' ) }
+						</p>
+						<FormTokenField
+							value={ getDisplayValues(
+								borderRadiusClass,
+								borderRadiusOptions,
+								showValues
+							) }
+							suggestions={ borderRadiusOptions.map( ( opt ) =>
+								showValues ? opt.value : opt.label
+							) }
+							onChange={ onChangeRadiusTokens }
+							label={ __( 'Add radius classes', 'fs-blocks' ) }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Border Radius Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ borderRadiusOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
 				</PanelBody>
 			</InspectorControls>
 			<PicturePreview />
