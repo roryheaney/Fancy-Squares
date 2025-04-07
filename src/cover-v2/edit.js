@@ -55,9 +55,8 @@ const getValuesFromDisplay = ( displayValues, options, showValues ) => {
 		const option = options.find( ( opt ) => {
 			if ( showValues ) {
 				return opt.value === display;
-			} else {
-				return opt.label === display;
 			}
+			return opt.label === display;
 		} );
 		if ( option ) {
 			result.push( option.value );
@@ -105,7 +104,7 @@ function ensureBaseClasses( arr ) {
 	return final;
 }
 
-/**
+/*
  * Builds the final array of classes, ensuring base classes and adding
  * the classes from each set (display, margin, padding, etc.).
  *

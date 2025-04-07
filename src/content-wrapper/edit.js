@@ -47,9 +47,8 @@ const getValuesFromDisplay = ( displayValues, options, showValues ) => {
 		const option = options.find( ( opt ) => {
 			if ( showValues ) {
 				return opt.value === display;
-			} else {
-				return opt.label === display;
 			}
+			return opt.label === display;
 		} );
 		if ( option ) {
 			result.push( option.value );
@@ -76,7 +75,7 @@ const getSuggestions = ( options, showValues ) => {
 /* ------------------------------------------------------------------------ */
 /*  Utility: Build final class array
 /* ------------------------------------------------------------------------ */
-/**
+/*
  * Merges everything into one final array for 'additionalClasses',
  * always including 'wp-block-fancysquares-content-wrapper-block' as a base.
  *

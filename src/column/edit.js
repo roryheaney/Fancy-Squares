@@ -55,9 +55,8 @@ const getValuesFromDisplay = ( displayValues, options, showValues ) => {
 		const option = options.find( ( opt ) => {
 			if ( showValues ) {
 				return opt.value === display;
-			} else {
-				return opt.label === display;
 			}
+			return opt.label === display;
 		} );
 		if ( option ) {
 			result.push( option.value );
@@ -84,7 +83,7 @@ const getSuggestions = ( options, showValues ) => {
 /* ------------------------------------------------------------------------ */
 /*  Helper to merge arrays into one final array of classes
 /* ------------------------------------------------------------------------ */
-/**
+/*
  * Combines all class arrays into a single array, adding singularSelectClass if present.
  *
  * @param {string} singularSelectClass - Single-choice class
