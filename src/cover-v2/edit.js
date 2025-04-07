@@ -15,67 +15,109 @@ import {
 	ToolbarGroup,
 	Dropdown,
 	AlignmentMatrixControl,
+	CheckboxControl,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { Fragment, useEffect } from '@wordpress/element';
-
+import { Fragment, useEffect, useRef, useState } from '@wordpress/element';
 import './editor.scss';
+
 import {
 	displayOptions,
 	marginOptions,
 	paddingOptions,
 	positionOptions,
 	zindexOptions,
-	bleedCoverOptions, // <-- Added here
+	bleedCoverOptions,
 } from '../../data/bootstrap-classes/classes.js';
 
-/* ------------------------------------------------------------------------ */
-/*  Prepare suggestions arrays
-/* ------------------------------------------------------------------------ */
-const displaySuggestions = displayOptions.map( ( o ) => o.value );
-const marginSuggestions = marginOptions.map( ( o ) => o.value );
-const paddingSuggestions = paddingOptions.map( ( o ) => o.value );
-const positionSuggestions = positionOptions.map( ( o ) => o.value );
-const zindexSuggestions = zindexOptions.map( ( o ) => o.value );
-const bleedCoverSuggestions = bleedCoverOptions.map( ( o ) => o.value ); // <-- Added here
+// Helper function to map class values to their labels or values based on mode
+const getDisplayValues = ( values, options, showValues ) => {
+	const result = [];
+	for ( const value of values ) {
+		const option = options.find( ( opt ) => opt.value === value );
+		if ( option ) {
+			if ( showValues ) {
+				result.push( option.value );
+			} else {
+				result.push( option.label );
+			}
+		} else {
+			result.push( value ); // Fallback if no matching option
+		}
+	}
+	return result;
+};
+
+// Helper function to map selected labels or values back to values
+const getValuesFromDisplay = ( displayValues, options, showValues ) => {
+	const result = [];
+	for ( const display of displayValues ) {
+		const option = options.find( ( opt ) => {
+			if ( showValues ) {
+				return opt.value === display;
+			} else {
+				return opt.label === display;
+			}
+		} );
+		if ( option ) {
+			result.push( option.value );
+		} else {
+			result.push( display ); // Fallback if no match
+		}
+	}
+	return result;
+};
+
+// Convert arrays of { label, value } to suggestion strings based on showValues
+const getSuggestions = ( options, showValues ) => {
+	const suggestions = [];
+	for ( const item of options ) {
+		if ( showValues ) {
+			suggestions.push( item.value );
+		} else {
+			suggestions.push( item.label );
+		}
+	}
+	return suggestions;
+};
 
 /* ------------------------------------------------------------------------ */
 /*  Utility functions
 /* ------------------------------------------------------------------------ */
 
 /**
- * Ensures that our base classes are always present.
+ * Ensures that base classes are always present.
  *
- * @param {string[]} arr Array of class names.
+ * @param {string[]} arr - Array of class names.
  * @return {string[]} Array of class names, guaranteed to include base classes.
  */
 function ensureBaseClasses( arr ) {
 	const final = [ ...arr ];
-	[ 'wp-block-cover', 'wp-block-fancysquares-cover-block' ].forEach(
-		( cls ) => {
-			if ( ! final.includes( cls ) ) {
-				final.unshift( cls );
-			}
+	const baseClasses = [
+		'wp-block-cover',
+		'wp-block-fancysquares-cover-block',
+	];
+	for ( const cls of baseClasses ) {
+		if ( ! final.includes( cls ) ) {
+			final.unshift( cls );
 		}
-	);
+	}
 	return final;
 }
 
-/*
+/**
  * Builds the final array of classes, ensuring base classes and adding
  * the classes from each set (display, margin, padding, etc.).
  *
- * @param {string[]} orig            - Original class array (including base classes).
- * @param {string[]} displayArr      - Selected display classes.
- * @param {string[]} marginArr       - Selected margin classes.
- * @param {string[]} paddingArr      - Selected padding classes.
- * @param {string[]} positionArr     - Selected position classes.
- * @param {string[]} zindexArr       - Selected z-index classes.
- * @param {string[]} bleedCoverArr   - Selected bleed cover classes.
- * @return {string[]}                - Final array of classes.
+ * @param {string[]} displayArr - Selected display classes.
+ * @param {string[]} marginArr - Selected margin classes.
+ * @param {string[]} paddingArr - Selected padding classes.
+ * @param {string[]} positionArr - Selected position classes.
+ * @param {string[]} zindexArr - Selected z-index classes.
+ * @param {string[]} bleedCoverArr - Selected bleed cover classes.
+ * @return {string[]} Final array of classes.
  */
 function buildClassArray(
-	orig,
 	displayArr,
 	marginArr,
 	paddingArr,
@@ -83,21 +125,7 @@ function buildClassArray(
 	zindexArr,
 	bleedCoverArr
 ) {
-	let final = ensureBaseClasses( orig );
-
-	const allSuggestions = [
-		...displaySuggestions,
-		...marginSuggestions,
-		...paddingSuggestions,
-		...positionSuggestions,
-		...zindexSuggestions,
-		...bleedCoverSuggestions,
-	];
-
-	// Remove classes that belong to any known set
-	final = final.filter( ( c ) => ! allSuggestions.includes( c ) );
-
-	// Add the selected classes from each set
+	const final = ensureBaseClasses( [] );
 	final.push(
 		...displayArr,
 		...marginArr,
@@ -110,10 +138,10 @@ function buildClassArray(
 }
 
 /**
- * Converts a string to a dash-delimited, lowercase "slug" format
+ * Converts a string to a dash-delimited, lowercase "slug" format.
  *
- * @param {string} str - Any string to be slugified
- * @return {string}    - Slugified version
+ * @param {string} str - Any string to be slugified.
+ * @return {string} Slugified version.
  */
 function toSlug( str ) {
 	return str
@@ -126,26 +154,21 @@ function toSlug( str ) {
 /* ------------------------------------------------------------------------ */
 /*  Edit Component
 /* ------------------------------------------------------------------------ */
-
-/**
- * The Edit component for the FancySquares Cover Block.
- *
- * @param {Object}   props
- * @param {Object}   props.attributes    - Current block attributes.
- * @param {Function} props.setAttributes - Function to update block attributes.
- * @return {JSX.Element} The editor element.
- */
-export default function Edit( { attributes, setAttributes } ) {
+export default function Edit( { attributes, setAttributes, clientId } ) {
 	const {
-		url,
-		isVideo,
-		lazyLoadVideo,
-		dimRatio,
-		contentPosition,
-		fullHeight,
-		additionalClasses,
+		url = '',
+		isVideo = false,
+		lazyLoadVideo = false,
+		dimRatio = 50,
+		contentPosition = 'center center',
+		fullHeight = false,
+		additionalClasses = [],
 	} = attributes;
 
+	const [ showValues, setShowValues ] = useState( false );
+	const blockRef = useRef();
+
+	// Set default classes and ensure base classes
 	useEffect( () => {
 		if ( additionalClasses.length === 0 ) {
 			setAttributes( {
@@ -162,7 +185,31 @@ export default function Edit( { attributes, setAttributes } ) {
 		}
 	}, [ additionalClasses, setAttributes ] );
 
-	// Filter out base classes for easier handling in the advanced fields
+	// Update InnerBlocks layout for focus fix
+	useEffect( () => {
+		if ( ! blockRef.current ) {
+			return;
+		}
+
+		const layoutEl = blockRef.current.querySelector(
+			'.block-editor-inner-blocks > .block-editor-block-list__layout'
+		);
+		const parentEl = blockRef.current.querySelector(
+			'.block-editor-inner-blocks'
+		);
+
+		if ( layoutEl ) {
+			const mergedEditorClasses = [
+				'block-editor-block-list__layout',
+				'wp-block-fancysquares-cover-block',
+				...additionalClasses,
+			].join( ' ' );
+			layoutEl.className = mergedEditorClasses;
+			parentEl.className += ' wp-block-fancysquares-cover-block-admin';
+		}
+	}, [ additionalClasses, clientId ] );
+
+	// Filter out base classes for token fields
 	const filtered = additionalClasses.filter(
 		( c ) =>
 			! [
@@ -171,24 +218,27 @@ export default function Edit( { attributes, setAttributes } ) {
 			].includes( c )
 	);
 
-	// Helper to find intersection (to pre-populate fields)
-	const intersect = ( arr, list ) =>
-		arr.filter( ( c ) => list.includes( c ) );
+	const intersect = ( arr, options ) =>
+		arr.filter( ( c ) => options.some( ( opt ) => opt.value === c ) );
 
-	const displayVals = intersect( filtered, displaySuggestions );
-	const marginVals = intersect( filtered, marginSuggestions );
-	const paddingVals = intersect( filtered, paddingSuggestions );
-	const positionVals = intersect( filtered, positionSuggestions );
-	const zindexVals = intersect( filtered, zindexSuggestions );
-	const bleedCoverVals = intersect( filtered, bleedCoverSuggestions ); // <-- Bleed cover
+	const displayVals = intersect( filtered, displayOptions );
+	const marginVals = intersect( filtered, marginOptions );
+	const paddingVals = intersect( filtered, paddingOptions );
+	const positionVals = intersect( filtered, positionOptions );
+	const zindexVals = intersect( filtered, zindexOptions );
+	const bleedCoverVals = intersect( filtered, bleedCoverOptions );
 
 	/* ------------------------------------------------------------------------ */
 	/*  onChange handlers for advanced classes
 	/* ------------------------------------------------------------------------ */
 	const onChangeDisplay = ( newTokens ) => {
-		const updated = buildClassArray(
-			additionalClasses,
+		const newValues = getValuesFromDisplay(
 			newTokens,
+			displayOptions,
+			showValues
+		);
+		const updated = buildClassArray(
+			newValues,
 			marginVals,
 			paddingVals,
 			positionVals,
@@ -199,10 +249,14 @@ export default function Edit( { attributes, setAttributes } ) {
 	};
 
 	const onChangeMargin = ( newTokens ) => {
-		const updated = buildClassArray(
-			additionalClasses,
-			displayVals,
+		const newValues = getValuesFromDisplay(
 			newTokens,
+			marginOptions,
+			showValues
+		);
+		const updated = buildClassArray(
+			displayVals,
+			newValues,
 			paddingVals,
 			positionVals,
 			zindexVals,
@@ -212,11 +266,15 @@ export default function Edit( { attributes, setAttributes } ) {
 	};
 
 	const onChangePadding = ( newTokens ) => {
+		const newValues = getValuesFromDisplay(
+			newTokens,
+			paddingOptions,
+			showValues
+		);
 		const updated = buildClassArray(
-			additionalClasses,
 			displayVals,
 			marginVals,
-			newTokens,
+			newValues,
 			positionVals,
 			zindexVals,
 			bleedCoverVals
@@ -225,12 +283,16 @@ export default function Edit( { attributes, setAttributes } ) {
 	};
 
 	const onChangePosition = ( newTokens ) => {
+		const newValues = getValuesFromDisplay(
+			newTokens,
+			positionOptions,
+			showValues
+		);
 		const updated = buildClassArray(
-			additionalClasses,
 			displayVals,
 			marginVals,
 			paddingVals,
-			newTokens,
+			newValues,
 			zindexVals,
 			bleedCoverVals
 		);
@@ -238,27 +300,35 @@ export default function Edit( { attributes, setAttributes } ) {
 	};
 
 	const onChangeZIndex = ( newTokens ) => {
+		const newValues = getValuesFromDisplay(
+			newTokens,
+			zindexOptions,
+			showValues
+		);
 		const updated = buildClassArray(
-			additionalClasses,
 			displayVals,
 			marginVals,
 			paddingVals,
 			positionVals,
-			newTokens,
+			newValues,
 			bleedCoverVals
 		);
 		setAttributes( { additionalClasses: updated } );
 	};
 
 	const onChangeBleedCover = ( newTokens ) => {
+		const newValues = getValuesFromDisplay(
+			newTokens,
+			bleedCoverOptions,
+			showValues
+		);
 		const updated = buildClassArray(
-			additionalClasses,
 			displayVals,
 			marginVals,
 			paddingVals,
 			positionVals,
 			zindexVals,
-			newTokens
+			newValues
 		);
 		setAttributes( { additionalClasses: updated } );
 	};
@@ -293,7 +363,6 @@ export default function Edit( { attributes, setAttributes } ) {
 	/*  Build block classes
 	/* ------------------------------------------------------------------------ */
 	const editorClasses = [ ...additionalClasses ];
-
 	if ( contentPosition ) {
 		const slug = toSlug( contentPosition );
 		editorClasses.push( `is-position-${ slug }` );
@@ -307,9 +376,9 @@ export default function Edit( { attributes, setAttributes } ) {
 		style: fullHeight ? { minHeight: '100vh' } : {},
 	} );
 
-	// ------------------------------------------------------------------------
-	// Compute background element classes and inline styles.
-	// ------------------------------------------------------------------------
+	/* ------------------------------------------------------------------------ */
+	/*  Compute background element classes and inline styles
+	/* ------------------------------------------------------------------------ */
 	const bgClasses = [ 'wp-block-cover__background' ];
 	if ( dimRatio !== 100 ) {
 		bgClasses.push( 'has-background-dim' );
@@ -326,7 +395,6 @@ export default function Edit( { attributes, setAttributes } ) {
 	const bgStyle = {
 		opacity: dimRatio / 100,
 	};
-
 	if (
 		attributes.style &&
 		attributes.style.color &&
@@ -345,9 +413,9 @@ export default function Edit( { attributes, setAttributes } ) {
 		bgStyle.backgroundColor = attributes.style.color.background;
 	}
 
-	// ------------------------------------------------------------------------
-	// Decide which media to render (video, image, or nothing) without nesting ternaries.
-	// ------------------------------------------------------------------------
+	/* ------------------------------------------------------------------------ */
+	/*  Decide which media to render
+	/* ------------------------------------------------------------------------ */
 	let mediaContent = null;
 	if ( url ) {
 		if ( isVideo ) {
@@ -463,46 +531,242 @@ export default function Edit( { attributes, setAttributes } ) {
 					title={ __( 'Advanced Classes', 'fs-blocks' ) }
 					initialOpen={ true }
 				>
-					<FormTokenField
-						label={ __( 'Display Classes', 'fs-blocks' ) }
-						value={ displayVals }
-						suggestions={ displaySuggestions }
-						onChange={ onChangeDisplay }
+					<CheckboxControl
+						label={ __( 'Show Values', 'fs-blocks' ) }
+						checked={ showValues }
+						onChange={ setShowValues }
+						help={ __(
+							'Display class names instead of labels.',
+							'fs-blocks'
+						) }
+						style={ { marginBottom: '20px' } }
 					/>
-					<FormTokenField
-						label={ __( 'Margin Classes', 'fs-blocks' ) }
-						value={ marginVals }
-						suggestions={ marginSuggestions }
-						onChange={ onChangeMargin }
-					/>
-					<FormTokenField
-						label={ __( 'Padding Classes', 'fs-blocks' ) }
-						value={ paddingVals }
-						suggestions={ paddingSuggestions }
-						onChange={ onChangePadding }
-					/>
-					<FormTokenField
-						label={ __( 'Position Classes', 'fs-blocks' ) }
-						value={ positionVals }
-						suggestions={ positionSuggestions }
-						onChange={ onChangePosition }
-					/>
-					<FormTokenField
-						label={ __( 'Z-Index Classes', 'fs-blocks' ) }
-						value={ zindexVals }
-						suggestions={ zindexSuggestions }
-						onChange={ onChangeZIndex }
-					/>
-					<FormTokenField
-						label={ __( 'Bleed Cover Classes', 'fs-blocks' ) }
-						value={ bleedCoverVals }
-						suggestions={ bleedCoverSuggestions }
-						onChange={ onChangeBleedCover }
-					/>
+
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Display Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								displayVals,
+								displayOptions,
+								showValues
+							) }
+							suggestions={ getSuggestions(
+								displayOptions,
+								showValues
+							) }
+							onChange={ onChangeDisplay }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Display Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ displayOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
+
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Margin Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								marginVals,
+								marginOptions,
+								showValues
+							) }
+							suggestions={ getSuggestions(
+								marginOptions,
+								showValues
+							) }
+							onChange={ onChangeMargin }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Margin Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ marginOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
+
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Padding Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								paddingVals,
+								paddingOptions,
+								showValues
+							) }
+							suggestions={ getSuggestions(
+								paddingOptions,
+								showValues
+							) }
+							onChange={ onChangePadding }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Padding Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ paddingOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
+
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Position Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								positionVals,
+								positionOptions,
+								showValues
+							) }
+							suggestions={ getSuggestions(
+								positionOptions,
+								showValues
+							) }
+							onChange={ onChangePosition }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Position Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ positionOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
+
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Z-Index Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								zindexVals,
+								zindexOptions,
+								showValues
+							) }
+							suggestions={ getSuggestions(
+								zindexOptions,
+								showValues
+							) }
+							onChange={ onChangeZIndex }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Z-Index Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ zindexOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
+
+					<div style={ { marginBottom: '20px' } }>
+						<FormTokenField
+							label={ __( 'Bleed Cover Classes', 'fs-blocks' ) }
+							value={ getDisplayValues(
+								bleedCoverVals,
+								bleedCoverOptions,
+								showValues
+							) }
+							suggestions={ getSuggestions(
+								bleedCoverOptions,
+								showValues
+							) }
+							onChange={ onChangeBleedCover }
+						/>
+						<details style={ { marginTop: '5px' } }>
+							<summary>
+								{ __(
+									'Available Bleed Cover Classes',
+									'fs-blocks'
+								) }
+							</summary>
+							<ul
+								style={ {
+									fontSize: '12px',
+									paddingLeft: '20px',
+									margin: '5px 0',
+								} }
+							>
+								{ bleedCoverOptions.map( ( item ) => (
+									<li key={ item.value }>
+										{ showValues ? item.value : item.label }
+									</li>
+								) ) }
+							</ul>
+						</details>
+					</div>
 				</PanelBody>
 			</InspectorControls>
 
-			<div { ...blockProps }>
+			<div { ...blockProps } ref={ blockRef }>
 				<div
 					className={ bgClasses.join( ' ' ) }
 					aria-hidden="true"
