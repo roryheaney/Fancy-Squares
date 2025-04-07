@@ -184,30 +184,6 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		}
 	}, [ additionalClasses, setAttributes ] );
 
-	// Update InnerBlocks layout for focus fix
-	useEffect( () => {
-		if ( ! blockRef.current ) {
-			return;
-		}
-
-		const layoutEl = blockRef.current.querySelector(
-			'.block-editor-inner-blocks > .block-editor-block-list__layout'
-		);
-		const parentEl = blockRef.current.querySelector(
-			'.block-editor-inner-blocks'
-		);
-
-		if ( layoutEl ) {
-			const mergedEditorClasses = [
-				'block-editor-block-list__layout',
-				'wp-block-fancysquares-cover-block',
-				...additionalClasses,
-			].join( ' ' );
-			layoutEl.className = mergedEditorClasses;
-			parentEl.className += ' wp-block-fancysquares-cover-block-admin';
-		}
-	}, [ additionalClasses, clientId ] );
-
 	// Filter out base classes for token fields
 	const filtered = additionalClasses.filter(
 		( c ) =>
