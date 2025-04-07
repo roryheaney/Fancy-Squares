@@ -42,7 +42,13 @@ import './editor.scss';
 const getDisplayValues = ( values, options, showValues ) => {
 	return values.map( ( value ) => {
 		const option = options.find( ( opt ) => opt.value === value );
-		return option ? ( showValues ? option.value : option.label ) : value;
+		if ( option ) {
+			if ( showValues ) {
+				return option.value;
+			}
+			return option.label;
+		}
+		return value; // Fallback if no matching option is found
 	} );
 };
 
@@ -52,7 +58,10 @@ const getValuesFromDisplay = ( displayValues, options, showValues ) => {
 		const option = options.find( ( opt ) =>
 			showValues ? opt.value === display : opt.label === display
 		);
-		return option ? option.value : display;
+		if ( option ) {
+			return option.value;
+		}
+		return display; // Fallback if no matching option is found
 	} );
 };
 
@@ -60,11 +69,15 @@ const getValuesFromDisplay = ( displayValues, options, showValues ) => {
  * Reusable ImageSelector component
  */
 function ImageSelector( { label, imageId, imageUrl, onSelect, onRemove } ) {
+	// Translators: %s is the label of the image (e.g., "Default", "Small").
 	const selectLabel = sprintf( __( 'Select %s Image', 'fs-blocks' ), label );
+	// Translators: %s is the label of the image (e.g., "Default", "Small").
 	const editLabel = sprintf(
+		// Translators: %s is the label of the image (e.g., "Default", "Small").
 		__( 'Edit or Replace %s Image', 'fs-blocks' ),
 		label
 	);
+	// Translators: %s is the label of the image (e.g., "Default", "Small").
 	const removeLabel = sprintf( __( 'Remove %s Image', 'fs-blocks' ), label );
 
 	return (
@@ -172,7 +185,9 @@ export default function Edit( props ) {
 
 	function onSelectImage( breakpoint ) {
 		return ( media ) => {
-			if ( ! media?.id || ! media?.url ) return;
+			if ( ! media?.id || ! media?.url ) {
+				return;
+			}
 			setAttributes( {
 				[ `${ breakpoint }ImageId` ]: media.id,
 				[ `${ breakpoint }ImageUrl` ]: media.url,
