@@ -3,6 +3,7 @@
 // ==========================================
 @use "settings" as *;
 @use "mixins" as *; // so we can use media-breakpoint-up for breakpoints
+@use "sass:list";
 
 // -------------------------------------------
 // A) DISPLAY UTILITIES
@@ -72,21 +73,27 @@ $align-self-values: (start, center, end, baseline, stretch);
 // -------------------------------------------
 // D) JUSTIFY-CONTENT / ALIGN-ITEMS
 // -------------------------------------------
-$justify-values: (start, end, center, between, around, evenly);
-@each $val in $justify-values {
-  .justify-content-#{$val} {
-    justify-content: #{$val} !important;
-  }
+$justify-class-names: (start, end, center, between, around, evenly);
+$justify-css-values: (flex-start, flex-end, center, space-between, space-around, space-evenly);
+@for $i from 1 through list.length($justify-class-names) {
+	$class-name: list.nth($justify-class-names, $i);
+	$class-value: list.nth($justify-css-values, $i);
 
-  @each $bp, $bpVal in $grid-breakpoints {
-    @if $bp != xs {
-      @include media-breakpoint-up($bp) {
-        .justify-content-#{$bp}-#{$val} {
-          justify-content: #{$val} !important;
-        }
-      }
-    }
-  }
+	// Base class
+	.justify-content-#{$class-name} {
+		justify-content: #{$class-value} !important;
+	}
+
+	// Breakpoint-specific classes
+	@each $bp, $bpVal in $grid-breakpoints {
+		@if $bp != xs {
+			@include media-breakpoint-up($bp) {
+				.justify-content-#{$bp}-#{$class-name} {
+					justify-content: #{$class-value} !important;
+				}
+			}
+		}
+	}
 }
 
 $align-values: (start, center, end, baseline, stretch);
