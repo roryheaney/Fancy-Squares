@@ -145,5 +145,13 @@ function fancysquares_fs_blocks_block_init()
 			'render_callback' => 'fs_dynamic_picture_block_render_callback',
 		]
 	);
+
+	// Register the Index Block from metadata, override render_callback
+	register_block_type_from_metadata(
+		__DIR__ . '/build/index-block',
+		[
+			'render_callback' => 'fsblocks_render_index_block',
+		]
+	);
 }
 add_action('init', 'fancysquares_fs_blocks_block_init');
