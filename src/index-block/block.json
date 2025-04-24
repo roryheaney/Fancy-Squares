@@ -4,9 +4,7 @@
 	"name": "fs-blocks/index-block",
 	"title": "Index Block",
 	"category": "layout",
-	"parent": [
-		"core/column"
-	],
+	"parent": [ "core/column" ],
 	"attributes": {
 		"blockIndex": {
 			"type": "number",
