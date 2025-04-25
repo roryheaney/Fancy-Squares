@@ -37,29 +37,29 @@ function fancysquares_fs_blocks_block_init()
 		)
 	);
 
-	// container block
-	register_block_type(
-		__DIR__ . '/build/container',
-		array(
-			'render_callback' => 'fsblocks_render_container_block',
-		)
-	);
+	// // container block
+	// register_block_type(
+	// 	__DIR__ . '/build/container',
+	// 	array(
+	// 		'render_callback' => 'fsblocks_render_container_block',
+	// 	)
+	// );
 
-	// row block
-	register_block_type(
-		__DIR__ . '/build/row',
-		array(
-			'render_callback' => 'fsblocks_render_row_block',
-		)
-	);
+	// // row block
+	// register_block_type(
+	// 	__DIR__ . '/build/row',
+	// 	array(
+	// 		'render_callback' => 'fsblocks_render_row_block',
+	// 	)
+	// );
 
-	// column block
-	register_block_type(
-		__DIR__ . '/build/column',
-		array(
-			'render_callback' => 'fsblocks_render_column_block',
-		)
-	);
+	// // column block
+	// register_block_type(
+	// 	__DIR__ . '/build/column',
+	// 	array(
+	// 		'render_callback' => 'fsblocks_render_column_block',
+	// 	)
+	// );
 
 	// accordion (parent) block
 	register_block_type(
