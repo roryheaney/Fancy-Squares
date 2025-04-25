@@ -14,10 +14,17 @@ if ($element_tag !== 'section') {
 	$element_tag = 'div';
 }
 
+$single_class = isset($attributes['singularSelectClass']) ? sanitize_html_class($attributes['singularSelectClass']) : '';
+
 // Additional classes from user
-$classes_array = (isset($attributes['additionalClasses']) && is_array($attributes['additionalClasses']))
+$classes_array = isset($attributes['additionalClasses']) && is_array($attributes['additionalClasses'])
 	? $attributes['additionalClasses']
 	: [];
+
+// add the singular class to the classes array
+if (!empty($single_class)) {
+	$classes_array[] = $single_class;
+}
 
 $sanitized = array_map('sanitize_html_class', $classes_array);
 $final_class = implode(' ', $sanitized);
@@ -26,6 +33,7 @@ $final_class = implode(' ', $sanitized);
 $wrapper_attributes = get_block_wrapper_attributes(array(
 	'class' => $final_class,
 ));
+
 ?>
 <<?php echo esc_attr($element_tag); ?> <?php echo $wrapper_attributes; ?>>
 	<?php echo $content; ?>

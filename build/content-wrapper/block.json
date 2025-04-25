@@ -40,13 +40,6 @@
       "type": "string",
       "default": ""
     },
-    "columnOptions": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "default": []
-    },
     "marginOptions": {
       "type": "array",
       "items": {
@@ -75,7 +68,14 @@
       },
       "default": []
     },
-    "columnOffsetOptions": {
+    "positionOptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "zindexOptions": {
       "type": "array",
       "items": {
         "type": "string"
