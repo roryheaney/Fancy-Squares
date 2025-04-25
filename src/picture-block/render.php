@@ -108,6 +108,8 @@ if ($imgStyle) {
 if (! $hasSmall && ! $hasMedium && ! $hasLarge) : ?>
 	<figure class="<?php echo $figure_class; ?>">
 		<img
+			decoding="async"
+			loading="lazy"
 			src="<?php echo $defaultUrl; ?>"
 			alt="<?php echo esc_attr($altText); ?>" <?php echo $img_class_str . $img_style_str; ?> />
 		<?php if (! empty($caption)) : ?>
@@ -156,6 +158,8 @@ endif;
 
 		<!-- Fallback <img> with classes & inline style if there's a border class -->
 		<img
+			decoding="async"
+			loading="lazy"
 			src="<?php echo $defaultUrl; ?>"
 			alt="<?php echo esc_attr($altText); ?>" <?php echo $img_class_str . $img_style_str; ?> />
 	</picture>

@@ -29,35 +29,35 @@ require_once plugin_dir_path(__FILE__) . 'lib/admin-settings.php';
  */
 function fancysquares_fs_blocks_block_init()
 {
+	// // container block
+	// register_block_type(
+	// 	__DIR__ . '/build/container',
+	// 	array(
+	// 		'render_callback' => 'fsblocks_render_container_block',
+	// 	)
+	// );
+
+	// // row block
+	// register_block_type(
+	// 	__DIR__ . '/build/row',
+	// 	array(
+	// 		'render_callback' => 'fsblocks_render_row_block',
+	// 	)
+	// );
+
+	// // column block
+	// register_block_type(
+	// 	__DIR__ . '/build/column',
+	// 	array(
+	// 		'render_callback' => 'fsblocks_render_column_block',
+	// 	)
+	// );
+
 	// content-wrapper block
 	register_block_type(
 		__DIR__ . '/build/content-wrapper',
 		array(
 			'render_callback' => 'fsblocks_render_content_wrapper_block',
-		)
-	);
-
-	// container block
-	register_block_type(
-		__DIR__ . '/build/container',
-		array(
-			'render_callback' => 'fsblocks_render_container_block',
-		)
-	);
-
-	// row block
-	register_block_type(
-		__DIR__ . '/build/row',
-		array(
-			'render_callback' => 'fsblocks_render_row_block',
-		)
-	);
-
-	// column block
-	register_block_type(
-		__DIR__ . '/build/column',
-		array(
-			'render_callback' => 'fsblocks_render_column_block',
 		)
 	);
 
@@ -143,6 +143,14 @@ function fancysquares_fs_blocks_block_init()
 		__DIR__ . '/build/picture-block',
 		[
 			'render_callback' => 'fs_dynamic_picture_block_render_callback',
+		]
+	);
+
+	// Register the Index Block from metadata, override render_callback
+	register_block_type_from_metadata(
+		__DIR__ . '/build/index-block',
+		[
+			'render_callback' => 'fsblocks_render_index_block',
 		]
 	);
 }

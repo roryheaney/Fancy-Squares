@@ -1115,3 +1115,38 @@ export const borderRadiusOptions = [
 	{ label: 'Extra Large Start Rounding', value: 'rounded-start-4' },
 	{ label: 'Maximum Start Rounding', value: 'rounded-start-5' },
 ];
+
+export const widthOptions = [
+	{ label: 'Auto Width', value: 'w-auto' },
+	{ label: '25% Width', value: 'w-25' },
+	{ label: '50% Width', value: 'w-50' },
+	{ label: '75% Width', value: 'w-75' },
+	{ label: '100% Width', value: 'w-100' },
+];
+
+export const heightOptions = [
+	{ label: 'Auto Height', value: 'h-auto' },
+	{ label: '25% Height', value: 'h-25' },
+	{ label: '50% Height', value: 'h-50' },
+	{ label: '75% Height', value: 'h-75' },
+	{ label: '100% Height', value: 'h-100' },
+];
+
+export const blendModeOptions = [
+	{ label: 'Normal', value: 'mix-blend-normal' },
+	{ label: 'Multiply', value: 'mix-blend-multiply' },
+	{ label: 'Screen', value: 'mix-blend-screen' },
+	{ label: 'Overlay', value: 'mix-blend-overlay' },
+	{ label: 'Darken', value: 'mix-blend-darken' },
+	{ label: 'Lighten', value: 'mix-blend-lighten' },
+	{ label: 'Color Dodge', value: 'mix-blend-color-dodge' },
+	{ label: 'Color Burn', value: 'mix-blend-color-burn' },
+	{ label: 'Hard Light', value: 'mix-blend-hard-light' },
+	{ label: 'Soft Light', value: 'mix-blend-soft-light' },
+	{ label: 'Difference', value: 'mix-blend-difference' },
+	{ label: 'Exclusion', value: 'mix-blend-exclusion' },
+	{ label: 'Hue', value: 'mix-blend-hue' },
+	{ label: 'Saturation', value: 'mix-blend-saturation' },
+	{ label: 'Color', value: 'mix-blend-color' },
+	{ label: 'Luminosity', value: 'mix-blend-luminosity' },
+];

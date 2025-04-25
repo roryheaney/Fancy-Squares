@@ -29,6 +29,52 @@
 				"type": "string"
 			},
 			"default": []
+		},
+		"singularSelectClass": {
+			"type": "string",
+			"default": ""
+		},
+		"marginOptions": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"default": []
+		},
+		"displayOptions": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"default": []
+		},
+		"orderOptions": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"default": []
+		},
+		"selfAlignmentOptions": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"default": []
+		},
+		"positionOptions": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"default": []
+		},
+		"zindexOptions": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"default": []
 		}
 	},
 	"textdomain": "fs-blocks",
