@@ -1,28 +1,18 @@
-/**
- * Registers a new block provided a unique name and an object defining its behavior.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/
- */
+// index.js
 import { registerBlockType } from '@wordpress/blocks';
 import { InnerBlocks } from '@wordpress/block-editor';
-
-/**
- * Lets webpack process CSS, SASS or SCSS files referenced in JavaScript files.
- * All files containing `style` keyword are bundled together and get applied
- * both to the front of your site and to the editor.
- */
-import './style.scss';
-
-/**
- * Internal dependencies
- */
-import Edit from './edit';
 import metadata from './block.json';
+import Edit from './edit';
+import { generateAttributes } from '../utils/helpers';
+
+// Combine static and generated attributes
+const blockAttributes = {
+	...metadata.attributes,
+	...generateAttributes(),
+};
 
 registerBlockType( metadata.name, {
+	attributes: blockAttributes,
 	edit: Edit,
-
-	// Because this is a dynamic block, the front-end markup
-	// is rendered by render.php instead of this save function.
 	save: () => <InnerBlocks.Content />,
 } );

@@ -27,16 +27,16 @@ import {
 	getDisplayValues,
 	getValuesFromDisplay,
 	getSuggestions,
-} from '../utils/helpers';
+} from '../helpers';
 import {
 	BLOCK_CONFIG,
 	BREAKPOINT_DIMENSIONS,
 	CLASS_OPTIONS_MAP,
 } from '../config/blockConfig';
-import desktopImage from '../assets/icons/desktop.png';
-import laptopImage from '../assets/icons/laptop.png';
-import tabletImage from '../assets/icons/tablet.png';
-import mobileImage from '../assets/icons/mobile.png';
+import desktopImage from '../icons/desktop.png';
+import laptopImage from '../icons/laptop.png';
+import tabletImage from '../icons/tablet.png';
+import mobileImage from '../icons/mobile.png';
 
 const BlockEdit = ( props ) => {
 	const { attributes, setAttributes, name, clientId } = props;
@@ -91,13 +91,13 @@ const BlockEdit = ( props ) => {
 				/>
 				<details style={ { marginTop: '5px' } }>
 					<summary>
-						{`Available ${
-							classType
+						{ `Available ${ classType
 							// 1) insert a space before each uppercase letter
-							.replace(/([A-Z])/g, ' $1')
+							.replace( /([A-Z])/g, ' $1' )
 							// 2) uppercase the very first character
-							.replace(/^./, str => str.toUpperCase())
-						} Classes`}
+							.replace( /^./, ( str ) =>
+								str.toUpperCase()
+							) } Classes` }
 					</summary>
 					<ul
 						style={ {
