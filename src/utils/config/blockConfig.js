@@ -12,17 +12,6 @@ import {
 	gapOptions,
 } from '../../../data/bootstrap-classes/classes.js';
 
-export const ALLOWED_BLOCKS = [
-	'core/heading',
-	'core/paragraph',
-	'core/list',
-	'core/list-item',
-	'core/buttons',
-	'core/columns',
-	'core/column',
-	'core/group',
-];
-
 export const BREAKPOINT_DIMENSIONS = {
 	'': 'All',
 	sm: '≥576px',
