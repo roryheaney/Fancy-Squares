@@ -34,6 +34,7 @@ export const BREAKPOINT_DIMENSIONS = {
 
 export const BLOCK_CONFIG = {
 	'fs-blocks/content-wrapper': {
+		hasWidthControls: true, // <-- must be set to true for width panel
 		classOptions: [
 			'displayOptions',
 			'orderOptions',

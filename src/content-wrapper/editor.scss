@@ -53,6 +53,19 @@
 				border: 0;
 			}
 		}
+		.custom-column-widths__label {
+			text-transform: capitalize;
+		}
+		&--width-controls {
+			.custom-column-widths__value {
+				color: red;
+				font-size: 12px;
+				font-weight: bold;
+			}
+			.custom-column-widths__label {
+				font-size: 13px;
+			}
+		}
 		// &--base {
 		// 	// Example: Add a border to the Base group
 		// 	border-left: 4px solid #007cba;
