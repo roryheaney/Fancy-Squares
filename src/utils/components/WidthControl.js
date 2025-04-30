@@ -7,57 +7,74 @@ const WidthControl = ( {
 	subLabel,
 	image,
 	breakpoint,
-	value,
+	value, // can be '', 'auto', 'wp-block-column--column-md-4', or undefined
 	onChange,
-	options,
+	options = [],
 } ) => {
-	const getNumericValue = ( val ) => {
-		if ( val === '' || val === 'auto' ) return 0;
+	/* ------------------------------------------------------------------ */
+	/*  Helpers
+	/* ------------------------------------------------------------------ */
+	const getNumericValue = ( v = '' ) => {
+		if ( v === '' || v === 'auto' ) return 0;
 		return (
 			parseInt(
-				val.replace( /wp-block-column--column-(?:[a-z]{0,3}-)?/, '' )
+				v.replace( /wp-block-column--column-(?:[a-z]{0,3}-)?/, '' ),
+				10
 			) || 0
 		);
 	};
 
-	const getLabelClassName = ( labelText ) => {
-		return labelText.toLowerCase().replace( /\s+/g, '-' );
-	};
+	const getLabelClassName = ( txt ) =>
+		txt.toLowerCase().replace( /\s+/g, '-' );
 
-	const numericValue = getNumericValue( value );
-	const [ sliderValue, setSliderValue ] = useState( numericValue );
+	/* ------------------------------------------------------------------ */
+	/*  Local state
+	/* ------------------------------------------------------------------ */
+	const [ sliderValue, setSliderValue ] = useState(
+		getNumericValue( value )
+	);
 
-	const handleChange = ( newValue ) => {
-		setSliderValue( newValue );
-		if ( newValue === 0 ) {
-			const autoOption = options.find( ( opt ) => opt.value === 'auto' );
-			onChange( autoOption ? 'auto' : '' );
+	/* ------------------------------------------------------------------ */
+	/*  Events
+	/* ------------------------------------------------------------------ */
+	const handleChange = ( newVal ) => {
+		setSliderValue( newVal );
+
+		if ( newVal === 0 ) {
+			const autoOpt = options.find( ( o ) => o.value === 'auto' );
+			onChange( autoOpt ? 'auto' : '' );
 		} else {
-			const classPrefix = breakpoint
+			const prefix = breakpoint
 				? `wp-block-column--column-${ breakpoint }`
 				: 'wp-block-column--column';
-			onChange( `${ classPrefix }-${ newValue }` );
+			onChange( `${ prefix }-${ newVal }` );
 		}
 	};
 
+	/* ------------------------------------------------------------------ */
+	/*  Slider marks
+	/* ------------------------------------------------------------------ */
 	const marks = [
 		{
 			value: 0,
-			label:
-				options.find( ( opt ) => opt.value === '' )?.label || 'Inherit',
+			label: options.find( ( o ) => o.value === '' )?.label || 'Inherit',
 		},
-		...Array.from( { length: 12 }, ( _, index ) => ( {
-			value: index + 1,
-			label: ( index + 1 ).toString(),
+		...Array.from( { length: 12 }, ( _, i ) => ( {
+			value: i + 1,
+			label: String( i + 1 ),
 		} ) ),
 	];
 
+	/* ------------------------------------------------------------------ */
+	/*  Render
+	/* ------------------------------------------------------------------ */
 	return (
 		<div
-			className={ `custom-column-widths__group custom-column-widths__group--${ getLabelClassName(
+			className={ `custom-column-widths__group custom-column-widths__group--width-controls custom-column-widths__group--${ getLabelClassName(
 				label
 			) }` }
 		>
+			{ /* header ---------------------------------------------------- */ }
 			<div className="custom-column-widths__header">
 				<div
 					className="custom-column-widths__icon"
@@ -74,30 +91,32 @@ const WidthControl = ( {
 				<span className="custom-column-widths__value">
 					{ value === 'auto'
 						? 'Auto'
-						: value === ''
+						: value === '' || typeof value === 'undefined'
 						? 'Inherit'
 						: `${ getNumericValue( value ) } columns` }
 				</span>
+
+				{ /* quick-select buttons ----------------------------------- */ }
 				<div className="custom-column-widths__buttons">
-					{ options.map( ( option ) => (
+					{ options.map( ( o ) => (
 						<Button
-							key={ option.value }
+							key={ o.value }
 							onClick={ () => {
-								setSliderValue(
-									getNumericValue( option.value )
-								);
-								onChange( option.value );
+								setSliderValue( getNumericValue( o.value ) );
+								onChange( o.value );
 							} }
-							className={ `custom-column-widths__option ${
-								value === option.value ? 'is-active' : ''
+							className={ `custom-column-widths__option${
+								value === o.value ? ' is-active' : ''
 							}` }
 							variant="secondary"
 						>
-							{ option.label }
+							{ o.label }
 						</Button>
 					) ) }
 				</div>
 			</div>
+
+			{ /* slider ---------------------------------------------------- */ }
 			<RangeControl
 				__next40pxDefaultSize
 				__nextHasNoMarginBottom

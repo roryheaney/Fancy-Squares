@@ -10,11 +10,13 @@ const PaddingControl = ( {
 	mdValue,
 	lgValue,
 	xlValue,
+	xxlValue,
 	onChangeBase,
 	onChangeSm,
 	onChangeMd,
 	onChangeLg,
 	onChangeXl,
+	onChangeXxl,
 	sideType,
 } ) => {
 	const getLabelClassName = ( labelText ) => {
@@ -142,6 +144,25 @@ const PaddingControl = ( {
 					value={ xlValue ? parseInt( xlValue ) : -1 }
 					onChange={ ( newValue ) =>
 						handleChange( newValue, onChangeXl, 'xl' )
+					}
+					min={ -1 }
+					max={ 5 }
+					step={ 1 }
+					marks={ marks }
+					showTooltip={ false }
+					withInputField={ false }
+				/>
+			</div>
+			<div className="custom-column-widths__range-control">
+				<label className="custom-column-widths__range-label">
+					XXL Screen (xxl)
+				</label>
+				<RangeControl
+					__next40pxDefaultSize
+					__nextHasNoMarginBottom
+					value={ xxlValue ? parseInt( xxlValue ) : -1 }
+					onChange={ ( newValue ) =>
+						handleChange( newValue, onChangeXxl, 'xxl' )
 					}
 					min={ -1 }
 					max={ 5 }
