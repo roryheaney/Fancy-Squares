@@ -10,6 +10,7 @@ import {
 	justifyContentOptions,
 	orderOptions,
 	gapOptions,
+	bleedCoverOptions,
 } from '../../../data/bootstrap-classes/classes.js';
 
 export const BREAKPOINT_DIMENSIONS = {
@@ -22,6 +23,23 @@ export const BREAKPOINT_DIMENSIONS = {
 };
 
 export const BLOCK_CONFIG = {
+	'fs-blocks/cover-v2': {
+		classOptions: [
+			'displayOptions',
+			'positionOptions',
+			'zindexOptions',
+			'bleedCoverOptions', // custom for cover-v2
+		],
+		hasWidthControls: false,
+		dropdown: {
+			attributeKey: 'uniqueBlockClass', // matches block.json
+			label: 'Block Class', // label for the dropdown
+			options: [
+				{ label: '— none —', value: '' },
+				{ label: 'Custom Class', value: 'custom' },
+			],
+		},
+	},
 	'fs-blocks/content-wrapper': {
 		hasWidthControls: true, // <-- must be set to true for width panel
 		classOptions: [
@@ -83,6 +101,11 @@ export const CLASS_OPTIONS_MAP = {
 		// Added gapSpacing for core/group
 		options: gapOptions,
 		suggestions: getSuggestions( gapOptions, false ),
+	},
+	bleedCover: {
+		// Added bleedCover for core/group
+		options: bleedCoverOptions,
+		suggestions: getSuggestions( bleedCoverOptions, false ),
 	},
 };
 

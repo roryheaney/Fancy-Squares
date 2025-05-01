@@ -11,6 +11,9 @@ $classes_array = (! empty($attributes['additionalClasses']) && is_array($attribu
 	? $attributes['additionalClasses']
 	: [];
 
+$classes_array[] = 'wp-block-cover';
+$classes_array[] = 'wp-block-fancysquares-cover-block';
+
 // 1) If there's an 'align' property, add alignwide or alignfull.
 if (! empty($attributes['align'])) {
 	$classes_array[] = 'align' . $attributes['align'];
@@ -39,6 +42,7 @@ $containerStyles = '';
 
 if (! empty($attributes['fullHeight'])) {
 	$containerStyles .= 'height: 100vh; aspect-ratio:unset;';
+	// print_r($containerStyles);
 }
 
 // Build background element styles.
