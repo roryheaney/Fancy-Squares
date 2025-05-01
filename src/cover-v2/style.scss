@@ -6,8 +6,7 @@
 	min-height: 400px;
 	display: flex;
 
-	.wp-block-cover__background.has-background-dim {
-		background-color: #000;
+	.wp-block-cover__background {
 		position: absolute;
 		top: 0;
 		right: 0;
@@ -15,6 +14,10 @@
 		left: 0;
 		pointer-events: none;
 		z-index: 1;
+		height: 100%;
+		&.has-background-dim {
+			background-color: #000;
+		}
 	}
 
 	.wp-block-cover__image-background,

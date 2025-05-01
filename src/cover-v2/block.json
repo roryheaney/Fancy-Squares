@@ -7,12 +7,18 @@
 	"category": "layout",
 	"icon": "cover-image",
 	"description": "A custom cover block with alignment matrix, full height, lazyload video, and advanced classes.",
-	"keywords": [ "cover", "layout" ],
+	"keywords": [
+		"cover",
+		"layout"
+	],
 	"textdomain": "fs-blocks",
 	"supports": {
 		"anchor": true,
 		"html": false,
-		"align": [ "wide", "full" ],
+		"align": [
+			"wide",
+			"full"
+		],
 		"color": {
 			"background": true,
 			"gradients": true,
@@ -52,6 +58,38 @@
 				"type": "string"
 			},
 			"default": []
+		},
+		"displayOptions": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"default": []
+		},
+		"positionOptions": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"default": []
+		},
+		"zindexOptions": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"default": []
+		},
+		"bleedCoverOptions": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"default": []
+		},
+		"uniqueBlockClass": {
+			"type": "string",
+			"default": ""
 		}
 	},
 	"editorScript": "file:./index.js",
