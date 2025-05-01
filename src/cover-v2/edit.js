@@ -1,185 +1,130 @@
+/**
+ * fs-blocks/cover-v2 — Edit component (shared plumbing + bespoke media panel)
+ */
 import {
 	BlockControls,
 	InspectorControls,
 	InnerBlocks,
-	useBlockProps,
 	MediaUpload,
 	MediaUploadCheck,
+	useBlockProps,
 } from '@wordpress/block-editor';
 import {
-	PanelBody,
-	FormTokenField,
-	ToggleControl,
-	Button,
-	RangeControl,
 	ToolbarGroup,
 	Dropdown,
+	Button,
+	RangeControl,
+	ToggleControl,
 	AlignmentMatrixControl,
-	CheckboxControl,
+	PanelBody,
 } from '@wordpress/components';
+import { Fragment, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Fragment, useEffect, useState } from '@wordpress/element';
+
+import { useBlockControls } from '../utils/useBlockControls';
+import { toSlug } from '../utils/helpers';
+import { BLOCK_CONFIG } from '../utils/config/blockConfig';
 
 import './editor.scss';
-import {
-	displayOptions,
-	marginOptions,
-	paddingOptions,
-	positionOptions,
-	zindexOptions,
-	bleedCoverOptions,
-} from '../../data/bootstrap-classes/classes.js';
 
-// Helper function to map class values to their labels or values based on mode
-const getDisplayValues = ( values, options, showValues ) => {
-	return values.map( ( value ) => {
-		const option = options.find( ( opt ) => opt.value === value );
-		if ( option ) {
-			if ( showValues ) {
-				return option.value;
-			}
-			return option.label;
-		}
-		return value; // Fallback if no matching option is found
-	} );
-};
+/* -------------------------------------------------------------------------- */
+/*  Media-handling helpers                                                    */
+/* -------------------------------------------------------------------------- */
+const MediaPanel = ( {
+	url,
+	isVideo,
+	lazyLoadVideo,
+	onSelectMedia,
+	onRemoveMedia,
+	onToggleLazy,
+	dimRatio,
+	setDimRatio,
+	fullHeight,
+	setFullHeight,
+} ) => (
+	<PanelBody title={ __( 'Cover Settings', 'fs-blocks' ) } initialOpen>
+		<MediaUploadCheck>
+			<MediaUpload
+				allowedTypes={ [ 'image', 'video' ] }
+				onSelect={ onSelectMedia }
+				render={ ( { open } ) => (
+					<Button variant="primary" onClick={ open }>
+						{ url
+							? __( 'Replace Media', 'fs-blocks' )
+							: __( 'Select Media', 'fs-blocks' ) }
+					</Button>
+				) }
+			/>
+			{ url && (
+				<Button
+					variant="secondary"
+					onClick={ onRemoveMedia }
+					style={ { marginTop: 8 } }
+				>
+					{ __( 'Remove Media', 'fs-blocks' ) }
+				</Button>
+			) }
+		</MediaUploadCheck>
 
-// Helper function to map selected labels or values back to values
-const getValuesFromDisplay = ( displayValues, options, showValues ) => {
-	return displayValues.map( ( display ) => {
-		const option = options.find( ( opt ) =>
-			showValues ? opt.value === display : opt.label === display
-		);
-		if ( option ) {
-			return option.value;
-		}
-		return display; // Fallback if no matching option is found
-	} );
-};
+		{ isVideo && (
+			<ToggleControl
+				label={ __( 'Lazy-load video', 'fs-blocks' ) }
+				checked={ lazyLoadVideo }
+				onChange={ onToggleLazy }
+			/>
+		) }
 
-/* ------------------------------------------------------------------------ */
-/*  Utility functions
-/* ------------------------------------------------------------------------ */
+		<RangeControl
+			label={ __( 'Dim ratio', 'fs-blocks' ) }
+			value={ dimRatio }
+			onChange={ setDimRatio }
+			min={ 0 }
+			max={ 100 }
+		/>
 
-function ensureBaseClasses( arr ) {
-	const final = [ ...arr ];
-	[ 'wp-block-cover', 'wp-block-fancysquares-cover-block' ].forEach(
-		( cls ) => {
-			if ( ! final.includes( cls ) ) {
-				final.unshift( cls );
-			}
-		}
-	);
-	return final;
-}
+		<ToggleControl
+			label={ __( 'Full-height', 'fs-blocks' ) }
+			checked={ fullHeight }
+			onChange={ setFullHeight }
+		/>
+	</PanelBody>
+);
 
-function buildClassArray(
-	orig,
-	displayArr,
-	marginArr,
-	paddingArr,
-	positionArr,
-	zindexArr,
-	bleedCoverArr
-) {
-	const final = ensureBaseClasses( orig );
-	final.push(
-		...displayArr,
-		...marginArr,
-		...paddingArr,
-		...positionArr,
-		...zindexArr,
-		...bleedCoverArr
-	);
-	return final;
-}
-
-function toSlug( str ) {
-	return str
-		.toLowerCase()
-		.replace( /[^\w\s-]+/g, '' )
-		.trim()
-		.replace( /\s+/g, '-' );
-}
-
-/* ------------------------------------------------------------------------ */
-/*  Edit Component
-/* ------------------------------------------------------------------------ */
-export default function Edit( { attributes, setAttributes } ) {
+/* -------------------------------------------------------------------------- */
+/*  Edit                                                                      */
+/* -------------------------------------------------------------------------- */
+export default function Edit( props ) {
+	const { attributes, setAttributes, clientId, name } = props;
 	const {
+		/* media */
 		url = '',
 		isVideo = false,
 		lazyLoadVideo = false,
-		dimRatio = 50,
+		/* overlay */
+		dimRatio = 40,
 		contentPosition = 'center center',
+		/* layout */
 		fullHeight = false,
-		additionalClasses = [],
 	} = attributes;
 
-	const [ showValues, setShowValues ] = useState( false ); // Local state for checkbox
-
-	useEffect( () => {
-		if ( additionalClasses.length === 0 ) {
-			setAttributes( {
-				additionalClasses: [
-					'wp-block-cover',
-					'wp-block-fancysquares-cover-block',
-				],
-			} );
-		} else {
-			const fixed = ensureBaseClasses( additionalClasses );
-			if ( fixed.join( ' ' ) !== additionalClasses.join( ' ' ) ) {
-				setAttributes( { additionalClasses: fixed } );
-			}
+	/* ---------- shared generic inspector panels ---------- */
+	const { inspectorPanels, previewClasses } = useBlockControls(
+		name,
+		attributes,
+		setAttributes,
+		clientId,
+		{
+			hasWidthControls: false,
+			dropdown: BLOCK_CONFIG[ name ]?.dropdown || null,
+			showPadding: true,
+			showMargin: true,
+			showNegMargin: true,
 		}
-	}, [ additionalClasses, setAttributes ] );
-
-	// Filter out base classes for easier handling in the advanced fields
-	const filtered = additionalClasses.filter(
-		( c ) =>
-			! [
-				'wp-block-cover',
-				'wp-block-fancysquares-cover-block',
-			].includes( c )
 	);
 
-	// Helper to find intersection (to pre-populate fields)
-	const intersect = ( arr, options ) =>
-		arr.filter( ( c ) => options.some( ( opt ) => opt.value === c ) );
-
-	const displayVals = intersect( filtered, displayOptions );
-	const marginVals = intersect( filtered, marginOptions );
-	const paddingVals = intersect( filtered, paddingOptions );
-	const positionVals = intersect( filtered, positionOptions );
-	const zindexVals = intersect( filtered, zindexOptions );
-	const bleedCoverVals = intersect( filtered, bleedCoverOptions );
-
-	/* ------------------------------------------------------------------------ */
-	/*  onChange handler for advanced classes
-	/* ------------------------------------------------------------------------ */
-	const handleTokenChange = ( options ) => ( newTokens ) => {
-		const newValues = getValuesFromDisplay(
-			newTokens,
-			options,
-			showValues
-		);
-		const updated = buildClassArray(
-			additionalClasses,
-			options === displayOptions ? newValues : displayVals,
-			options === marginOptions ? newValues : marginVals,
-			options === paddingOptions ? newValues : paddingVals,
-			options === positionOptions ? newValues : positionVals,
-			options === zindexOptions ? newValues : zindexVals,
-			options === bleedCoverOptions ? newValues : bleedCoverVals
-		);
-		setAttributes( { additionalClasses: updated } );
-	};
-
-	/* ------------------------------------------------------------------------ */
-	/*  Media Handling
-	/* ------------------------------------------------------------------------ */
+	/* ---------- bespoke media handlers ---------- */
 	const onSelectMedia = ( media ) => {
-		if ( ! media || ! media.url ) {
+		if ( ! media?.url ) {
 			setAttributes( { url: '', isVideo: false, lazyLoadVideo: false } );
 			return;
 		}
@@ -188,65 +133,88 @@ export default function Edit( { attributes, setAttributes } ) {
 			isVideo: media.type === 'video',
 		} );
 	};
+	const onRemoveMedia = () =>
+		setAttributes( { url: '', isVideo: false, lazyLoadVideo: false } );
+	const onToggleLazy = ( v ) => setAttributes( { lazyLoadVideo: v } );
+	const setDimRatio = ( v ) => setAttributes( { dimRatio: v } );
+	const setFullHeightFn = ( v ) => setAttributes( { fullHeight: v } );
 
-	const onRemoveMedia = () => {
-		setAttributes( {
-			url: '',
-			isVideo: false,
-			lazyLoadVideo: false,
-		} );
-	};
+	/* ---------- toolbar (content-position matrix) ---------- */
+	const setPosition = ( val ) => setAttributes( { contentPosition: val } );
 
-	const setPosition = ( val ) => {
-		setAttributes( { contentPosition: val } );
-	};
+	/* ---------------------------------------------------------------------- */
+	/*  Build *root* class list – and strip colour classes the engine adds    */
+	/* ---------------------------------------------------------------------- */
+	const rootClasses = useMemo( () => {
+		const cls = [
+			'wp-block-cover',
+			'wp-block-fancysquares-cover-block',
+			...previewClasses,
+		];
 
-	/* ------------------------------------------------------------------------ */
-	/*  Build block classes
-	/* ------------------------------------------------------------------------ */
-	const editorClasses = [ ...additionalClasses ];
-	if ( contentPosition ) {
-		const slug = toSlug( contentPosition );
-		editorClasses.push( `is-position-${ slug }` );
-		if ( contentPosition !== 'center center' ) {
-			editorClasses.push( 'has-custom-content-position' );
+		/* position helpers */
+		if ( contentPosition ) {
+			const slug = toSlug( contentPosition );
+			cls.push( `is-position-${ slug }` );
+			if ( contentPosition !== 'center center' ) {
+				cls.push( 'has-custom-content-position' );
+			}
 		}
-	}
 
-	const blockProps = useBlockProps( {
-		className: editorClasses.join( ' ' ),
-		style: fullHeight ? { minHeight: '100vh' } : {},
-	} );
+		/* remove any colour / gradient classes automatically added to root */
+		const colourRE = /has-(?:[\w-]+-)?background-(?:color|gradient)/;
+		return cls.filter( ( c ) => ! colourRE.test( c ) );
+	}, [ previewClasses, contentPosition ] );
 
-	// Background element classes and styles
-	const bgClasses = [ 'wp-block-cover__background' ];
-	if ( dimRatio !== 100 ) {
-		bgClasses.push( 'has-background-dim' );
-	}
-	if ( attributes.gradient ) {
-		bgClasses.push( `has-${ attributes.gradient }-gradient-background` );
-	}
+	/* ---------------------------------------------------------------------- */
+	/*  Derive overlay (background) classes + style from attributes           */
+	/* ---------------------------------------------------------------------- */
+	const overlayClasses = [ 'wp-block-cover__background' ];
+	const overlayStyle = { opacity: dimRatio / 100 };
+
+	/* theme palette colour -------------------------------------------------- */
 	if ( attributes.backgroundColor ) {
-		bgClasses.push(
+		overlayClasses.push(
 			`has-${ attributes.backgroundColor }-background-color`
 		);
 	}
 
-	const bgStyle = {
-		opacity: dimRatio / 100,
-		...( attributes.style?.color?.gradient && {
-			backgroundImage: attributes.style.color.gradient,
-		} ),
-		...( attributes.background && { background: attributes.background } ),
-		...( attributes.style?.color?.background && {
-			backgroundColor: attributes.style.color.background,
-		} ),
-	};
+	/* theme gradient -------------------------------------------------------- */
+	if ( attributes.gradient ) {
+		overlayClasses.push(
+			`has-${ attributes.gradient }-gradient-background`,
+			'has-background-gradient'
+		);
+	}
 
-	// Media element rendering
-	// eslint-disable-next-line no-nested-ternary
-	const mediaElement = url ? (
-		isVideo ? (
+	/* custom hex ------------------------------------------------------------ */
+	if ( attributes?.style?.color?.background ) {
+		overlayStyle.backgroundColor = attributes.style.color.background;
+	}
+
+	/* custom gradient ------------------------------------------------------- */
+	if ( attributes?.style?.color?.gradient ) {
+		overlayStyle.backgroundImage = attributes.style.color.gradient;
+	}
+
+	/* ---------------------------------------------------------------------- */
+	/*  root props (strip inline colour from root)                            */
+	/* ---------------------------------------------------------------------- */
+	const rootStyle = fullHeight ? { minHeight: '100vh' } : {};
+
+	/* WP stores custom colours in style.color[background|gradient] —
+	   we do NOT want those on the root element: */
+	if ( rootStyle.style?.color ) delete rootStyle.style;
+
+	const blockProps = useBlockProps( {
+		className: rootClasses.join( ' ' ),
+		style: rootStyle,
+	} );
+
+	/* ---------- media element ---------- */
+	const mediaEl =
+		url &&
+		( isVideo ? (
 			<video
 				className="wp-block-cover__video-background"
 				src={ url }
@@ -262,14 +230,14 @@ export default function Edit( { attributes, setAttributes } ) {
 				alt=""
 				loading="lazy"
 			/>
-		)
-	) : null;
+		) );
 
-	/* ------------------------------------------------------------------------ */
-	/*  Return Edit markup
-	/* ------------------------------------------------------------------------ */
+	/* ---------------------------------------------------------------------- */
+	/*  Render                                                                */
+	/* ---------------------------------------------------------------------- */
 	return (
 		<Fragment>
+			{ /* toolbar --------------------------------------------------------- */ }
 			<BlockControls group="block">
 				<ToolbarGroup>
 					<Dropdown
@@ -294,305 +262,36 @@ export default function Edit( { attributes, setAttributes } ) {
 				</ToolbarGroup>
 			</BlockControls>
 
+			{ /* inspector ------------------------------------------------------- */ }
 			<InspectorControls>
-				<PanelBody
-					title={ __( 'Cover Settings', 'fs-blocks' ) }
-					initialOpen={ true }
-				>
-					<MediaUploadCheck>
-						<MediaUpload
-							allowedTypes={ [ 'image', 'video' ] }
-							onSelect={ onSelectMedia }
-							render={ ( { open } ) => (
-								<Button variant="primary" onClick={ open }>
-									{ url
-										? __( 'Replace Media', 'fs-blocks' )
-										: __( 'Select Media', 'fs-blocks' ) }
-								</Button>
-							) }
-						/>
-						{ url && (
-							<Button
-								variant="secondary"
-								onClick={ onRemoveMedia }
-								style={ { marginTop: '8px' } }
-							>
-								{ __( 'Remove Media', 'fs-blocks' ) }
-							</Button>
-						) }
-					</MediaUploadCheck>
-
-					{ isVideo && (
-						<ToggleControl
-							label={ __( 'Lazy Load Video', 'fs-blocks' ) }
-							checked={ lazyLoadVideo }
-							onChange={ ( val ) =>
-								setAttributes( { lazyLoadVideo: val } )
-							}
-						/>
-					) }
-
-					<RangeControl
-						label={ __( 'Dim Ratio', 'fs-blocks' ) }
-						value={ dimRatio }
-						onChange={ ( val ) =>
-							setAttributes( { dimRatio: val } )
-						}
-						min={ 0 }
-						max={ 100 }
-					/>
-
-					<ToggleControl
-						label={ __( 'Toggle Full Height', 'fs-blocks' ) }
-						checked={ fullHeight }
-						onChange={ ( val ) =>
-							setAttributes( { fullHeight: val } )
-						}
-					/>
-				</PanelBody>
-
-				<PanelBody
-					title={ __( 'Advanced Classes', 'fs-blocks' ) }
-					initialOpen={ true }
-				>
-					<CheckboxControl
-						label={ __( 'Show Values', 'fs-blocks' ) }
-						checked={ showValues }
-						onChange={ setShowValues }
-						help={ __(
-							'Display Bootstrap class names instead of labels.',
-							'fs-blocks'
-						) }
-						style={ { marginBottom: '20px' } }
-					/>
-
-					<div style={ { marginBottom: '20px' } }>
-						<FormTokenField
-							label={ __( 'Display Classes', 'fs-blocks' ) }
-							value={ getDisplayValues(
-								displayVals,
-								displayOptions,
-								showValues
-							) }
-							suggestions={ displayOptions.map( ( o ) =>
-								showValues ? o.value : o.label
-							) }
-							onChange={ handleTokenChange( displayOptions ) }
-						/>
-						<details style={ { marginTop: '5px' } }>
-							<summary>
-								{ __(
-									'Available Display Classes',
-									'fs-blocks'
-								) }
-							</summary>
-							<ul
-								style={ {
-									fontSize: '12px',
-									paddingLeft: '20px',
-									margin: '5px 0',
-								} }
-							>
-								{ displayOptions.map( ( item ) => (
-									<li key={ item.value }>
-										{ showValues ? item.value : item.label }
-									</li>
-								) ) }
-							</ul>
-						</details>
-					</div>
-
-					<div style={ { marginBottom: '20px' } }>
-						<FormTokenField
-							label={ __( 'Margin Classes', 'fs-blocks' ) }
-							value={ getDisplayValues(
-								marginVals,
-								marginOptions,
-								showValues
-							) }
-							suggestions={ marginOptions.map( ( o ) =>
-								showValues ? o.value : o.label
-							) }
-							onChange={ handleTokenChange( marginOptions ) }
-						/>
-						<details style={ { marginTop: '5px' } }>
-							<summary>
-								{ __(
-									'Available Margin Classes',
-									'fs-blocks'
-								) }
-							</summary>
-							<ul
-								style={ {
-									fontSize: '12px',
-									paddingLeft: '20px',
-									margin: '5px 0',
-								} }
-							>
-								{ marginOptions.map( ( item ) => (
-									<li key={ item.value }>
-										{ showValues ? item.value : item.label }
-									</li>
-								) ) }
-							</ul>
-						</details>
-					</div>
-
-					<div style={ { marginBottom: '20px' } }>
-						<FormTokenField
-							label={ __( 'Padding Classes', 'fs-blocks' ) }
-							value={ getDisplayValues(
-								paddingVals,
-								paddingOptions,
-								showValues
-							) }
-							suggestions={ paddingOptions.map( ( o ) =>
-								showValues ? o.value : o.label
-							) }
-							onChange={ handleTokenChange( paddingOptions ) }
-						/>
-						<details style={ { marginTop: '5px' } }>
-							<summary>
-								{ __(
-									'Available Padding Classes',
-									'fs-blocks'
-								) }
-							</summary>
-							<ul
-								style={ {
-									fontSize: '12px',
-									paddingLeft: '20px',
-									margin: '5px 0',
-								} }
-							>
-								{ paddingOptions.map( ( item ) => (
-									<li key={ item.value }>
-										{ showValues ? item.value : item.label }
-									</li>
-								) ) }
-							</ul>
-						</details>
-					</div>
-
-					<div style={ { marginBottom: '20px' } }>
-						<FormTokenField
-							label={ __( 'Position Classes', 'fs-blocks' ) }
-							value={ getDisplayValues(
-								positionVals,
-								positionOptions,
-								showValues
-							) }
-							suggestions={ positionOptions.map( ( o ) =>
-								showValues ? o.value : o.label
-							) }
-							onChange={ handleTokenChange( positionOptions ) }
-						/>
-						<details style={ { marginTop: '5px' } }>
-							<summary>
-								{ __(
-									'Available Position Classes',
-									'fs-blocks'
-								) }
-							</summary>
-							<ul
-								style={ {
-									fontSize: '12px',
-									paddingLeft: '20px',
-									margin: '5px 0',
-								} }
-							>
-								{ positionOptions.map( ( item ) => (
-									<li key={ item.value }>
-										{ showValues ? item.value : item.label }
-									</li>
-								) ) }
-							</ul>
-						</details>
-					</div>
-
-					<div style={ { marginBottom: '20px' } }>
-						<FormTokenField
-							label={ __( 'Z-Index Classes', 'fs-blocks' ) }
-							value={ getDisplayValues(
-								zindexVals,
-								zindexOptions,
-								showValues
-							) }
-							suggestions={ zindexOptions.map( ( o ) =>
-								showValues ? o.value : o.label
-							) }
-							onChange={ handleTokenChange( zindexOptions ) }
-						/>
-						<details style={ { marginTop: '5px' } }>
-							<summary>
-								{ __(
-									'Available Z-Index Classes',
-									'fs-blocks'
-								) }
-							</summary>
-							<ul
-								style={ {
-									fontSize: '12px',
-									paddingLeft: '20px',
-									margin: '5px 0',
-								} }
-							>
-								{ zindexOptions.map( ( item ) => (
-									<li key={ item.value }>
-										{ showValues ? item.value : item.label }
-									</li>
-								) ) }
-							</ul>
-						</details>
-					</div>
-
-					<div style={ { marginBottom: '20px' } }>
-						<FormTokenField
-							label={ __( 'Bleed Cover Classes', 'fs-blocks' ) }
-							value={ getDisplayValues(
-								bleedCoverVals,
-								bleedCoverOptions,
-								showValues
-							) }
-							suggestions={ bleedCoverOptions.map( ( o ) =>
-								showValues ? o.value : o.label
-							) }
-							onChange={ handleTokenChange( bleedCoverOptions ) }
-						/>
-						<details style={ { marginTop: '5px' } }>
-							<summary>
-								{ __(
-									'Available Bleed Cover Classes',
-									'fs-blocks'
-								) }
-							</summary>
-							<ul
-								style={ {
-									fontSize: '12px',
-									paddingLeft: '20px',
-									margin: '5px 0',
-								} }
-							>
-								{ bleedCoverOptions.map( ( item ) => (
-									<li key={ item.value }>
-										{ showValues ? item.value : item.label }
-									</li>
-								) ) }
-							</ul>
-						</details>
-					</div>
-				</PanelBody>
+				{ inspectorPanels }
+				<MediaPanel
+					url={ url }
+					isVideo={ isVideo }
+					lazyLoadVideo={ lazyLoadVideo }
+					onSelectMedia={ onSelectMedia }
+					onRemoveMedia={ onRemoveMedia }
+					onToggleLazy={ onToggleLazy }
+					dimRatio={ dimRatio }
+					setDimRatio={ setDimRatio }
+					fullHeight={ fullHeight }
+					setFullHeight={ setFullHeightFn }
+				/>
 			</InspectorControls>
 
+			{ /* preview --------------------------------------------------------- */ }
 			<div { ...blockProps }>
+				{ /* overlay ------------------------------------------------------ */ }
 				<div
-					className={ bgClasses.join( ' ' ) }
+					className={ overlayClasses.join( ' ' ) }
 					aria-hidden="true"
-					style={ bgStyle }
+					style={ overlayStyle }
 				/>
+				{ /* media -------------------------------------------------------- */ }
 				<div className="wp-block-cover__img-video-wrapper">
-					{ mediaElement }
+					{ mediaEl }
 				</div>
+				{ /* inner blocks -------------------------------------------------- */ }
 				<div className="wp-block-cover__inner-container">
 					<InnerBlocks />
 				</div>

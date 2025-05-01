@@ -7,6 +7,20 @@ import {
 import { BLOCK_CONFIG } from './config/blockConfig';
 
 /**
+ * Convert an arbitrary string to a CSS-friendly slug.
+ * e.g. "Center Center" → "center-center"
+ */
+export function toSlug( str = '' ) {
+	return str
+		.toString()
+		.trim()
+		.toLowerCase()
+		.replace( /\s+/g, '-' ) // spaces → dash
+		.replace( /[^a-z0-9-]/g, '' ) // strip anything unsafe
+		.replace( /-{2,}/g, '-' ); // collapse multiple dashes
+}
+
+/**
  * Merge any number of class-arrays (plus an optional single-value) into one flat list.
  *
  * @param {string} singularSelectClass
