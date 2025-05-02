@@ -50,6 +50,10 @@ export const BLOCK_CONFIG = {
 			'zindexOptions',
 		],
 	},
+	'fs-blocks/index-block': {
+		classOptions: [ 'positionOptions', 'zindexOptions' ], // token fields
+		// no width‑controls or dropdown
+	},
 };
 
 export const CLASS_OPTIONS_MAP = {

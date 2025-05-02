@@ -7,18 +7,12 @@
 	"category": "layout",
 	"icon": "cover-image",
 	"description": "A custom cover block with alignment matrix, full height, lazyload video, and advanced classes.",
-	"keywords": [
-		"cover",
-		"layout"
-	],
+	"keywords": [ "cover", "layout" ],
 	"textdomain": "fs-blocks",
 	"supports": {
 		"anchor": true,
 		"html": false,
-		"align": [
-			"wide",
-			"full"
-		],
+		"align": [ "wide", "full" ],
 		"color": {
 			"background": true,
 			"gradients": true,
