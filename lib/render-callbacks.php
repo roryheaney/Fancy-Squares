@@ -251,3 +251,23 @@ function fs_dynamic_picture_block_render_callback($attributes)
 	include plugin_dir_path(__FILE__) . '../build/picture-block/render.php';
 	return ob_get_clean();
 }
+
+
+/**
+ * Render callback for the Index Block.
+ *
+ * @param array  $attributes Block attributes.
+ * @param string $content    Inner block markup (unused).
+ * @return string            Rendered output.
+ */
+function fsblocks_render_index_block($attributes, $content)
+{
+	// Start output buffering
+	ob_start();
+
+	// Make $attributes available in render.php
+	include plugin_dir_path(__FILE__) . '../build/index-block/render.php';
+
+	// Return the buffered output
+	return ob_get_clean();
+}
