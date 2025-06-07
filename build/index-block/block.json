@@ -1,0 +1,50 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "fs-blocks/index-block",
+  "title": "Index Block",
+  "category": "layout",
+  "parent": [
+    "core/column"
+  ],
+  "supports": {
+    "html": false,
+    "anchor": true,
+    "color": {
+      "text": true,
+      "background": true,
+      "gradients": true
+    }
+  },
+  "attributes": {
+    "blockIndex": {
+      "type": "number",
+      "default": -1
+    },
+    "positionOptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "zindexOptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "additionalClasses": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    }
+  },
+  "textdomain": "fs-blocks",
+  "editorStyle": "file:./index.css",
+  "editorScript": "file:./index.js",
+  "render": "file:./render.php"
+}

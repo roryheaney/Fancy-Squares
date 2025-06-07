@@ -61,6 +61,10 @@ function fancysquares_fs_blocks_bootstrap_field_render()
 		<option value="vanilla" <?php selected($value, 'vanilla'); ?>>
 			<?php esc_html_e('Vanilla (Sans Bootstrap)', 'fs-blocks'); ?>
 		</option>
+		<!-- Add the Sage option -->
+		<option value="sage" <?php selected($value, 'sage'); ?>>
+			<?php esc_html_e('Sage Theme (CDN)', 'fs-blocks'); ?>
+		</option>
 	</select>
 	<p class="description">
 		<?php esc_html_e('Choose whether to load Bootstrap 5 CSS/JS or a vanilla stylesheet in the block editor.', 'fs-blocks'); ?>
@@ -140,6 +144,22 @@ function fancysquares_fs_blocks_enqueue_editor_iframe_assets()
 			$file_url,
 			array(),
 			$version
+		);
+	}
+	// If Sage is selected, load the Sage theme styles, load the CDN Bootstrap 5 js
+	elseif ('sage' === $bootstrap_setting) {
+		wp_enqueue_script(
+			'fancysquares-bootstrap5',
+			'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js',
+			array(),
+			'5.3.3',
+			true
+		);
+		wp_enqueue_style(
+			'fancysquares-sage',
+			get_template_directory_uri() . '/dist/css/style.css',
+			array(),
+			wp_get_theme()->get('Version') // Use the theme version for cache busting
 		);
 	}
 }

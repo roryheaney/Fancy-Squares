@@ -58,6 +58,38 @@
         "type": "string"
       },
       "default": []
+    },
+    "displayOptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "positionOptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "zindexOptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "bleedCoverOptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "uniqueBlockClass": {
+      "type": "string",
+      "default": ""
     }
   },
   "editorScript": "file:./index.js",
