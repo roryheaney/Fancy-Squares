@@ -57,6 +57,10 @@ function fancysquares_fs_blocks_bootstrap_field_render()
 		<option value="bootstrap5" <?php selected($value, 'bootstrap5'); ?>>
 			<?php esc_html_e('Bootstrap 5 (CDN)', 'fs-blocks'); ?>
 		</option>
+		<!-- You can add a sage theme option -->
+		<option value="sage" <?php selected($value, 'sage'); ?>>
+			<?php esc_html_e('Sage Theme (if available)', 'fs-blocks'); ?>
+		</option>
 	</select>
 	<p class="description">
 		<?php esc_html_e('Choose whether to load Bootstrap 5 CSS/JS in the block editor.', 'fs-blocks'); ?>
@@ -122,6 +126,23 @@ function fancysquares_fs_blocks_enqueue_editor_iframe_assets()
 			true
 		);
 	}
+
+	// If Sage is selected, load the Sage theme styles, load the CDN Bootstrap 5 js
+	elseif ('sage' === $bootstrap_setting) {
+		wp_enqueue_script(
+			'fancysquares-bootstrap5',
+			'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js',
+			array(),
+			'5.3.3',
+			true
+		);
+		wp_enqueue_style(
+			'fancysquares-sage',
+			get_template_directory_uri() . '/dist/css/style.css',
+			array(),
+			wp_get_theme()->get('Version') // Use the theme version for cache busting
+		);
+	}
 }
 add_action('enqueue_block_assets', 'fancysquares_fs_blocks_enqueue_editor_iframe_assets');
 
@@ -130,20 +151,25 @@ add_action('enqueue_block_assets', 'fancysquares_fs_blocks_enqueue_editor_iframe
  */
 function fancysquares_fs_blocks_enqueue_frontend()
 {
-	wp_enqueue_style(
-		'fancysquares-bootstrap5',
-		'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
-		array(),
-		'5.3.3'
-	);
+	$bootstrap_setting = get_option('fancysquares_fs_blocks_bootstrap', '');
 
-	wp_enqueue_script(
-		'fancysquares-bootstrap5',
-		'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js',
-		array(),
-		'5.3.3',
-		true
-	);
+	// Load Bootstrap if the user chose "bootstrap5"
+	if ('bootstrap5' === $bootstrap_setting) {
+		wp_enqueue_style(
+			'fancysquares-bootstrap5',
+			'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
+			array(),
+			'5.3.3'
+		);
+
+		wp_enqueue_script(
+			'fancysquares-bootstrap5',
+			'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js',
+			array(),
+			'5.3.3',
+			true
+		);
+	}
 
 	wp_enqueue_style(
 		'fancysquares-swiper',
