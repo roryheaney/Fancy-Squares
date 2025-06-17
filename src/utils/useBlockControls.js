@@ -245,13 +245,13 @@ export function useBlockControls(
 							xl: desktopImg,
 							xxl: desktopImg,
 						}[ bp ];
+                                                // Build the attribute key for this breakpoint.
+                                                // "" becomes widthBase, "sm" becomes widthSm, and so on.
+                                                const camel = bp
+                                                        ? bp.charAt( 0 ).toUpperCase() + bp.slice( 1 )
+                                                         : 'Base';
+                                                const attr = `width${ camel }`;
 
-						/* --- fix here --------------------------------------------------- */
-						const camel = bp
-							? bp.charAt( 0 ).toUpperCase() + bp.slice( 1 )
-							: 'Base';
-						const attr = `width${ camel }`;
-						/* ---------------------------------------------------------------- */
 
 						return (
 							<WidthControl
