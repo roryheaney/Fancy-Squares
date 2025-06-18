@@ -282,9 +282,9 @@ export default function Edit( props ) {
 			{ /* preview --------------------------------------------------------- */ }
 			<div { ...blockProps }>
 				{ /* overlay ------------------------------------------------------ */ }
-				<div
-					className={ overlayClasses.join( ' ' ) }
+				<span
 					aria-hidden="true"
+					className={ overlayClasses.join( ' ' ) }
 					style={ overlayStyle }
 				/>
 				{ /* media -------------------------------------------------------- */ }
