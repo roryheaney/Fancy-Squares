@@ -36,34 +36,8 @@ import {
 	borderOptions,
 	borderRadiusOptions,
 } from '../../data/bootstrap-classes/classes.js';
+import { getDisplayValues, getValuesFromDisplay } from '../utils/helpers.js';
 import './editor.scss';
-
-// Helper function to map class values to their labels or values based on mode
-const getDisplayValues = ( values, options, showValues ) => {
-	return values.map( ( value ) => {
-		const option = options.find( ( opt ) => opt.value === value );
-		if ( option ) {
-			if ( showValues ) {
-				return option.value;
-			}
-			return option.label;
-		}
-		return value; // Fallback if no matching option is found
-	} );
-};
-
-// Helper function to map selected labels or values back to values
-const getValuesFromDisplay = ( displayValues, options, showValues ) => {
-	return displayValues.map( ( display ) => {
-		const option = options.find( ( opt ) =>
-			showValues ? opt.value === display : opt.label === display
-		);
-		if ( option ) {
-			return option.value;
-		}
-		return display; // Fallback if no matching option is found
-	} );
-};
 
 /*
  * Reusable ImageSelector component

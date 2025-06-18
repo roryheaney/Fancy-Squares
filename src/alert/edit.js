@@ -19,46 +19,11 @@ import {
 	marginOptions,
 	paddingOptions,
 } from '../../data/bootstrap-classes/classes.js';
-
-// Helper function to map class values to their labels or values based on mode
-const getDisplayValues = ( values, options, showValues ) => {
-	return values.map( ( value ) => {
-		const option = options.find( ( opt ) => opt.value === value );
-		if ( option ) {
-			return showValues ? option.value : option.label;
-		}
-		return value; // Fallback if no matching option is found
-	} );
-};
-
-// Helper function to map selected labels or values back to values
-const getValuesFromDisplay = ( displayValues, options, showValues ) => {
-	return displayValues.map( ( display ) => {
-		const option = options.find( ( opt ) =>
-			showValues ? opt.value === display : opt.label === display
-		);
-		if ( option ) {
-			return option.value;
-		}
-		return display; // Fallback if no matching option is found
-	} );
-};
-
-/* ------------------------------------------------------------------------ */
-/*  Helper to merge arrays into one final array of classes
-/* ------------------------------------------------------------------------ */
-/**
- * Combines all class arrays into a single array for 'additionalClasses'.
- *
- * @param {string[]} alertArr
- * @param {string[]} displayArr
- * @param {string[]} marginArr
- * @param {string[]} paddingArr
- * @return {string[]} The unified array of class names
- */
-function combineAllClasses( alertArr, displayArr, marginArr, paddingArr ) {
-	return [ ...alertArr, ...displayArr, ...marginArr, ...paddingArr ];
-}
+import {
+	getDisplayValues,
+	getValuesFromDisplay,
+	combineAllClasses,
+} from '../utils/helpers.js';
 
 export default function Edit( { attributes, setAttributes } ) {
 	const {
@@ -83,6 +48,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		);
 		setAttributes( { alertOptions: newValues } );
 		const merged = combineAllClasses(
+			null,
 			newValues,
 			displayVals,
 			marginVals,
@@ -99,6 +65,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		);
 		setAttributes( { displayOptions: newValues } );
 		const merged = combineAllClasses(
+			null,
 			alertVals,
 			newValues,
 			marginVals,
@@ -115,6 +82,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		);
 		setAttributes( { marginOptions: newValues } );
 		const merged = combineAllClasses(
+			null,
 			alertVals,
 			displayVals,
 			newValues,
@@ -131,6 +99,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		);
 		setAttributes( { paddingOptions: newValues } );
 		const merged = combineAllClasses(
+			null,
 			alertVals,
 			displayVals,
 			marginVals,
