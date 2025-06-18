@@ -20,11 +20,6 @@ import {
 	selfAlignmentOptions,
 	columnOffsetOptions,
 } from '../../data/bootstrap-classes/classes.js';
-import {
-	getDisplayValues,
-	getValuesFromDisplay,
-	combineAllClasses,
-} from '../utils/helpers.js';
 
 import './editor.scss';
 // Single-choice options for the dropdown
@@ -33,6 +28,55 @@ const singleChoiceOptions = [
 	{ label: __( 'Test', 'fs-blocks' ), value: 'test' },
 	{ label: __( 'Fancy', 'fs-blocks' ), value: 'fancy' },
 ];
+// Helper function to map class values to their labels or values based on mode
+const getDisplayValues = ( values, options, showValues ) => {
+	return values.map( ( value ) => {
+		const option = options.find( ( opt ) => opt.value === value );
+		if ( option ) {
+			if ( showValues ) {
+				return option.value;
+			}
+			return option.label;
+		}
+		return value; // Fallback if no matching option is found
+	} );
+};
+// Helper function to map selected labels or values back to values
+const getValuesFromDisplay = ( displayValues, options, showValues ) => {
+	return displayValues.map( ( display ) => {
+		const option = options.find( ( opt ) =>
+			showValues ? opt.value === display : opt.label === display
+		);
+		if ( option ) {
+			return option.value;
+		}
+		return display; // Fallback if no matching option is found
+	} );
+};
+// Combine all classes into a single array
+const combineAllClasses = (
+	singularSelectClass,
+	columnArr,
+	marginArr,
+	displayArr,
+	orderArr,
+	alignArr,
+	offsetArr
+) => {
+	const final = [];
+	if ( singularSelectClass ) {
+		final.push( singularSelectClass );
+	}
+	final.push(
+		...columnArr,
+		...marginArr,
+		...displayArr,
+		...orderArr,
+		...alignArr,
+		...offsetArr
+	);
+	return final;
+};
 
 export default function Edit( { attributes, setAttributes, clientId } ) {
 	const {

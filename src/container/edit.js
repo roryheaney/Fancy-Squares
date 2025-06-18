@@ -20,11 +20,62 @@ import {
 	positionOptions,
 	zindexOptions,
 } from '../../data/bootstrap-classes/classes.js';
-import {
-	getDisplayValues,
-	getValuesFromDisplay,
-	combineAllClasses,
-} from '../utils/helpers.js';
+// Helper function to map class values to their labels or values based on mode
+const getDisplayValues = ( values, options, showValues ) => {
+	return values.map( ( value ) => {
+		const option = options.find( ( opt ) => opt.value === value );
+		if ( option ) {
+			if ( showValues ) {
+				return option.value;
+			}
+			return option.label;
+		}
+		return value; // Fallback if no matching option is found
+	} );
+};
+// Helper function to map selected labels or values back to values
+const getValuesFromDisplay = ( displayValues, options, showValues ) => {
+	return displayValues.map( ( display ) => {
+		const option = options.find( ( opt ) =>
+			showValues ? opt.value === display : opt.label === display
+		);
+		if ( option ) {
+			return option.value;
+		}
+		return display; // Fallback if no matching option is found
+	} );
+};
+/* ------------------------------------------------------------------------ */
+/*  Utility: Build final class array
+/* ------------------------------------------------------------------------ */
+/*
+ * Merges everything into one final array for 'additionalClasses',
+ * always including 'wp-block-fancysquares-container-block' plus
+ * 'container' or 'container-fluid'.
+ */
+function combineAllClasses(
+	containerType,
+	displayArr,
+	marginArr,
+	paddingArr,
+	positionArr,
+	zindexArr
+) {
+	const final = [ 'wp-block-fancysquares-container-block' ];
+	if ( containerType === 'fluid' ) {
+		final.push( 'container-fluid' );
+	} else {
+		final.push( 'container' );
+	}
+	final.push(
+		...displayArr,
+		...marginArr,
+		...paddingArr,
+		...positionArr,
+		...zindexArr
+	);
+	return final;
+}
 
 /* ------------------------------------------------------------------------ */
 /*  Edit Component

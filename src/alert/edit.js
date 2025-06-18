@@ -48,6 +48,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		);
 		setAttributes( { alertOptions: newValues } );
 		const merged = combineAllClasses(
+			null,
 			newValues,
 			displayVals,
 			marginVals,
@@ -64,6 +65,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		);
 		setAttributes( { displayOptions: newValues } );
 		const merged = combineAllClasses(
+			null,
 			alertVals,
 			newValues,
 			marginVals,
@@ -80,6 +82,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		);
 		setAttributes( { marginOptions: newValues } );
 		const merged = combineAllClasses(
+			null,
 			alertVals,
 			displayVals,
 			newValues,
@@ -96,6 +99,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		);
 		setAttributes( { paddingOptions: newValues } );
 		const merged = combineAllClasses(
+			null,
 			alertVals,
 			displayVals,
 			marginVals,
