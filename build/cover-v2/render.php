@@ -70,9 +70,9 @@ if (!empty($attributes['backgroundColor'])) {
 }
 ?>
 <div class="<?php echo esc_attr($final_class); ?>" style="<?php echo esc_attr($containerStyles); ?>">
-	<div class="<?php echo esc_attr($bg_classes); ?>"
-		aria-hidden="true"
-		style="<?php echo esc_attr($bg_styles); ?>"></div>
+        <span class="<?php echo esc_attr($bg_classes); ?>"
+                aria-hidden="true"
+                style="<?php echo esc_attr($bg_styles); ?>"></span>
 
 	<div class="wp-block-cover__img-video-wrapper">
 		<?php
