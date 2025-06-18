@@ -33,29 +33,29 @@ $classes_array = array_unique($classes_array);
 $sanitized     = array_map('sanitize_html_class', $classes_array);
 $final_class   = implode(' ', $sanitized);
 
-$url      = isset($attributes['url']) ? $attributes['url'] : '';
-$is_video = ! empty($attributes['isVideo']);
-$lazy     = ! empty($attributes['lazyLoadVideo']);
-$dim      = isset($attributes['dimRatio']) ? (int)$attributes['dimRatio'] : 40;
+$url      = isset( $attributes['url'] ) ? $attributes['url'] : '';
+$is_video = ! empty( $attributes['isVideo'] );
+$lazy     = ! empty( $attributes['lazyLoadVideo'] );
+$dim      = isset( $attributes['dimRatio'] ) ? (int) $attributes['dimRatio'] : 40;
+
 
 $containerStyles = '';
 
-if (! empty($attributes['fullHeight'])) {
-	$containerStyles .= 'height: 100vh; aspect-ratio:unset;';
-	// print_r($containerStyles);
+if ( ! empty( $attributes['fullHeight'] ) ) {
+        $containerStyles .= 'height: 100vh; aspect-ratio:unset;';
 }
+
+// Prepare wrapper attributes.
+$wrapper_attributes = get_block_wrapper_attributes(
+        array(
+                'class' => $final_class,
+                'style' => $containerStyles,
+        ),
+        $attributes
+);
 
 // Build background element styles.
 $bg_styles = '';
-if (isset($attributes['style']) && isset($attributes['style']['color']) && isset($attributes['style']['color']['gradient'])) {
-	$bg_styles .= 'background-image: ' . $attributes['style']['color']['gradient'] . ';';
-}
-if (! empty($attributes['background'])) {
-	$bg_styles .= 'background: ' . $attributes['background'] . ';';
-}
-if (isset($attributes['style']) && isset($attributes['style']['color'])) {
-	$bg_styles .= 'background-color: ' . $attributes['style']['color']['background'] . ';';
-}
 
 
 // Build background element classes.
@@ -65,15 +65,8 @@ if ($dim !== 0) {
 	// Append opacity into the background styles.
 	$bg_styles .= 'opacity: ' . ($dim / 100) . ';';
 }
-if (isset($attributes['gradient'])) {
-	$gradient = $attributes['gradient'];
-	$bg_classes .= ' has-' . $gradient . '-gradient-background';
-}
-if (!empty($attributes['backgroundColor'])) {
-	$bg_classes .= ' has-' . $attributes['backgroundColor'] . '-background-color';
-}
 ?>
-<div class="<?php echo esc_attr($final_class); ?>" style="<?php echo esc_attr($containerStyles); ?>">
+<div <?php echo $wrapper_attributes; ?>>
         <span class="<?php echo esc_attr($bg_classes); ?>"
                 aria-hidden="true"
                 style="<?php echo esc_attr($bg_styles); ?>"></span>
