@@ -58,34 +58,6 @@ function fsblocks_render_content_wrapper_block($attributes, $content)
 }
 
 /**
- * Render callback for the row block.
- */
-// function fsblocks_render_row_block($attributes, $content)
-// {
-// 	$additional_classes = (isset($attributes['additionalClasses']) && is_array($attributes['additionalClasses']))
-// 		? $attributes['additionalClasses']
-// 		: [];
-
-// 	ob_start();
-// 	include plugin_dir_path(__FILE__) . '../build/row/render.php';
-// 	return ob_get_clean();
-// }
-
-// /**
-//  * Render callback for the column block.
-//  */
-// function fsblocks_render_column_block($attributes, $content)
-// {
-// 	$additional_classes = (isset($attributes['additionalClasses']) && is_array($attributes['additionalClasses']))
-// 		? $attributes['additionalClasses']
-// 		: [];
-
-// 	ob_start();
-// 	include plugin_dir_path(__FILE__) . '../build/column/render.php';
-// 	return ob_get_clean();
-// }
-
-/**
  * Render callback for the Accordion block.
  *
  * @param array  $attributes The block attributes.
