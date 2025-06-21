@@ -16,7 +16,7 @@
 	"attributes": {
 		"modalId": {
 			"type": "string",
-			"default": "myModal"
+			"default": ""
 		},
 		"modalTitle": {
 			"type": "string",

@@ -4,16 +4,23 @@ import {
 	InnerBlocks,
 	useBlockProps,
 } from '@wordpress/block-editor';
-import { PanelBody, TextControl } from '@wordpress/components';
-import { Fragment } from '@wordpress/element';
+import { PanelBody, TextControl, Flex, FlexItem } from '@wordpress/components';
+import { useEffect, Fragment } from '@wordpress/element';
+import { ClipboardButton } from '@10up/block-components';
 import './editor.scss';
 
-export default function Edit( { attributes, setAttributes } ) {
+export default function Edit( { clientId, attributes, setAttributes } ) {
 	const { modalId, modalTitle } = attributes;
 
 	const blockProps = useBlockProps( {
 		className: 'fs-blocks-modal-editor',
 	} );
+
+	useEffect( () => {
+		if ( ! modalId ) {
+			setAttributes( { modalId: clientId } );
+		}
+	}, [ clientId, modalId, setAttributes ] );
 
 	return (
 		<Fragment>
@@ -22,17 +29,25 @@ export default function Edit( { attributes, setAttributes } ) {
 					title={ __( 'Modal Settings', 'fs-blocks' ) }
 					initialOpen={ true }
 				>
-					<TextControl
-						label={ __( 'Modal ID', 'fs-blocks' ) }
-						help={ __(
-							'Must match the button’s "Modal ID" so it can open this modal.',
-							'fs-blocks'
-						) }
-						value={ modalId }
-						onChange={ ( newVal ) =>
-							setAttributes( { modalId: newVal } )
-						}
-					/>
+					<Flex gap="2">
+						<FlexItem isBlock>
+							<TextControl
+								label={ __( 'Modal ID', 'fs-blocks' ) }
+								help={ __(
+									'Use this ID for your Modal Button to open this modal.',
+									'fs-blocks'
+								) }
+								value={ modalId }
+								disabled
+							/>
+						</FlexItem>
+						<FlexItem>
+							<ClipboardButton
+								text={ modalId }
+								disabled={ ! modalId }
+							/>
+						</FlexItem>
+					</Flex>
 					<TextControl
 						label={ __( 'Modal Title', 'fs-blocks' ) }
 						value={ modalTitle }
