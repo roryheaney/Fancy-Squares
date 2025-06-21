@@ -7,7 +7,10 @@
 	"category": "widgets",
 	"icon": "feedback",
 	"description": "A Bootstrap 5 Modal dialog. Set the same ID as your Modal Button.",
-	"keywords": [ "bootstrap", "modal" ],
+	"keywords": [
+		"bootstrap",
+		"modal"
+	],
 	"textdomain": "fs-blocks",
 	"supports": {
 		"html": false,
@@ -16,7 +19,7 @@
 	"attributes": {
 		"modalId": {
 			"type": "string",
-			"default": "myModal"
+			"default": ""
 		},
 		"modalTitle": {
 			"type": "string",
