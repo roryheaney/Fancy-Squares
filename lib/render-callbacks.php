@@ -64,15 +64,6 @@ function fsblocks_render_accordion_item_block($attributes, $content)
 	return ob_get_clean();
 }
 
-/**
- * Render callback for the Modal Button block.
- */
-function fsblocks_render_modal_button_block($attributes, $content)
-{
-	ob_start();
-	include plugin_dir_path(__FILE__) . '../build/modal-button/render.php';
-	return ob_get_clean();
-}
 
 /**
  * Render callback for the Modal block.
@@ -95,20 +86,6 @@ function fsblocks_render_alert_block($attributes, $content)
 {
 	ob_start();
 	include plugin_dir_path(__FILE__) . '../build/alert/render.php';
-	return ob_get_clean();
-}
-
-/**
- * Render callback for the updated Cover Block (v2).
- *
- * @param array  $attributes
- * @param string $content
- * @return string
- */
-function fsblocks_render_cover_v2_block($attributes, $content)
-{
-	ob_start();
-	include plugin_dir_path(__FILE__) . '../build/cover-v2/render.php';
 	return ob_get_clean();
 }
 

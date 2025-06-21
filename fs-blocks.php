@@ -53,14 +53,6 @@ function fancysquares_fs_blocks_block_init()
 		)
 	);
 
-	// modal-button
-	register_block_type(
-		__DIR__ . '/build/modal-button',
-		array(
-			'render_callback' => 'fsblocks_render_modal_button_block',
-		)
-	);
-
 	// modal
 	register_block_type(
 		__DIR__ . '/build/modal',
@@ -76,11 +68,6 @@ function fancysquares_fs_blocks_block_init()
 			'render_callback' => 'fsblocks_render_alert_block',
 		)
 	);
-
-	// cover block v2
-	register_block_type(__DIR__ . '/build/cover-v2', [
-		'render_callback' => 'fsblocks_render_cover_v2_block',
-	]);
 
 	// Tabbed Panel (parent) block registration.
 	register_block_type(
