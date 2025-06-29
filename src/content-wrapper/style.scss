@@ -5,8 +5,13 @@
  * Replace them with your own styles or remove the file completely.
  */
 
-.wp-block-fancysquares-container-block {
+.wp-block-fs-blocks-content-wrapper {
 	// background-color: #21759b;
 	// color: #fff;
 	// // padding: 2px;
+	&.alignfull {
+		.wp-block-cover__inner-container {
+			margin: 0 auto !important
+		}
+	}
 }
