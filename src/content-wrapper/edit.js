@@ -3,6 +3,7 @@ import {
 	useBlockProps,
 	InspectorControls,
 } from '@wordpress/block-editor';
+import { PanelBody, SelectControl } from '@wordpress/components';
 import { useBlockControls } from '../utils/useBlockControls';
 import './editor.scss';
 const TEMPLATE = [
@@ -12,6 +13,7 @@ const TEMPLATE = [
 
 export default function Edit( props ) {
 	const { attributes, setAttributes, name, clientId } = props;
+	const { elementTag } = attributes;
 
 	// token field for class options, defaults are in blockConfig.js
 	const { inspectorPanels, previewClasses } = useBlockControls(
@@ -39,7 +41,22 @@ export default function Edit( props ) {
 
 	return (
 		<>
-			<InspectorControls>{ inspectorPanels }</InspectorControls>
+			<InspectorControls>
+				{ inspectorPanels }
+				<PanelBody title="Wrapper Settings" initialOpen={ false }>
+					<SelectControl
+						label="HTML Element"
+						value={ elementTag }
+						options={ [
+							{ label: 'div', value: 'div' },
+							{ label: 'section', value: 'section' },
+						] }
+						onChange={ ( val ) =>
+							setAttributes( { elementTag: val } )
+						}
+					/>
+				</PanelBody>
+			</InspectorControls>
 
 			<div
 				{ ...useBlockProps( {

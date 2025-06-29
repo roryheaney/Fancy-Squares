@@ -92,11 +92,20 @@ if ($attributes['autoHeight']) {
 // Classes for pause/pagination container
 $pause_pagination_classes = array('swiper-pause-pagination');
 if (!$attributes['showPlayPauseButton'] && !$attributes['pagination']) {
-	$pause_pagination_classes[] = 'd-none';
+        $pause_pagination_classes[] = 'd-none';
 }
+
+$wrapper_attributes = get_block_wrapper_attributes(
+        array(
+                'class' => 'swiper',
+                'data-swiper' => wp_json_encode($swiper_data),
+                'aria-roledescription' => 'carousel',
+                'aria-label' => 'Highlighted content',
+        )
+);
 ?>
 
-<div class="swiper wp-block-fancysquares-carousel" data-swiper="<?php echo esc_js(wp_json_encode($swiper_data)); ?>" aria-roledescription="carousel" aria-label="Highlighted content">
+<div <?php echo $wrapper_attributes; ?>>
 	<div class="swiper-wrapper">
 		<?php echo $content; // Slide items
 		?>

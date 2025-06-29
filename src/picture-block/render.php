@@ -75,6 +75,7 @@ if ($aspect && 'none' !== $aspect) {
 	$figureClasses[] = 'fs-block-image--no-aspect-ratio';
 }
 $figure_class = implode(' ', array_map('esc_attr', $figureClasses));
+$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => $figure_class ) );
 
 /**
  * Build <img> classes & inline style if we have a border class
@@ -106,7 +107,7 @@ if ($imgStyle) {
  * Single <img> case: no small/medium/large images
  */
 if (! $hasSmall && ! $hasMedium && ! $hasLarge) : ?>
-	<figure class="<?php echo $figure_class; ?>">
+        <figure <?php echo $wrapper_attributes; ?>>
 		<img
 			decoding="async"
 			loading="lazy"
@@ -115,13 +116,13 @@ if (! $hasSmall && ! $hasMedium && ! $hasLarge) : ?>
 		<?php if (! empty($caption)) : ?>
 			<figcaption><?php echo wp_kses_post($caption); ?></figcaption>
 		<?php endif; ?>
-	</figure>
+        </figure>
 <?php
-	return;
+        return;
 endif;
 ?>
 
-<figure class="<?php echo $figure_class; ?>">
+<figure <?php echo $wrapper_attributes; ?>>
 	<picture>
 		<?php // Up to 600px
 		if ($hasSmall) : ?>
