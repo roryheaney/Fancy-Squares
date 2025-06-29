@@ -8,6 +8,8 @@ import {
 	PanelBody,
 	RangeControl,
 	ToggleControl,
+	SelectControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalNumberControl as NumberControl,
 	Button,
 } from '@wordpress/components';
@@ -47,6 +49,9 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		enableFade,
 		fractionalSlidesEnabled,
 		fractionalSlidesValue,
+
+		// HTML element tag
+		elementTag,
 
 		// ADA specific feature
 		// New attribute for play/pause button
@@ -103,6 +108,17 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 						min={ 0 }
 						max={ 100 }
 						step={ 10 }
+					/>
+					<SelectControl
+						label="HTML Element"
+						value={ elementTag }
+						options={ [
+							{ label: 'div', value: 'div' },
+							{ label: 'section', value: 'section' },
+						] }
+						onChange={ ( val ) =>
+							setAttributes( { elementTag: val } )
+						}
 					/>
 					<ToggleControl
 						label="Dots navigation"
