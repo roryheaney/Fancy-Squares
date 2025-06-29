@@ -20,13 +20,19 @@ $defaults = array(
 	'enableFade'              => false,
 	'fractionalSlidesEnabled' => false,
 	'fractionalSlidesValue'   => 0.25,
-	'showPlayPauseButton'     => false,
-	'breakpoints'             => array(),
-	'autoHeight'              => false,
+        'showPlayPauseButton'     => false,
+        'breakpoints'             => array(),
+        'autoHeight'              => false,
+        'elementTag'              => 'div',
 );
 
 // Merge with defaults
 $attributes = wp_parse_args($attributes, $defaults);
+
+$element_tag = isset($attributes['elementTag']) ? $attributes['elementTag'] : 'div';
+if ($element_tag !== 'section') {
+        $element_tag = 'div';
+}
 
 // Build Swiper configuration
 $swiper_data = array(
@@ -85,8 +91,7 @@ if ($attributes['navigation']) {
 
 // Handle autoHeight
 if ($attributes['autoHeight']) {
-	print_r($attributes['autoHeight']);
-	$swiper_data['autoHeight'] = true;
+        $swiper_data['autoHeight'] = true;
 }
 
 // Classes for pause/pagination container
@@ -95,9 +100,14 @@ if (!$attributes['showPlayPauseButton'] && !$attributes['pagination']) {
         $pause_pagination_classes[] = 'd-none';
 }
 
+$wrapper_classes = array('swiper');
+if ('section' === $element_tag) {
+        $wrapper_classes[] = 'swiper--section';
+}
+
 $wrapper_attributes = get_block_wrapper_attributes(
         array(
-                'class' => 'swiper',
+                'class' => implode(' ', $wrapper_classes),
                 'data-swiper' => wp_json_encode($swiper_data),
                 'aria-roledescription' => 'carousel',
                 'aria-label' => 'Highlighted content',
@@ -105,11 +115,11 @@ $wrapper_attributes = get_block_wrapper_attributes(
 );
 ?>
 
-<div <?php echo $wrapper_attributes; ?>>
-	<div class="swiper-wrapper">
-		<?php echo $content; // Slide items
-		?>
-	</div>
+<<?php echo esc_attr($element_tag); ?> <?php echo $wrapper_attributes; ?>>
+        <div class="swiper-wrapper">
+                <?php echo $content; // Slide items
+                ?>
+        </div>
 
 	<div class="<?php echo esc_attr(implode(' ', $pause_pagination_classes)); ?>">
 		<div class="swiper-pause-pagination__inner-container">
@@ -133,4 +143,4 @@ $wrapper_attributes = get_block_wrapper_attributes(
 		</div>
 	</div>
 
-</div>
+</<?php echo esc_attr($element_tag); ?>>

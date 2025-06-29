@@ -71,6 +71,10 @@
 		"autoHeight": {
 			"type": "boolean",
 			"default": false
+		},
+		"elementTag": {
+			"type": "string",
+			"default": "div"
 		}
 	},
 	"editorScript": "file:./index.js",
