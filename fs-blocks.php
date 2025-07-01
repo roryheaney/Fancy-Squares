@@ -118,3 +118,33 @@ function fancysquares_fs_blocks_block_init()
 	);
 }
 add_action('init', 'fancysquares_fs_blocks_block_init');
+
+/**
+ * Enqueue Cover block extension scripts.
+ */
+function fsblocks_cover_hoc_editor_script() {
+        $asset = include __DIR__ . '/build/cover-hoc/index.asset.php';
+        wp_enqueue_script(
+                'fs-cover-hoc',
+                plugins_url( 'build/cover-hoc/index.js', __FILE__ ),
+                $asset['dependencies'],
+                $asset['version'],
+                true
+        );
+}
+add_action( 'enqueue_block_editor_assets', 'fsblocks_cover_hoc_editor_script' );
+
+/**
+ * Enqueue front-end video helper script.
+ */
+function fsblocks_cover_hoc_view_script() {
+        $asset = include __DIR__ . '/build/cover-hoc/view.asset.php';
+        wp_enqueue_script(
+                'fs-cover-hoc-view',
+                plugins_url( 'build/cover-hoc/view.js', __FILE__ ),
+                $asset['dependencies'],
+                $asset['version'],
+                true
+        );
+}
+add_action( 'enqueue_block_assets', 'fsblocks_cover_hoc_view_script' );
