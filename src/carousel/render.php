@@ -22,8 +22,9 @@ $defaults = array(
 	'fractionalSlidesValue'   => 0.25,
         'showPlayPauseButton'     => false,
         'breakpoints'             => array(),
-        'autoHeight'              => false,
-        'elementTag'              => 'div',
+       'autoHeight'              => false,
+       'enforceHeight'           => false,
+       'elementTag'              => 'div',
 );
 
 // Merge with defaults
@@ -107,11 +108,12 @@ if ('section' === $element_tag) {
 
 $wrapper_attributes = get_block_wrapper_attributes(
         array(
-                'class' => implode(' ', $wrapper_classes),
-                'data-swiper' => wp_json_encode($swiper_data),
-                'aria-roledescription' => 'carousel',
-                'aria-label' => 'Highlighted content',
-        )
+               'class' => implode(' ', $wrapper_classes),
+               'data-swiper' => wp_json_encode($swiper_data),
+               'data-enforce-height' => $attributes['enforceHeight'] ? 'true' : 'false',
+               'aria-roledescription' => 'carousel',
+               'aria-label' => 'Highlighted content',
+       )
 );
 ?>
 

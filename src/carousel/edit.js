@@ -58,6 +58,8 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		showPlayPauseButton,
 		// auto Height
 		autoHeight,
+		// Enforce equal slide height
+		enforceHeight,
 	} = attributes;
 
 	const [ localBreakpoints, setLocalBreakpoints ] = useState( breakpoints );
@@ -217,6 +219,15 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 						onChange={ () =>
 							setAttributes( {
 								autoHeight: ! autoHeight,
+							} )
+						}
+					/>
+					<ToggleControl
+						label="Enforce Height"
+						checked={ enforceHeight }
+						onChange={ () =>
+							setAttributes( {
+								enforceHeight: ! enforceHeight,
 							} )
 						}
 					/>
