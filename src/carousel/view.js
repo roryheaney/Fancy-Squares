@@ -1,5 +1,49 @@
+function resizeWidthOnly( start, finish ) {
+	const initialInnerWidth = [ window.innerWidth ];
+	return (
+		( window.onresize = function () {
+			const newInnerWidth = window.innerWidth,
+				previousInnerWidth = initialInnerWidth.length;
+			initialInnerWidth.push( newInnerWidth );
+			if (
+				initialInnerWidth[ previousInnerWidth ] !==
+				initialInnerWidth[ previousInnerWidth - 1 ]
+			) {
+				clearTimeout( finish );
+				finish = setTimeout( start, 350 );
+			}
+		} ),
+		start
+	);
+}
+
 document.addEventListener( 'DOMContentLoaded', () => {
 	const carousels = document.querySelectorAll( '.swiper' );
+	const enforceHeightEls = Array.from( carousels ).filter(
+		( el ) => el.dataset.enforceHeight === 'true'
+	);
+
+	const setAllMinHeights = () => {
+		enforceHeightEls.forEach( ( el ) => {
+			const slides = el.querySelectorAll( '.swiper-slide' );
+			let tallest = 0;
+			slides.forEach( ( slide ) => {
+				slide.style.minHeight = '';
+				if ( slide.offsetHeight > tallest ) {
+					tallest = slide.offsetHeight;
+				}
+			} );
+			slides.forEach( ( slide ) => {
+				slide.style.minHeight = `${ tallest }px`;
+				// add a class to indicate the height is enforced
+				slide.classList.add( 'swiper-slide-enforced-height' );
+			} );
+		} );
+	};
+
+	if ( enforceHeightEls.length ) {
+		resizeWidthOnly( setAllMinHeights )();
+	}
 
 	carousels.forEach( ( el ) => {
 		// Retrieve config from data-swiper
