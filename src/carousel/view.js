@@ -35,6 +35,8 @@ document.addEventListener( 'DOMContentLoaded', () => {
 			} );
 			slides.forEach( ( slide ) => {
 				slide.style.minHeight = `${ tallest }px`;
+				// add a class to indicate the height is enforced
+				slide.classList.add( 'swiper-slide-enforced-height' );
 			} );
 		} );
 	};
