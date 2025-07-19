@@ -16,6 +16,8 @@ import {
 	FormTokenField,
 	SelectControl,
 	Button,
+	TabPanel,
+	Icon,
 } from '@wordpress/components';
 import { useState, useMemo, useEffect } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -94,6 +96,9 @@ export function useBlockControls(
 		showPadding = true,
 		showMargin = true,
 		showNegMargin = true,
+		paddingControls = null,
+		marginControls = null,
+		negMarginControls = null,
 	} = {}
 ) {
 	/* ---------- live preview ---------- */
@@ -127,7 +132,9 @@ export function useBlockControls(
 			{ ( BLOCK_CONFIG[ name ]?.classOptions || [] ).map( ( key ) => {
 				const mapKey = key.replace( /Options$/, '' );
 				const optsData = CLASS_OPTIONS_MAP[ mapKey ];
-				if ( ! optsData ) return null;
+				if ( ! optsData ) {
+					return null;
+				}
 				const opts = optsData.options;
 				const val = attributes[ key ] || [];
 				const nice = mapKey
@@ -245,13 +252,12 @@ export function useBlockControls(
 							xl: desktopImg,
 							xxl: desktopImg,
 						}[ bp ];
-                                                // Build the attribute key for this breakpoint.
-                                                // "" becomes widthBase, "sm" becomes widthSm, and so on.
-                                                const camel = bp
-                                                        ? bp.charAt( 0 ).toUpperCase() + bp.slice( 1 )
-                                                         : 'Base';
-                                                const attr = `width${ camel }`;
-
+						// Build the attribute key for this breakpoint.
+						// "" becomes widthBase, "sm" becomes widthSm, and so on.
+						const camel = bp
+							? bp.charAt( 0 ).toUpperCase() + bp.slice( 1 )
+							: 'Base';
+						const attr = `width${ camel }`;
 
 						return (
 							<WidthControl
@@ -279,44 +285,67 @@ export function useBlockControls(
 		} )();
 
 	/* range panels */
-	const makeRangePanel = ( title, list, Cmp, key ) => (
-		<PanelBody title={ title } initialOpen={ false } key={ key }>
-			{ list.map( ( { key } ) => {
-				const label = key.replace( /([A-Z])/g, ' $1' ).trim();
-				return (
-					<Cmp
-						key={ key }
-						icon={ ICON[ key ] }
-						label={ label }
-						baseValue={ attributes[ `${ key }Base` ] }
-						smValue={ attributes[ `${ key }Sm` ] }
-						mdValue={ attributes[ `${ key }Md` ] }
-						lgValue={ attributes[ `${ key }Lg` ] }
-						xlValue={ attributes[ `${ key }Xl` ] }
-						xxlValue={ attributes[ `${ key }Xxl` ] }
-						onChangeBase={ ( v ) =>
-							setAttributes( { [ `${ key }Base` ]: v } )
-						}
-						onChangeSm={ ( v ) =>
-							setAttributes( { [ `${ key }Sm` ]: v } )
-						}
-						onChangeMd={ ( v ) =>
-							setAttributes( { [ `${ key }Md` ]: v } )
-						}
-						onChangeLg={ ( v ) =>
-							setAttributes( { [ `${ key }Lg` ]: v } )
-						}
-						onChangeXl={ ( v ) =>
-							setAttributes( { [ `${ key }Xl` ]: v } )
-						}
-						onChangeXxl={ ( v ) =>
-							setAttributes( { [ `${ key }Xxl` ]: v } )
-						}
-					/>
-				);
-			} ) }
-		</PanelBody>
-	);
+	const makeRangePanel = ( title, list, Cmp, key, controls ) => {
+		const filtered = controls
+			? list.filter( ( item ) => controls.includes( item.key ) )
+			: list;
+		if ( ! filtered.length ) {
+			return null;
+		}
+
+		const tabs = filtered.map( ( { key } ) => ( {
+			name: key,
+			title: <Icon icon={ ICON[ key ] } />,
+		} ) );
+
+		return (
+			<PanelBody title={ title } initialOpen={ false } key={ key }>
+				<TabPanel className="fs-inspector-tab-panel" tabs={ tabs }>
+					{ ( tab ) => {
+						const current = tab.name;
+						const label = current
+							.replace( /([A-Z])/g, ' $1' )
+							.trim();
+						return (
+							<Cmp
+								key={ current }
+								icon={ ICON[ current ] }
+								label={ label }
+								baseValue={ attributes[ `${ current }Base` ] }
+								smValue={ attributes[ `${ current }Sm` ] }
+								mdValue={ attributes[ `${ current }Md` ] }
+								lgValue={ attributes[ `${ current }Lg` ] }
+								xlValue={ attributes[ `${ current }Xl` ] }
+								xxlValue={ attributes[ `${ current }Xxl` ] }
+								onChangeBase={ ( v ) =>
+									setAttributes( {
+										[ `${ current }Base` ]: v,
+									} )
+								}
+								onChangeSm={ ( v ) =>
+									setAttributes( { [ `${ current }Sm` ]: v } )
+								}
+								onChangeMd={ ( v ) =>
+									setAttributes( { [ `${ current }Md` ]: v } )
+								}
+								onChangeLg={ ( v ) =>
+									setAttributes( { [ `${ current }Lg` ]: v } )
+								}
+								onChangeXl={ ( v ) =>
+									setAttributes( { [ `${ current }Xl` ]: v } )
+								}
+								onChangeXxl={ ( v ) =>
+									setAttributes( {
+										[ `${ current }Xxl` ]: v,
+									} )
+								}
+							/>
+						);
+					} }
+				</TabPanel>
+			</PanelBody>
+		);
+	};
 
 	const dropdownPanel = dropdown && (
 		<PanelBody
@@ -345,21 +374,24 @@ export function useBlockControls(
 				'Padding',
 				PADDING_SIDE_TYPES,
 				PaddingControl,
-				'pad'
+				'pad',
+				paddingControls
 			),
 		showMargin &&
 			makeRangePanel(
 				'Margin',
 				MARGIN_SIDE_TYPES,
 				PositiveMarginControl,
-				'mar'
+				'mar',
+				marginControls
 			),
 		showNegMargin &&
 			makeRangePanel(
 				'Negative Margin',
 				NEGATIVE_MARGIN_SIDE_TYPES,
 				NegativeMarginControl,
-				'neg'
+				'neg',
+				negMarginControls
 			),
 	].filter( Boolean );
 

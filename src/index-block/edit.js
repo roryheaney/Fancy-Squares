@@ -5,7 +5,6 @@
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
 
 import { useBlockControls } from '../utils/useBlockControls';
 import './editor.scss';
@@ -29,6 +28,12 @@ export default function Edit( props ) {
 			showPadding: true,
 			showMargin: true,
 			showNegMargin: true,
+			negMarginControls: [
+				'negativeMarginTop',
+				'negativeMarginBottom',
+				'negativeMarginLeft',
+				'negativeMarginRight',
+			],
 		}
 	);
 

@@ -19,6 +19,7 @@
 		"classnames": "^2.5.1"
 	},
 	"dependencies": {
-		"@10up/block-components": "^1.20.0"
+		"@10up/block-components": "^1.20.0",
+		"@wordpress/icons": "^10.26.0"
 	}
 }
